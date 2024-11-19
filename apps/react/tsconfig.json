@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@contensis/personalization": ["../../packages/personalization"],
+      "@contensis/personalization-react": ["../../packages/react"]
+    }
+  },
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}

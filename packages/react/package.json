@@ -1,0 +1,44 @@
+{
+  "name": "@contensis/personalization-react",
+  "version": "1.0.0-alpha.0",
+  "description": "Create personalized experiences with React and Contensis",
+  "main": "dist/personalization-react.js",
+  "module": "dist/personalization-react.mjs",
+  "types": "dist/personalization-react.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/personalization-react.d.ts",
+      "require": "./dist/personalization-react.js",
+      "import": "./dist/personalization-react.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "npm run build",
+    "prebuild": "npm run tsc",
+    "build": "tsup --dts-resolve",
+    "tsc": "tsc --build --verbose --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zengenti",
+  "license": "ISC",
+  "keywords": [
+    "contensis",
+    "cms",
+    "dxp",
+    "content",
+    "audience",
+    "personalization",
+    "api",
+    "js",
+    "react",
+    "client",
+    "library"
+  ],
+  "peerDependencies": {
+    "@contensis/personalization": "*",
+    "react": "*"
+  }
+}
