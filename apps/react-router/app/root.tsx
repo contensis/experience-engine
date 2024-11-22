@@ -3,6 +3,7 @@ import type { LinksFunction } from "react-router";
 
 import "./app.css";
 import { PersonalizationProvider } from "@contensis/personalization-react";
+import { MOCK_MANIFEST } from "./mocks/manifest-1";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -37,7 +38,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <PersonalizationProvider>
+    <PersonalizationProvider manifest={MOCK_MANIFEST}>
       <Outlet />
     </PersonalizationProvider>
   );

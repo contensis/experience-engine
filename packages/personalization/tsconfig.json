@@ -1,13 +1,15 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
+    "rootDir": ".",
     "jsx": "react",
     "declaration": true,
+    "noEmit": true,
     "outDir": "dist",
     "paths": {
       "@contensis/*": ["./packages/*"]
     }
   },
+  "include": ["src/**/*"],
   "references": []
 }

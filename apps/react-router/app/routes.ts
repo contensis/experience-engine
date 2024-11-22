@@ -6,4 +6,9 @@ export const routes: RouteConfig = [
     path: "/page1",
     file: "./pages/page1.tsx",
   },
+  {
+    id: "artsHome",
+    path: "/arts/home",
+    file: "./pages/page1.tsx",
+  },
 ];

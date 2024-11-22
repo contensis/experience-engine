@@ -42,7 +42,8 @@ export function Welcome() {
               </li>
             ))}
           </ul>
-          <Link to={'/page1'} >Navigate to Page 1</Link>
+          <Link to={"/page1"}>Navigate to Page 1</Link>
+          <Link to={"/arts/home"}>Navigate to Arts Home Page</Link>
         </nav>
       </div>
     </div>

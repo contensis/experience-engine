@@ -17,10 +17,10 @@
   ],
   "scripts": {
     "start": "npm run build",
-    "prebuild": "npm run tsc",
-    "build": "tsup --dts-resolve",
+    "prebuild": "rimraf dist && npm run tsc",
+    "build": "tsup",
     "tsc": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest -c ../../jest.config.js"
   },
   "author": "Zengenti",
   "license": "ISC",

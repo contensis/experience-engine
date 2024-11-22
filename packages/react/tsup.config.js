@@ -1,9 +1,6 @@
 import { defineConfig } from "tsup";
-import path from "path";
-const tsconfig = path.resolve(__dirname, "../../tsconfig.build.json");
-console.log(tsconfig);
+
 export default defineConfig({
-  // tsconfig,
   entry: {
     ["personalization-react"]: "src/index.tsx",
   },
