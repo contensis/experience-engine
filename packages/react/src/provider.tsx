@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { PersonalizationContext, Manifest } from "@contensis/personalization";
+import { PersonalizationContext, IManifest } from "@contensis/personalization";
 import { PersonalizationReactContext } from "./context";
 
 export type PersonalizationProviderInstantiationProps = {
@@ -13,7 +13,7 @@ export type PersonalizationProviderProps =
   | (PersonalizationProviderInstantiationProps & {
       context: PersonalizationContext;
     })
-  | (PersonalizationProviderInstantiationProps & { manifest: Manifest });
+  | (PersonalizationProviderInstantiationProps & { manifest: IManifest });
 
 export const PersonalizationProvider = (
   props: React.PropsWithChildren<PersonalizationProviderProps>

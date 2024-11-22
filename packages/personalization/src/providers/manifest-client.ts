@@ -1,5 +1,5 @@
-import { IManifest } from "./models";
-import { tryParse } from "./util";
+import { IManifest } from "../models";
+import { tryParse } from "../util";
 
 export interface IManifestClientConstructor {
   new (alias: string, projectId: string): IManifestClient;

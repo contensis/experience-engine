@@ -1,6 +1,6 @@
 import { ISignal, ISignalsStore, WhereCriteria } from "./models";
 import { PersonalizationContext } from "./personalization";
-import { cookieStore } from "./store";
+import { cookieStore } from "./providers/store";
 import { isNumber, isSSR, isString, isUndefined } from "./util";
 
 export class UrlSignals {
@@ -137,7 +137,7 @@ export class CalculateSignals {
         `${this.matched.length} signals matched: ${this.matched.map(
           (m) =>
             `${m.id}(${
-              (this.context.state.signals?.matched?.[m.id].length || 0) + 1
+              (this.context.state.signals?.matched?.[m.id]?.length || 0) + 1
             }/${m.minMatches})`
         )}`
       );

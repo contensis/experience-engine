@@ -1,8 +1,8 @@
 import { CalculateAudiences } from "./audiences";
-import { Manifest } from "./manifest";
+import { Manifest } from "./providers/manifest";
 import { IManifest, IPersonalizationStore, ISignalsStore } from "./models";
 import { CalculateSignals } from "./signals";
-import { IStoreOptions, Store } from "./store";
+import { IStoreOptions, Store } from "./providers/store";
 import { isArray, isSSR, isStore } from "./util";
 
 export type PersonalizationContextOptions = {
@@ -130,12 +130,17 @@ export class PersonalizationContext {
       this.log(`Initialising manifest with client`);
       this.manifest = new Manifest(
         { alias: "", projectId: "" },
-        this.onManifestReady
+        this.onManifestReady,
+        state.manifest
       );
     }
     if (manifest) {
       this.log(`Initialising manifest with supplied manifest`, manifest);
-      this.manifest = new Manifest(manifest, this.onManifestReady);
+      this.manifest = new Manifest(
+        manifest,
+        this.onManifestReady,
+        state.manifest
+      );
     }
 
     this.init();
@@ -225,10 +230,7 @@ export class PersonalizationContext {
 
     // Record page view
     state.pageViews++;
-    this.log(`pvc: ${state.pageViews}`, this.pageViews);
-
-    // Call event handler
-    this.handlers.onPageView(this.currentPage!, this.previousPage);
+    this.log(`pageViews: ${state.pageViews}`, this.pageViews);
 
     // Persist new state
     this.persist = state;
@@ -256,5 +258,8 @@ export class PersonalizationContext {
         audiences: audiences.state,
       };
     }
+
+    // Call event handler
+    this.handlers.onPageView(this.currentPage!, this.previousPage);
   };
 }

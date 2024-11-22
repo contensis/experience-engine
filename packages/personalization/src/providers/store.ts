@@ -1,4 +1,4 @@
-import { isSSR, tryParse } from "./util";
+import { isSSR, tryParse } from "../util";
 
 export type StoreConstructorArgs = { persist?: boolean; type?: Store["type"] };
 

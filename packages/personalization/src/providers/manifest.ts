@@ -1,7 +1,5 @@
 import { IManifestClient, ManifestClient } from "./manifest-client";
-import { IAudience } from "./models/api/Audience";
-import { IManifest, IManifestVersion } from "./models/api/Manifest";
-import { ISignal } from "./models/api/Signal";
+import { IAudience, IManifest, IManifestVersion, ISignal } from "../models";
 
 export type IManifestClientArgs = {
   alias: string;
@@ -23,22 +21,42 @@ export class Manifest implements IManifest {
 
   constructor(
     { alias, projectId }: IManifestClientArgs,
-    onReady: IManifestOnReady
+    onReady: IManifestOnReady,
+    state?: IManifest
   );
-  constructor(client: IManifestClient, onReady: IManifestOnReady);
-  constructor(manifest: IManifest, onReady: IManifestOnReady);
+  constructor(
+    client: IManifestClient,
+    onReady: IManifestOnReady,
+    state?: IManifest
+  );
+  constructor(
+    manifest: IManifest,
+    onReady: IManifestOnReady,
+    state?: IManifest
+  );
 
   constructor(
     client: IManifestClientArgs | IManifestClient | IManifest,
-    public onReady: IManifestOnReady
+    public onReady: IManifestOnReady,
+    state?: IManifest
   ) {
+    // Fallback to manifest from state while we initialise if available
+    if (state) {
+      this.audiences = state.audiences || [];
+      this.signals = state.signals || [];
+      this.version = state.version || ({} as IManifestVersion);
+    }
+
+    // Initialise with an instance of ManifestClient
     if (client instanceof ManifestClient) this.client = client;
+    // Initialise with a new client (alias and projectId supplied)
     else if ("alias" in client) {
       this.client = new ManifestClient(client.alias, client.projectId);
     } else {
-      this.audiences = client.audiences || [];
-      this.signals = client.signals || [];
-      this.version = client.version || ({} as IManifestVersion);
+      // Initialise with an IManifest object
+      this.audiences = client.audiences || this.audiences;
+      this.signals = client.signals || this.signals;
+      this.version = client.version || this.version;
     }
     this.init(); // not awaitable in constructor
   }
@@ -47,6 +65,7 @@ export class Manifest implements IManifest {
     if (this.client) {
       const manifest = await this.client.get();
       if (manifest) {
+        // Initialise with an API response
         this.audiences = manifest.audiences;
         this.signals = manifest.signals;
         this.version = manifest.version;

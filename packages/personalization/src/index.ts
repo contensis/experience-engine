@@ -1,4 +1,4 @@
 export type * from "./models";
 
-export * from "./manifest";
+export * from "./providers/manifest";
 export * from "./personalization";
