@@ -20,3 +20,8 @@ export const getRelativeTime = (d1: number, d2 = +new Date()) => {
       return rtf.format(Math.round(elapsed / units[unit]), unit);
   }
 };
+
+export const ifCypressTest = <T, F = undefined>(ifTrue: T, ifFalse?: F) =>
+  typeof window !== "undefined" && "Cypress" in window
+    ? ifTrue
+    : ifFalse;

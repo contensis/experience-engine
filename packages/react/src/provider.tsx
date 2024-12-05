@@ -25,7 +25,7 @@ export const PersonalizationProvider = (
     }
     // Unwrap props
     const client =
-      "projectId" in props
+      "alias" in props
         ? { alias: props.alias || "", projectId: props.projectId || "" }
         : undefined;
     const manifest = "manifest" in props ? props.manifest : undefined;

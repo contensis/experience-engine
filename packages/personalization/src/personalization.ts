@@ -146,7 +146,7 @@ export class PersonalizationContext {
     if (client) {
       this.log(`Initialising manifest with client`);
       this.manifest = new Manifest(
-        { alias: "", projectId: "" },
+        { alias: client.alias, projectId: client.projectId || "website" },
         this.onManifestReady,
         state.manifest
       );

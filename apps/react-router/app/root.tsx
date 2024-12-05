@@ -4,6 +4,7 @@ import type { LinksFunction } from "react-router";
 import "./app.css";
 import { PersonalizationProvider } from "@contensis/personalization-react";
 import { MOCK_MANIFEST } from "./mocks/manifest-1";
+import { ifCypressTest } from "./util";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -38,7 +39,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <PersonalizationProvider manifest={MOCK_MANIFEST}>
+    <PersonalizationProvider
+      // Use a specific alias to intercept manifest calls in Cypress tests
+      alias={ifCypressTest("cypress-test")}
+      // Use a mock manifest when running the app outside of Cypress tests
+      manifest={ifCypressTest(undefined, MOCK_MANIFEST)}
+    >
       <Outlet />
     </PersonalizationProvider>
   );

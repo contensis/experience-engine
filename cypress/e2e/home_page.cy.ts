@@ -3,6 +3,13 @@ import { ISignal, PersonalizationContext } from "@contensis/personalization";
 describe("Personalisation basics: Signals and audiences", () => {
   context("Given I access the home page", () => {
     beforeEach(() => {
+      cy.fixture("url-manifest.json").then((manifest) => {
+        cy.intercept(
+          "GET",
+          "https://cms-cypress-test.cloud.contensis.com/api/delivery/projects/website/personalization/manifest/current",
+          manifest
+        );
+      });
       cy.pageViewVisit("/");
     });
 
