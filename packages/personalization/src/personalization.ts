@@ -1,6 +1,6 @@
 import { CalculateAudiences } from "./audiences";
 import { Manifest } from "./providers/manifest";
-import { IManifest, IPersonalizationStore, ISignalsStore } from "./models";
+import { IManifest, IPersonalizationStore } from "./models";
 import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
 import { isArray, isSSR, isStore } from "./util";
@@ -15,9 +15,9 @@ export class PersonalizationContext {
   private store: Store;
   private cpid: string;
   private percentile: number;
-  private currentPage?: string;
-  private previousPage?: string;
-  private pageViews: [string, Date, ISignalsStore | null][] = [];
+  private _audiences?: CalculateAudiences;
+  currentPage: string = "";
+  previousPage?: string;
   /** Output console.log messaging */
   debug = true;
   /** User-supplied event handlers */
@@ -34,9 +34,12 @@ export class PersonalizationContext {
   };
   /** Log debug messages */
   log = (...messages: unknown[]) =>
-    this.debug ? console.log(...messages) : void 0;
+    this.debug
+      ? console.log(`@contensis/personalization:`, ...messages)
+      : void 0;
 
   manifest?: Manifest;
+  pageViews: [string, Date, CalculateSignals | null][] = [];
 
   /** generate a personalisation uuid and a percentile for random bucketing */
   private initialState = (): IPersonalizationStore => {
@@ -74,15 +77,23 @@ export class PersonalizationContext {
         this.handlers.onNavigate(this.page!, lastHref);
       }
     });
-    observer.observe(document.querySelector("body")!, {
+
+    const bodyEl = document.querySelector("body");
+
+    observer.observe(bodyEl!, {
       childList: true,
       subtree: true,
     });
   };
 
+  /** Get the computed audiences for the current route  */
+  get audiences() {
+    return this._audiences;
+  }
+
   /** Safely return the current location.href */
   get page() {
-    if (isSSR()) return undefined;
+    if (isSSR()) return "";
     return window.location.href;
   }
 
@@ -95,6 +106,11 @@ export class PersonalizationContext {
     }
   }
 
+  /** Gets the computed signals for the current route */
+  get signals() {
+    return this.pageViews[this.pageViews.length - 1]?.[2];
+  }
+
   /** Check the store for an existing entry or initialise a new state */
   get state() {
     return this.store.get<IPersonalizationStore>() || this.initialState();
@@ -105,6 +121,7 @@ export class PersonalizationContext {
     manifest,
     session,
   }: PersonalizationContextOptions = {}) {
+    this.currentPage = this.page;
     this.store = new Store({ persist: !session });
     // Get the current state from the store
     const state = this.state;
@@ -172,34 +189,39 @@ export class PersonalizationContext {
       const toCheck = this.pageViews.filter((pv) => pv[2] === null);
       for (const check of toCheck) {
         // Compute signals
-        const signals = new CalculateSignals(this).state;
+        const signals = new CalculateSignals(this);
+        const signalState = signals.state;
         const hasNewSignals =
-          signals.matched?.length !== this.state.signals?.matched?.length;
+          signalState.matched?.length !== this.state.signals?.matched?.length;
 
         // If we have matched new signals...
         if (hasNewSignals) {
+          this.log(`Matched new signals from updated manifest`);
           // Persist new signals state
           this.persist = {
             ...this.state,
-            signals,
+            signals: signalState,
           };
         }
 
         // Add signal state to pageViews array so we know it has been calculated
-        check[2] = this.state.signals!;
+        check[2] = signals;
 
         // Determine audiences, evaluate conditions
-        const audiences = new CalculateAudiences(this).state;
+        this._audiences = new CalculateAudiences(this);
+        const audiences = this._audiences.state;
 
         const hasNewAudiences =
           audiences.active.length !== this.state.audiences?.active.length;
         // If we have matched new audiences...
-        if (hasNewAudiences)
+        if (hasNewAudiences) {
+          this.log(`Matched new audiences from updated manifest`);
           // Persist new audiences state
           this.persist = {
             ...this.state,
             audiences,
           };
+        }
       }
     }
 
@@ -207,20 +229,26 @@ export class PersonalizationContext {
     this.handlers.onManifestReady(manifest!);
   };
 
-  pageView = () => {
+  pageView = (url = this.page) => {
     this.pageViews.push([this.page!, new Date(), null]);
 
     const state = this.state;
 
     // If no current page in state
-    if (!state.currentPage)
+    if (!state.currentPage) {
       // Set currentPage
-      this.currentPage = state.currentPage = this.page;
+      this.currentPage = state.currentPage = url;
+
+      // Set previousPage as document referrer
+      this.previousPage = state.previousPage = !isSSR()
+        ? window.document.referrer
+        : undefined;
+    }
     // If current page has changed
-    else if (state.currentPage !== this.page) {
+    else if (state.currentPage !== url) {
       // Set current and previousPage
       this.previousPage = state.previousPage = state.currentPage;
-      this.currentPage = state.currentPage = this.page;
+      this.currentPage = state.currentPage = url;
     } else {
       // Current page has not changed
       // Use state values
@@ -247,10 +275,10 @@ export class PersonalizationContext {
       };
 
       // Add signal state to pageViews array so we know it does not require recalculation
-      this.pageViews[this.pageViews.length - 1][2] = this.state.signals!;
+      this.pageViews[this.pageViews.length - 1][2] = signals;
 
       // Determine audiences, evaluate conditions
-      const audiences = new CalculateAudiences(this);
+      const audiences = (this._audiences = new CalculateAudiences(this));
 
       // Persist current audiences state
       this.persist = {
@@ -260,6 +288,6 @@ export class PersonalizationContext {
     }
 
     // Call event handler
-    this.handlers.onPageView(this.currentPage!, this.previousPage);
+    this.handlers.onPageView(this.currentPage, this.previousPage);
   };
 }

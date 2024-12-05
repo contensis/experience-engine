@@ -15,7 +15,7 @@ export class ManifestClient implements IManifestClient {
   get = async (): Promise<IManifest | undefined> => {
     try {
       const response = await fetch(
-        `https://cms-${this.alias}.cloud.contensis.com/api/management/projects/${this.projectId}/personalization/manifest/current`
+        `https://cms-${this.alias}.cloud.contensis.com/api/delivery/projects/${this.projectId}/personalization/manifest/current`
       );
 
       if (response.ok) {

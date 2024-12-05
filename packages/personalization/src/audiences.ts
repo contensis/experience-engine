@@ -19,11 +19,12 @@ export class CalculateAudiences {
 
   /** Return the state of the audiences, checking for newly matched audiences we may not have detected earlier */
   get state() {
-    // Merge signal matches from this instance into any previously matched
+    // Merge audience matches from this instance into any previously matched
     const matchedThis = this.matched;
     const matchedPrev: IAudiencesStore["matched"] =
       this.context.state.audiences?.matched || {};
 
+    // Create a distinct list of all audience ids
     const allIds = new Set<string>([
       ...this.matched.map((m) => m.id),
       ...Object.keys(matchedPrev),
@@ -34,33 +35,21 @@ export class CalculateAudiences {
     // Iterate all audience ids from this instance and persisted history
     for (const audienceId of allIds) {
       // Did we match this audienceId in this request?
-      const currentMatch = matchedThis.find((m) => m.id === audienceId);
-      if (currentMatch) {
+      if (matchedThis.find((m) => m.id === audienceId)) {
         matched[audienceId] = [
           { p: this.context.page!, t: this.timestamp },
           // // Add prev match(es)
           // ...(matchedPrev[audienceId] || []),
         ];
       } else {
-        // Assign previously matched audience, if the audienceId is included in the manifest
+        // Assign previously matched audience, if the audienceId is still available in the manifest
         if (this.context.manifest?.audiences.find((a) => a.id === audienceId))
           matched[audienceId] = matchedPrev[audienceId];
       }
     }
 
     // Activate audiences
-    const active: IAudiencesStore["active"] = [];
-
-    // Iterate all audience matches and add id to active array if all conditions met
-    for (const matchedId of Object.keys(matched)) {
-      // Get audience from manifest
-      const audienceManifest = this.context.manifest?.audiences.find(
-        (a) => a.id === matchedId
-      );
-
-      // Check have we matched the signal enough times to activate it
-      if (audienceManifest) active.push(matchedId);
-    }
+    const active: IAudiencesStore["active"] = Object.keys(matched);
 
     const nextState: IAudiencesStore = {
       computed:

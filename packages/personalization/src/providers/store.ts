@@ -54,9 +54,7 @@ export class Store {
     }
   };
 
-  getAll = ({ type = this.type }: IStoreOptions = {}):
-    | Record<string, unknown>
-    | undefined => {
+  getAll = ({ type = this.type }: IStoreOptions = {}): Storage | undefined => {
     if (isSSR()) return undefined;
 
     switch (type) {
@@ -69,7 +67,22 @@ export class Store {
           document.cookie.split(";").map((cookie) => cookie.split("="))
         );
       default:
-        return {};
+        return new Storage();
+    }
+  };
+
+  getString = ({ type = this.type }: IStoreOptions = {}): string => {
+    if (isSSR()) return "";
+
+    switch (type) {
+      case "localStorage":
+        return JSON.stringify(localStorage);
+      case "sessionStorage":
+        return JSON.stringify(sessionStorage);
+      case "cookie":
+        return document.cookie.toString();
+      default:
+        return "";
     }
   };
 

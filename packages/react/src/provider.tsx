@@ -33,13 +33,13 @@ export const PersonalizationProvider = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globalAny = globalThis as any;
 
-    // To avoid double-rendering issues check for a context in global
+    // To avoid double-rendering issues check for a cpcontext in global
     const context: PersonalizationContext =
-      globalAny.context ||
+      globalAny.cpcontext ||
       new PersonalizationContext({ client, manifest, session });
 
     // Hoist the context to global scope so we can pick it back up in subsequent re-renders
-    globalAny.context = context;
+    globalAny.cpcontext = context;
     return context;
   }, []);
 

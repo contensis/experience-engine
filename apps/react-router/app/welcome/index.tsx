@@ -1,6 +1,8 @@
 import { Link } from "react-router";
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
+import Audiences from "~/audiences";
+import { Suspense } from "react";
 
 export function Welcome() {
   return (
@@ -45,6 +47,9 @@ export function Welcome() {
           <Link to={"/page1"}>Navigate to Page 1</Link>
           <Link to={"/arts/home"}>Navigate to Arts Home Page</Link>
         </nav>
+        <Suspense fallback={<h2>🌀 Loading...</h2>}>
+          <Audiences />
+        </Suspense>
       </div>
     </div>
   );
