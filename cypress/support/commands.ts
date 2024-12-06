@@ -42,6 +42,40 @@ import {
 } from "@contensis/personalization";
 import "cypress-wait-until";
 
+/**
+ * Custom interceptManifest command intercepts the ManifestClient request
+ * for the current manifest and stubs the response with the given fixture
+ */
+Cypress.Commands.add("interceptManifest", (fixture: string) =>
+  cy.fixture(fixture).then((manifest) => {
+    cy.intercept(
+      "GET",
+      "https://cms-cypress-test.cloud.contensis.com/api/delivery/projects/website/personalization/manifest/current",
+      manifest
+    );
+  })
+);
+
+/**
+ * Custom injectLink command injects a link into the current document
+ * so we can link back from an external site to populate document.referrer
+ * otherwise it is usually blank
+ */
+Cypress.Commands.add(
+  "injectLink",
+  {
+    prevSubject: "optional",
+  },
+  <T>(subject: T, innerHTML: string, href = Cypress.config("baseUrl")) =>
+    cy.document().then((doc) => {
+      const a = doc.createElement("a");
+      a.setAttribute("href", href);
+      a.innerHTML = innerHTML;
+      doc.body.prepend(a);
+      return subject;
+    })
+);
+
 type ContextWindow = typeof window & { cpcontext: PersonalizationContext };
 /**
  * Custom getContext command is needed to wait for the personalisation
@@ -73,20 +107,20 @@ Cypress.Commands.add("getLocalStorage", (key = "cp") => {
  * pageView method in the personalisation context global as this
  * does not automatically trigger via the MutationObserver in Cypress
  */
-Cypress.Commands.add("pageView", (url?: string) =>
+Cypress.Commands.add("pageView", () =>
   cy.getContext().then((context) =>
-    cy.location("href").then((href) => {
-      const nextUrl = url || href;
+    cy.location("href").then((nextUrl) => {
       const prevUrl = context.currentPage;
       const prevPageCount = context.pageViews.length;
 
       // Manually call the pageView method
-      context.pageView(nextUrl);
+      context.pageView();
 
       // Assert the pageView has been registered correctly
       expect(context.currentPage).equal(nextUrl);
+
       if (context.pageViews.length > 1)
-        // Cannot assert a prevUrl on the first hit
+        // Cannot assert a previousPage on the first hit
         expect(context.previousPage).equal(prevUrl);
 
       // Check pageViews have been incremented
@@ -111,8 +145,18 @@ Cypress.Commands.add(
   {
     prevSubject: true,
   },
-  // eslint-disable-next-line cypress/unsafe-to-chain-command
-  (subject: keyof HTMLElementTagNameMap) => cy.get(subject).click().pageView()
+  (subject: keyof HTMLElementTagNameMap) =>
+    // cy.get(subject).click().pageView();
+    // This is better because we assert the href has updated before we record the
+    // pageView avoiding occasional flaky tests
+    cy.location("href").then((prevUrl) => {
+      // eslint-disable-next-line cypress/unsafe-to-chain-command
+      cy.get(subject)
+        .click()
+        .location("href")
+        .should("not.equal", prevUrl)
+        .pageView();
+    })
 );
 
 /**
