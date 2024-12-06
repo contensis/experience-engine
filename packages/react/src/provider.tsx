@@ -25,10 +25,11 @@ export const PersonalizationProvider = (
     }
     // Unwrap props
     const client =
-      "alias" in props
+      "alias" in props && props.alias
         ? { alias: props.alias || "", projectId: props.projectId || "" }
         : undefined;
-    const manifest = "manifest" in props ? props.manifest : undefined;
+    const manifest =
+      "manifest" in props && props.manifest ? props.manifest : undefined;
     const session = props.session || undefined;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globalAny = globalThis as any;

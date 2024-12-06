@@ -143,19 +143,21 @@ export class PersonalizationContext {
     this.persist = [state.cpid, { type: "cookie", key: "cpid" }];
 
     // Ensure we have a manifest
-    if (client) {
-      this.log(`Initialising manifest with client`);
-      this.manifest = new Manifest(
-        { alias: client.alias, projectId: client.projectId || "website" },
-        this.onManifestReady,
-        state.manifest
-      );
-    }
     if (manifest) {
       this.log(`Initialising manifest with supplied manifest`, manifest);
       this.manifest = new Manifest(
         manifest,
         this.onManifestReady,
+        this.log,
+        state.manifest
+      );
+    }
+    if (client) {
+      this.log(`Initialising manifest with client`);
+      this.manifest = new Manifest(
+        { alias: client.alias, projectId: client.projectId || "website" },
+        this.onManifestReady,
+        this.log,
         state.manifest
       );
     }
@@ -236,6 +238,11 @@ export class PersonalizationContext {
 
     // If no current page in state
     if (!state.currentPage) {
+      this.log(
+        `no current page in state; referrer: ${
+          !isSSR() ? window.document.referrer : undefined
+        }`
+      );
       // Set currentPage
       this.currentPage = state.currentPage = url;
 
@@ -246,14 +253,26 @@ export class PersonalizationContext {
     }
     // If current page has changed
     else if (state.currentPage !== url) {
+      this.log(
+        `current page in state has changed; referrer: ${
+          !isSSR() ? window.document.referrer : undefined
+        }`
+      );
       // Set current and previousPage
-      this.previousPage = state.previousPage = state.currentPage;
+      this.previousPage = state.previousPage =
+        (!isSSR() ? window.document.referrer : undefined) || state.currentPage;
       this.currentPage = state.currentPage = url;
     } else {
+      this.log(
+        `current page in state has not changed; referrer: ${
+          !isSSR() ? window.document.referrer : undefined
+        }`
+      );
       // Current page has not changed
       // Use state values
       this.currentPage = state.currentPage;
-      this.previousPage = state.previousPage;
+      this.previousPage = state.previousPage =
+        (!isSSR() ? window.document.referrer : undefined) || state.previousPage;
     }
 
     // Record page view

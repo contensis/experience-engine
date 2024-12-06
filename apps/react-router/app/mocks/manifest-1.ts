@@ -212,7 +212,7 @@ export const MOCK_MANIFEST: IManifest = {
   ],
   version: {
     published: new Date("2024-11-19T12:00:00Z"),
-    publishedBy: "j.doe",
-    versionNo: "3.1",
+    publishedBy: "manifest-1.ts",
+    versionNo: "0.0",
   },
 };

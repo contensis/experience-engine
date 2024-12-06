@@ -1,5 +1,6 @@
 import { IManifestClient, ManifestClient } from "./manifest-client";
 import { IAudience, IManifest, IManifestVersion, ISignal } from "../models";
+import { PersonalizationContext } from "../personalization";
 
 export type IManifestClientArgs = {
   alias: string;
@@ -22,26 +23,33 @@ export class Manifest implements IManifest {
   constructor(
     { alias, projectId }: IManifestClientArgs,
     onReady: IManifestOnReady,
+    log: PersonalizationContext["log"],
     state?: IManifest
   );
   constructor(
     client: IManifestClient,
     onReady: IManifestOnReady,
+    log: PersonalizationContext["log"],
     state?: IManifest
   );
   constructor(
     manifest: IManifest,
     onReady: IManifestOnReady,
+    log: PersonalizationContext["log"],
     state?: IManifest
   );
 
   constructor(
     client: IManifestClientArgs | IManifestClient | IManifest,
     public onReady: IManifestOnReady,
+    private log: PersonalizationContext["log"],
     state?: IManifest
   ) {
     // Fallback to manifest from state while we initialise if available
     if (state) {
+      this.log(
+        `[Manifest] Fallback to manifest found in state while we initialise`
+      );
       this.audiences = state.audiences || [];
       this.signals = state.signals || [];
       this.version = state.version || ({} as IManifestVersion);
