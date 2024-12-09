@@ -14,6 +14,6 @@ declare namespace Cypress {
     pageView(url?: string): Chainable<PersonalizationContext>;
     pageViewClick(): Chainable<PersonalizationContext>;
     pageViewVisit(url: string): Chainable<PersonalizationContext>;
-    waitManifest(fixture: string, attribute: string): Chainable<Subject>;
+    waitManifest(fixture: string, versionNo: string): Chainable<Subject>;
   }
 }

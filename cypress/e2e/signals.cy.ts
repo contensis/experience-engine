@@ -2,10 +2,10 @@ import { ISignal, PersonalizationContext } from "@contensis/personalization";
 
 describe("Signals", () => {
   for (const attribute of ["page.path", "page.querystring"]) {
+    const manifestFixture = `signals.${attribute}-manifest.json`;
     context(`${attribute}`, () => {
       context("Given I access the home page", () => {
         beforeEach(() => {
-          const manifestFixture = `signals.${attribute}-manifest.json`;
           cy.interceptManifest(manifestFixture);
           cy.pageViewVisit("/")
             // wait for manifest stub to be called
@@ -89,7 +89,6 @@ describe("Signals", () => {
             });
           }
         );
-
         context(
           "When I make separate visits to pages that match a signal enough times",
           () => {
@@ -99,12 +98,18 @@ describe("Signals", () => {
                 fixture: "google.html",
               });
               cy.getContext().then((c: PersonalizationContext) => {
-                signal = c.manifest?.signals.find((s) => s.minMatches === 3);
+                expect(c.manifest).to.exist;
+                expect(c.signals).to.exist;
+                expect(c.signals.computed).to.has.lengthOf.at.least(1);
+                signal = c.manifest.signals.find((s) => s.minMatches === 3);
                 expect(signal).to.exist;
                 expect(c.state.signals?.computed?.[signal.id]).to.exist;
 
                 for (let i = 1; i <= signal.minMatches; i++) {
-                  cy.pageViewVisit("/arts/home?field1");
+                  cy.pageViewVisit("/arts/home?field1").waitManifest(
+                    manifestFixture,
+                    attribute
+                  );
                   cy.contains("Navigate to Home Page").pageViewClick();
 
                   // Use clicks to visit an external url rather than visits
@@ -113,23 +118,28 @@ describe("Signals", () => {
 
                   // cy.visit("https://duckduckgo.com");
 
-                  // inject a link into the external page so we can click the
-                  // link back to ourselves
-                  cy.injectLink("Link back to my home");
+                  if (Cypress.isBrowser("firefox")) {
+                    cy.pageViewVisit("/");
+                  } else {
+                    // inject a link into the external page so we can click the
+                    // link back to ourselves
+                    cy.injectLink("Link back to my home");
 
-                  cy.contains("Link back to my home").pageViewClick();
-                  //cy.pageViewVisit("/")
+                    cy.contains("Link back to my home")
+                      .pageViewClick()
+                      .waitManifest(manifestFixture, attribute);
+                  }
 
-                  cy.getLocalStorage()
-                    .then((state) => {
-                      const signalMatches =
-                        state.signals?.matched?.[signal.id] || [];
+                  cy.getContext().then((c) => {
+                    expect(c.signals).to.exist;
+                    const signalMatches =
+                      c.state.signals?.matched?.[signal.id] || [];
 
-                      expect(signalMatches).to.have.lengthOf(i);
+                    expect(signalMatches).to.have.lengthOf(i);
 
-                      if (i < signal.minMatches)
-                        expect(state.signals?.active).to.not.include(signal.id);
-                    });
+                    if (i < signal.minMatches)
+                      expect(c.state.signals?.active).to.not.include(signal.id);
+                  });
                 }
               });
             });

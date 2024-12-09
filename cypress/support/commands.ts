@@ -59,17 +59,12 @@ Cypress.Commands.add("interceptManifest", (fixture: string) =>
 /**
  * Custom waitManifest command waits for the manifest stub to be called
  */
-Cypress.Commands.add(
-  "waitManifest",
-  {
-    prevSubject: true,
-  },
-  <T>(subject: T, alias: string, attribute: string) =>
-    cy
-      .wait(`@${alias}`) // wait for manifest stub to be called
-      .then(({ response }) => {
-        expect(response.body?.version).to.have.property("versionNo", attribute);
-      })
+Cypress.Commands.add("waitManifest", (alias: string, versionNo: string) =>
+  cy
+    .wait(`@${alias}`) // wait for manifest stub to be called
+    .then(({ response }) => {
+      expect(response.body?.version).to.have.property("versionNo", versionNo);
+    })
 );
 
 /**

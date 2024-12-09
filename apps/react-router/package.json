@@ -22,6 +22,7 @@
     "@react-router/dev": "7.0.0-pre.5",
     "@types/react": "^18.3.9",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",

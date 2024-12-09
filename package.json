@@ -10,8 +10,8 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "start": "npm -w react-router run dev",
-    "test": "start-server-and-test start http://localhost:5173 e2e:chrome",
-    "test:open": "start-server-and-test start http://localhost:5173 cy:open",
+    "test": "cross-env START_SERVER_AND_TEST_INSECURE=1 start-server-and-test start https://localhost:5173 e2e:chrome",
+    "test:open": "cross-env START_SERVER_AND_TEST_INSECURE=1 start-server-and-test start https://localhost:5173 cy:open",
     "cy:open": "cypress open",
     "e2e:chrome": "cypress run --browser chrome"
   },
@@ -23,6 +23,7 @@
     "@tsconfig/recommended": "^1.0.8",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.6",
+    "cross-env": "^7.0.3",
     "cypress": "^13.16.0",
     "cypress-wait-until": "^3.0.2",
     "eslint": "^9.15.0",
