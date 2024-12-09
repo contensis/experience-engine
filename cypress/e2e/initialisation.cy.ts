@@ -2,7 +2,9 @@ describe("Personalisation basics", () => {
   context("Given I am a visitor from an external site", () => {
     context("When I click a link that brings me to this site", () => {
       beforeEach(() => {
-        cy.visit("https://duckduckgo.com");
+        cy.interceptManifest("signals.page.path-manifest.json");
+        cy.intercept("https://google.com", { fixture: "google.html" });
+        cy.visit("https://google.com");
         // inject a link into the external page so we can link back to ourselves
         cy.injectLink("Link back to my home");
         cy.contains("Link back to my home").pageViewClick();
@@ -11,7 +13,7 @@ describe("Personalisation basics", () => {
       it("Then the referrer is correctly identified", () => {
         cy.getLocalStorage()
           .its("previousPage")
-          .should("contain", "https://duckduckgo.com");
+          .should("contain", "https://google.com");
       });
     });
   });

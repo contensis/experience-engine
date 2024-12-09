@@ -47,13 +47,29 @@ import "cypress-wait-until";
  * for the current manifest and stubs the response with the given fixture
  */
 Cypress.Commands.add("interceptManifest", (fixture: string) =>
-  cy.fixture(fixture).then((manifest) => {
-    cy.intercept(
+  cy
+    .intercept(
       "GET",
       "https://cms-cypress-test.cloud.contensis.com/api/delivery/projects/website/personalization/manifest/current",
-      manifest
-    );
-  })
+      { fixture }
+    )
+    .as(fixture)
+);
+
+/**
+ * Custom waitManifest command waits for the manifest stub to be called
+ */
+Cypress.Commands.add(
+  "waitManifest",
+  {
+    prevSubject: true,
+  },
+  <T>(subject: T, alias: string, attribute: string) =>
+    cy
+      .wait(`@${alias}`) // wait for manifest stub to be called
+      .then(({ response }) => {
+        expect(response.body?.version).to.have.property("versionNo", attribute);
+      })
 );
 
 /**

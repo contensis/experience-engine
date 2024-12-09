@@ -5,8 +5,11 @@ describe("Signals", () => {
     context(`${attribute}`, () => {
       context("Given I access the home page", () => {
         beforeEach(() => {
-          cy.interceptManifest(`signals.${attribute}-manifest.json`);
-          cy.pageViewVisit("/").getContext();
+          const manifestFixture = `signals.${attribute}-manifest.json`;
+          cy.interceptManifest(manifestFixture);
+          cy.pageViewVisit("/")
+            // wait for manifest stub to be called
+            .waitManifest(manifestFixture, attribute);
         });
 
         context("When I navigate to a page that matches a signal", () => {
@@ -87,11 +90,14 @@ describe("Signals", () => {
           }
         );
 
-        context.only(
+        context(
           "When I make separate visits to pages that match a signal enough times",
           () => {
             let signal: ISignal;
             beforeEach(() => {
+              cy.intercept("https://duckduckgo.com", {
+                fixture: "google.html",
+              });
               cy.getContext().then((c: PersonalizationContext) => {
                 signal = c.manifest?.signals.find((s) => s.minMatches === 3);
                 expect(signal).to.exist;
@@ -100,34 +106,29 @@ describe("Signals", () => {
                 for (let i = 1; i <= signal.minMatches; i++) {
                   cy.pageViewVisit("/arts/home?field1");
                   cy.contains("Navigate to Home Page").pageViewClick();
+
+                  // Use clicks to visit an external url rather than visits
+                  // so the referrer is retained
                   cy.contains("External URL").click();
 
                   // cy.visit("https://duckduckgo.com");
 
-                  // inject a link into the external page so we can link back to ourselves
+                  // inject a link into the external page so we can click the
+                  // link back to ourselves
                   cy.injectLink("Link back to my home");
 
                   cy.contains("Link back to my home").pageViewClick();
                   //cy.pageViewVisit("/")
-                  cy.getContext()
-                    .its("manifest")
-                    .should("exist")
-                    .then(() => {
-                      // cy.contains("Navigate to Page 1").pageViewClick();
-                      cy.getContext()
-                        .its("signals")
-                        .getLocalStorage()
-                        .then((state) => {
-                          const signalMatches =
-                            state.signals?.matched?.[signal.id] || [];
 
-                          expect(signalMatches).to.have.lengthOf(i);
+                  cy.getLocalStorage()
+                    .then((state) => {
+                      const signalMatches =
+                        state.signals?.matched?.[signal.id] || [];
 
-                          if (i < signal.minMatches)
-                            expect(state.signals?.active).to.not.include(
-                              signal.id
-                            );
-                        });
+                      expect(signalMatches).to.have.lengthOf(i);
+
+                      if (i < signal.minMatches)
+                        expect(state.signals?.active).to.not.include(signal.id);
                     });
                 }
               });
