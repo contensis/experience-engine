@@ -53,6 +53,7 @@ export class Manifest implements IManifest {
       this.audiences = state.audiences || [];
       this.signals = state.signals || [];
       this.version = state.version || ({} as IManifestVersion);
+      this._isReady = (state as Manifest)._isReady;
     }
 
     // Initialise with an instance of ManifestClient

@@ -226,13 +226,23 @@ export class CalculateSignals {
 
     if (isSSR()) return; // Don't compute signals in SSR
 
-    for (const signal of this.context.manifest?.signals || []) {
+    const signals = this.context.manifest?.signals || [];
+    this.context.log(
+      `[CalculateSignals] checking ${signals.length} signals in manifest version "${this.context.manifest?.version.versionNo}"`
+    );
+    const timeStart = +new Date();
+    for (const signal of signals) {
       this.computed.push({
         ...signal,
         matched: this.checkSignal(signal),
       });
     }
-
+    const timeEnd = +new Date();
+    this.context.log(
+      `[CalculateSignals] checked ${signals.length} signals in ${
+        timeEnd - timeStart
+      }ms`
+    );
     if (this.matched.length)
       this.context.log(
         `${this.matched.length} signals matched: ${this.matched.map(

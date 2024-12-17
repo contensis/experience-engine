@@ -304,6 +304,8 @@ export class PersonalizationContext {
         ...this.state,
         audiences: audiences.state,
       };
+    } else {
+      this.log(`manifest is not ready yet`);
     }
 
     // Call event handler
