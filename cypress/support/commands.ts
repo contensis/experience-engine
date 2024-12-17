@@ -66,6 +66,21 @@ Cypress.Commands.add("waitManifest", (alias: string, versionNo: string) =>
       expect(response.body?.version).to.have.property("versionNo", versionNo);
     })
 );
+/**
+ * Custom waitSignals command waits for the computed signals array to be filled
+ */
+Cypress.Commands.add("waitSignals", () =>
+  cy
+    .waitUntil(() =>
+      cy.getContext().then((c: PersonalizationContext) => {
+        return (
+          c.signals?.computed?.length > 0 &&
+          c.signals.computed.length === c.manifest.signals.length
+        );
+      })
+    )
+    .getContext()
+);
 
 /**
  * Custom injectLink command injects a link into the current document
@@ -138,7 +153,8 @@ Cypress.Commands.add("pageView", () =>
       expect(context.pageViews.length).equal(prevPageCount + 1);
 
       // Assert the current page has been saved in local storage state
-      cy.getLocalStorage()
+      cy.waitSignals()
+        .getLocalStorage()
         .then((state) => state.currentPage)
         .should("equal", nextUrl)
         // .log(`[pageView] This: ${context.page}`)

@@ -56,30 +56,32 @@ describe("Signals", () => {
           () => {
             let signal: ISignal;
             beforeEach(() => {
-              cy.getContext().then((c: PersonalizationContext) => {
-                // Find a signal in the manifest
-                signal = c.manifest?.signals.find((s) => s.minMatches === 3);
+              cy.getContext()
+                .waitSignals()
+                .then((c: PersonalizationContext) => {
+                  // Find a signal in the manifest
+                  signal = c.manifest?.signals.find((s) => s.minMatches === 3);
 
-                // Expect this signal to have been computed
-                expect(c.state.signals?.computed?.[signal.id]).to.exist;
+                  // Expect this signal to have been computed
+                  expect(c.state.signals?.computed?.[signal.id]).to.exist;
 
-                // Make required number of visits back and forth to match the signal enough times
-                for (let i = 1; i <= signal.minMatches; i++) {
-                  cy.contains("Navigate to Arts Home Page").pageViewClick();
+                  // Make required number of visits back and forth to match the signal enough times
+                  for (let i = 1; i <= signal.minMatches; i++) {
+                    cy.contains("Navigate to Arts Home Page").pageViewClick();
 
-                  cy.getLocalStorage().then((state) => {
-                    // Ensure we have matched the signal the expected number of times
-                    expect(
-                      state.signals?.matched?.[signal.id]
-                    ).to.have.lengthOf(i);
-                    if (i < signal.minMatches)
-                      // If we haven't met the minMatches yet we expect the signal to not be active
-                      expect(state.signals?.active).to.not.include(signal.id);
-                  });
+                    cy.getLocalStorage().then((state) => {
+                      // Ensure we have matched the signal the expected number of times
+                      expect(
+                        state.signals?.matched?.[signal.id]
+                      ).to.have.lengthOf(i);
+                      if (i < signal.minMatches)
+                        // If we haven't met the minMatches yet we expect the signal to not be active
+                        expect(state.signals?.active).to.not.include(signal.id);
+                    });
 
-                  cy.contains("Navigate to Home Page").pageViewClick();
-                }
-              });
+                    cy.contains("Navigate to Home Page").pageViewClick();
+                  }
+                });
             });
 
             it("Then the signal is made active", () => {
@@ -97,51 +99,54 @@ describe("Signals", () => {
               cy.intercept("https://duckduckgo.com", {
                 fixture: "google.html",
               });
-              cy.getContext().then((c: PersonalizationContext) => {
-                expect(c.manifest).to.exist;
-                expect(c.signals).to.exist;
-                expect(c.signals.computed).to.has.lengthOf.at.least(1);
-                signal = c.manifest.signals.find((s) => s.minMatches === 3);
-                expect(signal).to.exist;
-                expect(c.state.signals?.computed?.[signal.id]).to.exist;
+              cy.getContext()
+                .waitSignals()
+                .then((c: PersonalizationContext) => {
+                  signal = c.manifest.signals.find((s) => s.minMatches === 3);
+                  expect(signal).to.exist;
+                  if (!c.state.signals?.computed?.[signal.id])
+                    cy.log(JSON.stringify(c.state.signals?.computed, null, 2));
+                  expect(c.state.signals?.computed?.[signal.id]).to.exist;
 
-                for (let i = 1; i <= signal.minMatches; i++) {
-                  cy.pageViewVisit("/arts/home?field1").waitManifest(
-                    manifestFixture,
-                    attribute
-                  );
-                  cy.contains("Navigate to Home Page").pageViewClick();
+                  for (let i = 1; i <= signal.minMatches; i++) {
+                    cy.pageViewVisit("/arts/home?field1");
+                    cy.contains("Navigate to Home Page").pageViewClick();
 
-                  // Use clicks to visit an external url rather than visits
-                  // so the referrer is retained
-                  cy.contains("External URL").click();
+                    // Use clicks to visit an external url rather than visits
+                    // so the referrer is retained
+                    cy.contains("External URL").click();
 
-                  // cy.visit("https://duckduckgo.com");
+                    // cy.visit("https://duckduckgo.com");
 
-                  if (Cypress.isBrowser("firefox")) {
-                    cy.pageViewVisit("/");
-                  } else {
-                    // inject a link into the external page so we can click the
-                    // link back to ourselves
-                    cy.injectLink("Link back to my home");
+                    if (Cypress.isBrowser("firefox")) {
+                      cy.pageViewVisit("/")
+                        .waitManifest(manifestFixture, attribute)
+                        .waitSignals();
+                    } else {
+                      // inject a link into the external page so we can click the
+                      // link back to ourselves
+                      cy.injectLink("Link back to my home");
 
-                    cy.contains("Link back to my home")
-                      .pageViewClick()
-                      .waitManifest(manifestFixture, attribute);
+                      cy.contains("Link back to my home")
+                        .pageViewClick()
+                        .waitManifest(manifestFixture, attribute)
+                        .waitSignals();
+                    }
+
+                    cy.getContext().then((c) => {
+                      expect(c.signals).to.exist;
+                      const signalMatches =
+                        c.state.signals?.matched?.[signal.id] || [];
+
+                      expect(signalMatches).to.have.lengthOf(i);
+
+                      if (i < signal.minMatches)
+                        expect(c.state.signals?.active).to.not.include(
+                          signal.id
+                        );
+                    });
                   }
-
-                  cy.getContext().then((c) => {
-                    expect(c.signals).to.exist;
-                    const signalMatches =
-                      c.state.signals?.matched?.[signal.id] || [];
-
-                    expect(signalMatches).to.have.lengthOf(i);
-
-                    if (i < signal.minMatches)
-                      expect(c.state.signals?.active).to.not.include(signal.id);
-                  });
-                }
-              });
+                });
             });
 
             it("Then the signal is made active", () => {
