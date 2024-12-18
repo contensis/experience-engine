@@ -65,6 +65,8 @@ jobs:
 
       - name: Run Cypress tests for all workspace packages
         uses: cypress-io/github-action@v6
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
         with:
           start: npm start
           wait-on: "https://localhost:5173"
