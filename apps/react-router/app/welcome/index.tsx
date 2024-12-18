@@ -50,7 +50,7 @@ export function Welcome() {
           <Link to={"/arts/home?field1=value1a&field1=value1b&field2=value2"}>
             Navigate to Arts Home Page
           </Link>
-          <Link to={"https://duckduckgo.com"}>Navigate to External URL</Link>
+          <Link to={"https://www.duckduckgo.com/"}>Navigate to External URL</Link>
         </nav>
         <Suspense fallback={<h2>🌀 Loading...</h2>}>
           <Audiences />

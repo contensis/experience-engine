@@ -1,0 +1,149 @@
+{
+  "audiences": [
+    {
+      "id": "artsInterestedStudents",
+      "name": "Interested Arts Students",
+      "description": "Students who have browsed arts section",
+      "conditions": {
+        "and": [
+          {
+            "type": "signal",
+            "id": "artsVisitor"
+          }
+        ]
+      },
+      "version": {
+        "created": "2024-11-22T00:00:00.000Z",
+        "createdBy": "n.flatley",
+        "modified": "2024-11-22T00:00:00.000Z",
+        "modifiedBy": "n.flatley"
+      }
+    },
+    {
+      "id": "artsEngagedStudents",
+      "name": "Highly Engaged Arts Students",
+      "description": "Students with a deep interest in arts",
+      "conditions": {
+        "and": [
+          {
+            "type": "audience",
+            "id": "artsInterestedStudents"
+          },
+          {
+            "or": [
+              {
+                "type": "signal",
+                "id": "frequentArtsVisitor"
+              },
+              {
+                "type": "signal",
+                "id": "searchedForArts"
+              }
+            ]
+          }
+        ]
+      },
+      "version": {
+        "created": "2024-06-01T00:00:00Z",
+        "createdBy": "s.horan",
+        "modified": "2024-06-04T00:00:00Z",
+        "modifiedBy": "s.horan"
+      }
+    },
+    {
+      "id": "techSavvyUsers",
+      "name": "Tech Savvy Users",
+      "description": "Users frequently engaging with technology and gadget content",
+      "conditions": {
+        "or": [
+          {
+            "type": "signal",
+            "id": "frequentTechBlogReader"
+          },
+          {
+            "and": [
+              {
+                "type": "signal",
+                "id": "frequentGadgetReviewer"
+              },
+              {
+                "type": "signal",
+                "id": "recentlyPurchasedTech"
+              }
+            ]
+          }
+        ]
+      },
+      "version": {
+        "created": "2024-04-20T14:00:00Z",
+        "createdBy": "k.jones",
+        "modified": "2024-05-25T17:00:00Z",
+        "modifiedBy": "k.jones"
+      }
+    }
+  ],
+  "signals": [
+    {
+      "id": "artsVisitor",
+      "name": "Arts Section Visitor",
+      "minMatches": 3,
+      "where": {
+        "and": [
+          {
+            "attribute": "referrer.path",
+            "startsWith": "/arts/"
+          },
+          {
+            "attribute": "referrer.subdomain",
+            "equalTo": "localhost"
+          }
+        ]
+      }
+    },
+    {
+      "id": "frequentArtsVisitor",
+      "name": "Frequent Arts Section Visitor",
+      "minMatches": 5,
+      "where": {
+        "and": [
+          {
+            "attribute": "referrer.path",
+            "startsWith": "/arts/"
+          },
+          {
+            "attribute": "referrer.subdomain",
+            "equalTo": "localhost"
+          }
+        ]
+      }
+    },
+    {
+      "id": "frequentTechBlogReader",
+      "name": "Frequent Technology Blog Reader",
+      "minMatches": 10,
+      "where": {
+        "or": [
+          {
+            "attribute": "pageUrl",
+            "contains": "techblog"
+          },
+          {
+            "attribute": "searchQuery",
+            "contains": "latest gadgets"
+          }
+        ]
+      },
+      "version": {
+        "created": "2024-04-20T14:00:00Z",
+        "createdBy": "k.jones",
+        "modified": "2024-05-25T17:00:00Z",
+        "modifiedBy": "k.jones"
+      }
+    }
+  ],
+  "version": {
+    "published": "2024-11-19T12:00:00.000Z",
+    "publishedBy": "j.doe",
+    "versionNo": "referrer.subdomain"
+  }
+}

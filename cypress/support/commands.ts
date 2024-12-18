@@ -63,19 +63,25 @@ Cypress.Commands.add("waitManifest", (alias: string, versionNo: string) =>
   cy
     .wait(`@${alias}`) // wait for manifest stub to be called
     .then(({ response }) => {
+      // validate that we have loaded the intended manifest stub version
       expect(response.body?.version).to.have.property("versionNo", versionNo);
     })
 );
 /**
- * Custom waitSignals command waits for the computed signals array to be filled
+ * Custom waitSignals command waits for the signals to be computed and persisted
  */
 Cypress.Commands.add("waitSignals", () =>
   cy
     .waitUntil(() =>
       cy.getContext().then((c: PersonalizationContext) => {
         return (
+          // ensure we have computed signals
           c.signals?.computed?.length > 0 &&
-          c.signals.computed.length === c.manifest.signals.length
+          // ensure the computed signals matches the number of signals in the manifest
+          c.signals.computed.length === c.manifest.signals.length &&
+          // ensure the computed signals have been persisted to local storage
+          Object.keys(c.state.signals?.computed || {}).length ===
+            c.signals.computed.length
         );
       })
     )

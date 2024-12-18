@@ -1,55 +1,86 @@
 import { ISignal, PersonalizationContext } from "@contensis/personalization";
 
-describe("Signals", () => {
-  for (const attribute of ["page.path", "page.querystring"]) {
+// Loop through this array running the test suite for each attribute
+// A specific manifest fixture will provide the specific stub manifest for each iteration
+const attributes = [
+  "page.baseUrl",
+  "page.domain",
+  "page.path",
+  "page.queryParams",
+  "page.querystring",
+  "page.subdomain",
+  "page.url",
+  "referrer.baseUrl",
+  "referrer.domain",
+  "referrer.path",
+  "referrer.queryParams",
+  "referrer.querystring",
+  "referrer.subdomain",
+  "referrer.url",
+];
+
+describe("Match Signals via attributes", () => {
+  for (const attribute of attributes) {
     const manifestFixture = `signals.${attribute}-manifest.json`;
-    context(`${attribute}`, () => {
+    context(`attribute="${attribute}"`, () => {
       context("Given I access the home page", () => {
         beforeEach(() => {
           cy.interceptManifest(manifestFixture);
+          cy.intercept("https://www.duckduckgo.com", {
+            fixture: "google.html",
+          });
           cy.pageViewVisit("/")
             // wait for manifest stub to be called
             .waitManifest(manifestFixture, attribute);
         });
 
-        context("When I navigate to a page that matches a signal", () => {
-          beforeEach(() => {
-            cy.contains("Navigate to Arts Home Page").pageViewClick();
-          });
+        context(
+          `When I navigate to a page that matches a ${attribute} signal`,
+          () => {
+            beforeEach(() => {
+              cy.contains("Navigate to Arts Home Page").pageViewClick();
+              if (attribute.startsWith("referrer"))
+                // ensure we navigate away from our target page when we are looking for a signal based on a referrer attribute
+                cy.contains("Navigate to Home Page").pageViewClick();
+            });
 
-          it("Then the signal rules are available in the manifest", () => {
-            cy.waitUntil(() =>
-              cy.getLocalStorage().then((state) => !!state.manifest)
-            ).then(() => {
-              cy.getLocalStorage().then((state) => {
+            it("Then the signal rules are available in the manifest", () => {
+              cy.waitUntil(() =>
+                cy.getLocalStorage().then((state) => !!state.manifest)
+              ).then(() => {
+                cy.getLocalStorage().then((state) => {
+                  const signal = state.manifest?.signals.find(
+                    (s) => s.minMatches === 3
+                  );
+                  expect(signal).to.exist;
+                });
+              });
+            });
+
+            it("And the matched signal is recorded and persisted in localStorage", () => {
+              cy.getContext().then((c) => {
+                const state = c.state;
                 const signal = state.manifest?.signals.find(
                   (s) => s.minMatches === 3
                 );
-                expect(signal).to.exist;
+                expect(state.signals?.computed?.[signal.id]).to.exist;
+                expect(
+                  state.signals?.matched?.[signal.id] || []
+                ).to.have.lengthOf(1);
+                cy.log(
+                  `Matched signal: ${signal.id}`,
+                  JSON.stringify(state.signals.matched?.[signal.id])
+                );
               });
             });
-          });
 
-          it("And the matched signal is recorded and persisted in localStorage", () => {
-            cy.getLocalStorage().then((state) => {
-              const signal = state.manifest?.signals.find(
-                (s) => s.minMatches === 3
-              );
-              expect(state.signals?.computed?.[signal.id]).to.exist;
-              expect(state.signals?.matched?.[signal.id]).to.have.lengthOf(1);
-              cy.log(
-                `Matched signal: ${signal.id}`,
-                JSON.stringify(state.signals.matched?.[signal.id])
-              );
+            it("And the matched signal is not active", () => {
+              cy.getLocalStorage().then((state) => {
+                expect(state.signals?.active).to.be.empty;
+              });
             });
-          });
-
-          it("And the matched signal is not active", () => {
-            cy.getLocalStorage().then((state) => {
-              expect(state.signals?.active).to.be.empty;
-            });
-          });
-        });
+          }
+        );
 
         context(
           "When I navigate to multiple pages that match a signal enough times",
@@ -67,19 +98,20 @@ describe("Signals", () => {
 
                   // Make required number of visits back and forth to match the signal enough times
                   for (let i = 1; i <= signal.minMatches; i++) {
+                    // Our target page that should match the signal
                     cy.contains("Navigate to Arts Home Page").pageViewClick();
+                    // Navigate away from our target page so we can test for referrer signals
+                    cy.contains("Navigate to Home Page").pageViewClick();
 
                     cy.getLocalStorage().then((state) => {
                       // Ensure we have matched the signal the expected number of times
                       expect(
-                        state.signals?.matched?.[signal.id]
+                        state.signals?.matched?.[signal.id] || []
                       ).to.have.lengthOf(i);
                       if (i < signal.minMatches)
                         // If we haven't met the minMatches yet we expect the signal to not be active
                         expect(state.signals?.active).to.not.include(signal.id);
                     });
-
-                    cy.contains("Navigate to Home Page").pageViewClick();
                   }
                 });
             });
@@ -96,9 +128,6 @@ describe("Signals", () => {
           () => {
             let signal: ISignal;
             beforeEach(() => {
-              cy.intercept("https://duckduckgo.com", {
-                fixture: "google.html",
-              });
               cy.getContext()
                 .waitSignals()
                 .then((c: PersonalizationContext) => {
@@ -109,7 +138,7 @@ describe("Signals", () => {
                   expect(c.state.signals?.computed?.[signal.id]).to.exist;
 
                   for (let i = 1; i <= signal.minMatches; i++) {
-                    cy.pageViewVisit("/arts/home?field1");
+                    cy.pageViewVisit("/arts/home?field1=value1b");
                     cy.contains("Navigate to Home Page").pageViewClick();
 
                     // Use clicks to visit an external url rather than visits
@@ -119,9 +148,10 @@ describe("Signals", () => {
                     // cy.visit("https://duckduckgo.com");
 
                     if (Cypress.isBrowser("firefox")) {
-                      cy.pageViewVisit("/")
-                        .waitManifest(manifestFixture, attribute)
-                        .waitSignals();
+                      cy.pageViewVisit("/").waitManifest(
+                        manifestFixture,
+                        attribute
+                      );
                     } else {
                       // inject a link into the external page so we can click the
                       // link back to ourselves
@@ -129,8 +159,7 @@ describe("Signals", () => {
 
                       cy.contains("Link back to my home")
                         .pageViewClick()
-                        .waitManifest(manifestFixture, attribute)
-                        .waitSignals();
+                        .waitManifest(manifestFixture, attribute);
                     }
 
                     cy.getContext().then((c) => {
