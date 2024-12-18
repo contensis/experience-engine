@@ -271,8 +271,9 @@ export class PersonalizationContext {
       // Current page has not changed
       // Use state values
       this.currentPage = state.currentPage;
-      this.previousPage = state.previousPage =
-        (!isSSR() ? window.document.referrer : undefined) || state.previousPage;
+      this.previousPage = state.previousPage = !isSSR()
+        ? window.document.referrer
+        : undefined;
     }
 
     // Record page view

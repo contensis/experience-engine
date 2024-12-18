@@ -132,7 +132,7 @@ describe("Match Signals via attributes", () => {
                 .waitSignals()
                 .then((c: PersonalizationContext) => {
                   signal = c.manifest.signals.find((s) => s.minMatches === 3);
-                  expect(signal).to.exist;
+                  expect(signal?.id).to.exist;
                   if (!c.state.signals?.computed?.[signal.id])
                     cy.log(JSON.stringify(c.state.signals?.computed, null, 2));
                   expect(c.state.signals?.computed?.[signal.id]).to.exist;
