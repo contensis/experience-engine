@@ -22,6 +22,7 @@ export const getRelativeTime = (d1: number, d2 = +new Date()) => {
 };
 
 export const ifCypressTest = <T, F = undefined>(ifTrue: T, ifFalse?: F) =>
-  typeof window !== "undefined" && "Cypress" in window
+  typeof window !== "undefined" &&
+  ("Cypress" in window || "Cypress" in window.parent)
     ? ifTrue
     : ifFalse;
