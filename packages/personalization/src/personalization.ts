@@ -199,12 +199,12 @@ export class PersonalizationContext {
         // If we have matched new signals...
         if (hasNewSignals) {
           this.log(`Matched new signals from updated manifest`);
-          // Persist new signals state
-          this.persist = {
-            ...this.state,
-            signals: signalState,
-          };
         }
+        // Persist new signals state (including signals calculated for the first time after manifest is available)
+        this.persist = {
+          ...this.state,
+          signals: signalState,
+        };
 
         // Add signal state to pageViews array so we know it has been calculated
         check[2] = signals;
@@ -218,12 +218,12 @@ export class PersonalizationContext {
         // If we have matched new audiences...
         if (hasNewAudiences) {
           this.log(`Matched new audiences from updated manifest`);
-          // Persist new audiences state
-          this.persist = {
-            ...this.state,
-            audiences,
-          };
         }
+        // Persist new audiences state
+        this.persist = {
+          ...this.state,
+          audiences,
+        };
       }
     }
 
