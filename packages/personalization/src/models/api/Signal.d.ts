@@ -22,6 +22,7 @@ export interface WhereCriteria {
   attribute: string;
   contains?: string;
   equals?: string;
+  equalTo?: string;
   exists?: boolean;
   in?: string[];
   lessThan?: number;

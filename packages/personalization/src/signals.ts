@@ -379,6 +379,7 @@ class SignalCriteriaEvaluation<T extends SignalValue | SignalValue[]> {
     const {
       contains,
       equals,
+      equalTo,
       exists,
       greaterThan,
       in: equalsIn, // can't use a var called "in"
@@ -394,6 +395,10 @@ class SignalCriteriaEvaluation<T extends SignalValue | SignalValue[]> {
     if (!isUndefined(equals) && !isUndefined(value))
       if (isString(value)) return trimToLower(value) === trimToLower(equals);
       else return value == (equals as unknown);
+
+    if (!isUndefined(equalTo) && !isUndefined(value))
+      if (isString(value)) return trimToLower(value) === trimToLower(equalTo);
+      else return value == (equalTo as unknown);
 
     if (!isUndefined(equalsIn) && isArray(equalsIn) && !isUndefined(value))
       return equalsIn.map((ic) => trimToLower(ic)).includes(trimToLower(value));
