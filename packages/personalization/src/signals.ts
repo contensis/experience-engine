@@ -39,7 +39,7 @@ export class UrlSignals {
     // my.example.company.co.uk will return just "my"
     return parts?.[0];
   };
-  baseUrl = () => this.url.origin;
+  baseUrl = () => `${this.url.origin}${this.url.pathname}`;
   querystring = () => this.url.search;
   queryParam = (name: string) => this.url.searchParams.getAll(name);
   queryParams = () => {
@@ -54,14 +54,16 @@ export class SignalAttributes {
   "page.url": string = "";
   "page.path": string = "";
   "page.querystring": string = "";
-  "page.queryParams.*": { [key: string]: string } = {};
+  "page.queryParams.*": (key: string) => string[];
+  // "page.queryParams.*": { [key: string]: string } = {};
   "page.domain": string = "";
   "page.subdomain": string = "";
   "page.baseUrl": string = "";
   "referrer.url"?: string = "";
   "referrer.path"?: string = "";
   "referrer.querystring"?: string = "";
-  "referrer.queryParams.*"?: { [key: string]: string } = {};
+  "referrer.queryParams.*": (key: string) => string[] | undefined;
+  // "referrer.queryParams.*"?: { [key: string]: string } = {};
   "referrer.domain"?: string = "";
   "referrer.subdomain"?: string = "";
   "referrer.baseUrl"?: string = "";
@@ -92,14 +94,17 @@ export class Signals extends SignalAttributes {
       "page.path": this._url.path(),
       pageUrl: this._url.path(),
       "page.querystring": this._url.querystring(),
-      "page.queryParams.*": this._url.queryParams(),
+      "page.queryParams.*": (name: string) => this._url.queryParam(name),
+      // "page.queryParams.*": this._url.queryParams(),
       "page.domain": this._url.domain(),
       "page.subdomain": this._url.subdomain(),
       "page.baseUrl": this._url.baseUrl(),
       "referrer.url": this.referrer?._url.href(),
       "referrer.path": this.referrer?._url.path(),
       "referrer.querystring": this.referrer?._url.querystring(),
-      "referrer.queryParams.*": this.referrer?._url.queryParams(),
+      "referrer.queryParams.*": (name: string) =>
+        this.referrer?._url.queryParam(name),
+      // "referrer.queryParams.*": this.referrer?._url.queryParams(),
       "referrer.domain": this.referrer?._url.domain(),
       "referrer.subdomain": this.referrer?._url.subdomain(),
       "referrer.baseUrl": this.referrer?._url.baseUrl(),
@@ -109,23 +114,6 @@ export class Signals extends SignalAttributes {
 
     Object.assign(this, attributes);
   }
-  // "page.path" = () => this._url.path();
-  // pageUrl = this["page.path"];
-  // "page.querystring" = () => this._url.querystring();
-  // "page.queryParams.*" = (key: string) => this._url.queryParam(key);
-  // "page.domain" = () => this._url.domain();
-  // "page.subdomain" = () => this._url.subdomain();
-  // "page.baseUrl" = () => this._url.baseUrl();
-  // "referrer.url" = () => this.referrer?._url.href();
-  // "referrer.path" = () => this.referrer?._url.path();
-  // "referrer.querystring" = () => this.referrer?._url.querystring();
-  // "referrer.queryParams.*" = (key: string) =>
-  //   this.referrer?._url.queryParam(key);
-  // "referrer.domain" = () => this.referrer?._url.domain();
-  // "referrer.subdomain" = () => this.referrer?._url.subdomain();
-  // "referrer.baseUrl" = () => this.referrer?._url.baseUrl();
-  // "cookie" = () => this._cookie.string;
-  // "cookie.*" = (key: string) => this._cookie.get(key);
 }
 
 export type ComputedSignal = ISignal & { matched: boolean };
@@ -324,10 +312,11 @@ export class CalculateSignals {
       case "referrer.baseUrl":
       case "cookie":
         return this.signals[attribute];
-      case "page.queryParams.*":
-      case "referrer.queryParams.*":
       case "cookie.*":
         return this.signals[attribute]?.[key];
+      case "page.queryParams.*":
+      case "referrer.queryParams.*":
+        return this.signals[attribute](key);
       default:
         // some other attribute type
         break;
