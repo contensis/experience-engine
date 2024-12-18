@@ -67,7 +67,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           start: npm start
-          wait-on: "https://localhost:5178"
+          wait-on: "https://localhost:5173"
           browser: ${{ matrix.browser }}
 
       # after the test run completes store videos and any screenshots
