@@ -14,8 +14,12 @@ export type Conditions =
       or: ConditionsOr[];
     };
 
-export type ConditionsAnd = Condition | Conditions;
-export type ConditionsOr = Condition | Conditions;
+export type ConditionsAnd = Condition | NotCondition | Conditions;
+export type ConditionsOr = Condition | NotCondition | Conditions;
+
+export interface NotCondition {
+  not: Condition;
+}
 
 export interface Condition {
   type: "audience" | "signal";

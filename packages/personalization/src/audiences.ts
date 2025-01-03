@@ -1,9 +1,4 @@
-import {
-  ConditionsAnd,
-  ConditionsOr,
-  IAudience,
-  IAudiencesStore,
-} from "./models";
+import { Condition, Conditions, IAudience, IAudiencesStore } from "./models";
 import { PersonalizationContext } from "./personalization";
 import { isSSR } from "./util";
 
@@ -19,14 +14,14 @@ export class CalculateAudiences {
 
   /** Return the state of the audiences, checking for newly matched audiences we may not have detected earlier */
   get state() {
+    const { computed, context, matched: matchedThis, timestamp } = this;
     // Merge audience matches from this instance into any previously matched
-    const matchedThis = this.matched;
     const matchedPrev: IAudiencesStore["matched"] =
-      this.context.state.audiences?.matched || {};
+      context.state.audiences?.matched || {};
 
     // Create a distinct list of all audience ids
     const allIds = new Set<string>([
-      ...this.matched.map((m) => m.id),
+      ...matchedThis.map((m) => m.id),
       ...Object.keys(matchedPrev),
     ]);
 
@@ -37,13 +32,13 @@ export class CalculateAudiences {
       // Did we match this audienceId in this request?
       if (matchedThis.find((m) => m.id === audienceId)) {
         matched[audienceId] = [
-          { p: this.context.page!, t: this.timestamp },
+          { p: context.page!, t: timestamp },
           // // Add prev match(es)
           // ...(matchedPrev[audienceId] || []),
         ];
       } else {
         // Assign previously matched audience, if the audienceId is still available in the manifest
-        if (this.context.manifest?.audiences.find((a) => a.id === audienceId))
+        if (context.manifest?.audiences.find((a) => a.id === audienceId))
           matched[audienceId] = matchedPrev[audienceId];
       }
     }
@@ -53,14 +48,14 @@ export class CalculateAudiences {
 
     const nextState: IAudiencesStore = {
       computed:
-        this.context.debug && this.computed.length
+        context.debug && computed.length
           ? Object.fromEntries(
-              this.computed.map((a) => [
+              computed.map((a) => [
                 a.id,
                 [
                   {
-                    p: this.context.page!,
-                    t: this.timestamp,
+                    p: context.page!,
+                    t: timestamp,
                     m: a.matched,
                   },
                 ],
@@ -76,10 +71,10 @@ export class CalculateAudiences {
 
   constructor(private context: PersonalizationContext) {
     if (isSSR()) return;
-    for (const audience of this.context.manifest?.audiences || []) {
+    for (const audience of context.manifest?.audiences || []) {
       this.computed.push({
         ...audience,
-        matched: this.check(audience),
+        matched: this.check(audience.conditions),
       });
     }
     const num = this.matched.length;
@@ -90,14 +85,16 @@ export class CalculateAudiences {
       for (const audience of this.computed.filter((a) => !a.matched)) {
         this.computed.push({
           ...audience,
-          matched: this.check(audience),
+          matched: this.check(audience.conditions),
         });
       }
       matchLen = this.matched.length;
     }
     if (matchLen)
-      this.context.log(
-        `${matchLen} audiences matched: ${this.matched.map((m) => m.id)}`
+      context.log(
+        `[Audiences] ${matchLen} matched: ${this.matched.map(
+          (m) => m.id
+        )}`
       );
   }
   /**
@@ -105,25 +102,45 @@ export class CalculateAudiences {
    * in a single and/or array. Iterate criteria and evaluate
    * each to produce a final boolean match
    */
-  check = (audience: IAudience) => {
-    if ("and" in audience.conditions && audience.conditions.and.length) {
+  check = (conditions: Conditions) => {
+    if ("and" in conditions && conditions.and.length) {
       // All criteria must evaluate true
-      for (const and of audience.conditions.and) {
-        const match = this.evaluate(and);
-        // first failed match will fail the "and" criteria
-        if (!match) return false;
+      for (const and of conditions.and) {
+        if ("and" in and || "or" in and) {
+          const match = this.check(and);
+          // first failed match will fail the "and" criteria
+          if (!match) return false;
+        } else if ("not" in and) {
+          const match = this.evaluate(and.not);
+          // first successful match will fail the "not" and the outer "and" criteria
+          if (match) return false;
+        } else {
+          const match = this.evaluate(and);
+          // first failed match will fail the "and" criteria
+          if (!match) return false;
+        }
       }
       // If we have not returned already:
       // - an "and" criteria will have all matched so signal must be true
       return true;
     }
 
-    if ("or" in audience.conditions) {
+    if ("or" in conditions) {
       // Only one of the criteria must evaluate true
-      for (const or of audience.conditions.or) {
-        const match = this.evaluate(or);
-        // first match will satisfy the "or" criteria
-        if (match) return true;
+      for (const or of conditions.or) {
+        if ("and" in or || "or" in or) {
+          const match = this.check(or);
+          // first match will satisfy the "or" criteria
+          if (match) return true;
+        } else if ("not" in or) {
+          const notMatch = !this.evaluate(or.not);
+          // first successful match will satisfy the "not" and the outer "or" criteria
+          if (!notMatch) return true;
+        } else {
+          const match = this.evaluate(or);
+          // first match will satisfy the "or" criteria
+          if (match) return true;
+        }
       }
       // If we have not returned already:
       // - an "or" criteria would have returned on the first match so signal must be false
@@ -134,29 +151,15 @@ export class CalculateAudiences {
   };
 
   /** Evaluate one audience condition and return a boolean match */
-  evaluate = (condition: ConditionsAnd | ConditionsOr) => {
-    if ("and" in condition) {
-      for (const and of condition.and) {
-        const match = this.evaluate(and);
-        // first failed match will fail the "and" criteria
-        if (!match) return false;
-      }
-    } else if ("or" in condition) {
-      for (const or of condition.or) {
-        const match = this.evaluate(or);
-        // first match will satisfy the "or" criteria
-        if (match) return true;
-      }
-      // If we have not returned already:
-      // - an "or" criteria would have returned on the first match so signal must be false
-      return false;
-    } else if (condition.type === "audience") {
-      const match = !!this.context.state.audiences?.active.find(
+  evaluate = (condition: Condition): boolean => {
+    const { audiences, signals } = this.context.state;
+    if (condition.type === "audience") {
+      const match = !!audiences?.active.find(
         (audienceId) => audienceId === condition.id
       );
       return match;
     } else if (condition.type === "signal") {
-      const match = !!this.context.state.signals?.active.find(
+      const match = !!signals?.active.find(
         (signalId) => signalId === condition.id
       );
       return match;

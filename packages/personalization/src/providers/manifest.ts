@@ -1,17 +1,23 @@
 import { IManifestClient, ManifestClient } from "./manifest-client";
 import { IAudience, IManifest, IManifestVersion, ISignal } from "../models";
 import { PersonalizationContext } from "../personalization";
+import { isManifestClient } from "../util";
 
-export type IManifestClientArgs = {
-  alias: string;
-  projectId: string;
-};
+export type IManifestClientArgs =
+  | {
+      alias: string;
+      projectId: string;
+    }
+  | {
+      rootUrl: string;
+      projectId: string;
+    };
 
 export type IManifestOnReady = (manifest: IManifest) => unknown;
 
 export class Manifest implements IManifest {
   private _isReady = false;
-  client?: ManifestClient;
+  client?: ReturnType<typeof ManifestClient>;
   audiences: IAudience[] = [];
   signals: ISignal[] = [];
   version: IManifestVersion = {} as IManifestVersion;
@@ -21,7 +27,7 @@ export class Manifest implements IManifest {
   }
 
   constructor(
-    { alias, projectId }: IManifestClientArgs,
+    client: IManifestClientArgs,
     onReady: IManifestOnReady,
     log: PersonalizationContext["log"],
     state?: IManifest
@@ -45,9 +51,23 @@ export class Manifest implements IManifest {
     private log: PersonalizationContext["log"],
     state?: IManifest
   ) {
-    // Fallback to manifest from state while we initialise if available
-    if (state) {
-      this.log(
+    // Initialise with an instance of ManifestClient
+    if (isManifestClient(client)) this.client = client;
+    // Initialise with a new client (alias and projectId supplied)
+    else if ("alias" in client)
+      this.client = ManifestClient(client.alias, client.projectId);
+    else if ("rootUrl" in client)
+      this.client = ManifestClient(client.rootUrl, client.projectId);
+    else {
+      // Initialise with an IManifest object
+      this.audiences = client.audiences || this.audiences;
+      this.signals = client.signals || this.signals;
+      this.version = client.version || this.version;
+    }
+
+    // Fallback to manifest from state if available before we initialise any client
+    if (state && this.client) {
+      log(
         `[Manifest] Fallback to manifest found in state while we initialise`
       );
       this.audiences = state.audiences || [];
@@ -56,17 +76,6 @@ export class Manifest implements IManifest {
       this._isReady = (state as Manifest)._isReady;
     }
 
-    // Initialise with an instance of ManifestClient
-    if (client instanceof ManifestClient) this.client = client;
-    // Initialise with a new client (alias and projectId supplied)
-    else if ("alias" in client) {
-      this.client = new ManifestClient(client.alias, client.projectId);
-    } else {
-      // Initialise with an IManifest object
-      this.audiences = client.audiences || this.audiences;
-      this.signals = client.signals || this.signals;
-      this.version = client.version || this.version;
-    }
     this.init(); // not awaitable in constructor
   }
 

@@ -1,4 +1,5 @@
-import { ISignal, ISignalsStore, WhereCriteria } from "./models";
+import { ISignal, ISignalsStore, Where, WhereCriteria } from "./models";
+import { ISignalAttributes } from "./models/ISignalAttributes";
 import { PersonalizationContext } from "./personalization";
 import { cookieStore } from "./providers/store";
 import {
@@ -49,78 +50,52 @@ export class UrlSignals {
   };
 }
 
-export class SignalAttributes {
-  pageUrl: string = "";
-  "page.url": string = "";
-  "page.path": string = "";
-  "page.querystring": string = "";
-  "page.queryParams.*": (key: string) => string[];
-  // "page.queryParams.*": { [key: string]: string } = {};
-  "page.domain": string = "";
-  "page.subdomain": string = "";
-  "page.baseUrl": string = "";
-  "referrer.url"?: string = "";
-  "referrer.path"?: string = "";
-  "referrer.querystring"?: string = "";
-  "referrer.queryParams.*": (key: string) => string[] | undefined;
-  // "referrer.queryParams.*"?: { [key: string]: string } = {};
-  "referrer.domain"?: string = "";
-  "referrer.subdomain"?: string = "";
-  "referrer.baseUrl"?: string = "";
-  cookie: string = "";
-  "cookie.*": { [key: string]: string } = {};
-}
+/** A call to RouteSignals instance will return a snapshot of the signals for a given url */
+export const RouteSignalsSnapshot = (
+  url: string,
+  referrer?: string | ISignalAttributes
+): ISignalAttributes => {
+  const _cookie = new CookieSignals();
+  const _url = new UrlSignals(url);
+  let _referrer: ISignalAttributes | undefined;
 
-/** A Signals instance will hold a snapshot of the signals for a given url */
-export class Signals extends SignalAttributes {
-  referrer?: Signals;
-  timestamp = +new Date();
+  // Gather signals for a referrer using previously collected signals or
+  // new signals based on a previous or referrer url
+  if (typeof referrer === "object") _referrer = referrer;
+  else if (referrer) _referrer = RouteSignalsSnapshot(referrer);
 
-  private _cookie: CookieSignals;
-  private _url: UrlSignals;
+  const attributes: ISignalAttributes = {
+    timestamp: +new Date(),
+    "page.url": _url.href(),
+    "page.path": _url.path(),
+    pageUrl: _url.path(),
+    "page.querystring": _url.querystring(),
+    "page.queryParams.*": (name: string) => _url.queryParam(name),
+    // "page.queryParams.*": _url.queryParams(),
+    "page.domain": _url.domain(),
+    "page.subdomain": _url.subdomain(),
+    "page.baseUrl": _url.baseUrl(),
+    "referrer.url": _referrer?.["page.url"],
+    "referrer.path": _referrer?.["page.path"],
+    "referrer.querystring": _referrer?.["page.querystring"],
+    "referrer.queryParams.*": (name: string) =>
+      _referrer?.["page.queryParams.*"](name),
+    // "referrer.queryParams.*": _referrer?._url.queryParams(),
+    "referrer.domain": _referrer?.["page.domain"],
+    "referrer.subdomain": _referrer?.["page.subdomain"],
+    "referrer.baseUrl": _referrer?.["page.baseUrl"],
+    cookie: _cookie.string,
+    "cookie.*": _cookie.cookies,
+  };
 
-  constructor(url: string, referrer?: string | Signals) {
-    super();
-    this._cookie = new CookieSignals();
-    this._url = new UrlSignals(url);
-
-    // Gather signals for a referrer using previously collected signals or
-    // new signals based on a previous or referrer url
-    if (referrer instanceof Signals) this.referrer = referrer;
-    else if (referrer) this.referrer = new Signals(referrer);
-
-    const attributes: SignalAttributes = {
-      "page.url": this._url.href(),
-      "page.path": this._url.path(),
-      pageUrl: this._url.path(),
-      "page.querystring": this._url.querystring(),
-      "page.queryParams.*": (name: string) => this._url.queryParam(name),
-      // "page.queryParams.*": this._url.queryParams(),
-      "page.domain": this._url.domain(),
-      "page.subdomain": this._url.subdomain(),
-      "page.baseUrl": this._url.baseUrl(),
-      "referrer.url": this.referrer?._url.href(),
-      "referrer.path": this.referrer?._url.path(),
-      "referrer.querystring": this.referrer?._url.querystring(),
-      "referrer.queryParams.*": (name: string) =>
-        this.referrer?._url.queryParam(name),
-      // "referrer.queryParams.*": this.referrer?._url.queryParams(),
-      "referrer.domain": this.referrer?._url.domain(),
-      "referrer.subdomain": this.referrer?._url.subdomain(),
-      "referrer.baseUrl": this.referrer?._url.baseUrl(),
-      cookie: this._cookie.string,
-      "cookie.*": this._cookie.cookies,
-    };
-
-    Object.assign(this, attributes);
-  }
-}
+  return attributes;
+};
 
 export type ComputedSignal = ISignal & { matched: boolean };
 
 export class CalculateSignals {
   computed: ComputedSignal[] = [];
-  signals: Signals;
+  signals: ISignalAttributes;
 
   get matched() {
     return this.computed.filter((s) => s.matched);
@@ -128,13 +103,14 @@ export class CalculateSignals {
 
   /** Return the state of the signals, merging newly matched signals with those previously matched */
   get state() {
+    const { computed, context, matched: matchedThis, signals } = this;
     // Merge signal matches from this instance into any previously matched
-    const matchedThis = this.matched;
+    // const matchedThis = this.matched;
     const matchedPrev: ISignalsStore["matched"] =
-      this.context.state.signals?.matched || {};
+      context.state.signals?.matched || {};
 
     const allIds = new Set<string>([
-      ...this.matched.map((m) => m.id),
+      ...matchedThis.map((m) => m.id),
       ...Object.keys(matchedPrev),
     ]);
 
@@ -146,13 +122,13 @@ export class CalculateSignals {
       const currentMatch = matchedThis.find((m) => m.id === signalId);
       if (currentMatch) {
         matched[signalId] = [
-          { p: this.context.page!, t: this.signals.timestamp },
+          { p: context.page!, t: signals.timestamp },
           // Add prev match(es)s
           ...(matchedPrev[signalId] || []),
         ];
       } else {
         // No changes just assign prev, if the signalId is included in the manifest
-        if (this.context.manifest?.signals.find((s) => s.id === signalId))
+        if (context.manifest?.signals.find((s) => s.id === signalId))
           matched[signalId] = matchedPrev[signalId];
       }
     }
@@ -163,7 +139,7 @@ export class CalculateSignals {
     // Iterate all signal matches and add id to active array if all conditions met
     for (const [matchedId, match] of Object.entries(matched)) {
       // Get signal from manifest
-      const signalManifest = this.context.manifest?.signals.find(
+      const signalManifest = context.manifest?.signals.find(
         (s) => s.id === matchedId
       );
 
@@ -176,14 +152,14 @@ export class CalculateSignals {
     }
 
     const nextState: ISignalsStore = {
-      computed: this.computed.length
+      computed: computed.length
         ? Object.fromEntries(
-            this.computed.map((s) => [
+            computed.map((s) => [
               s.id,
               [
                 {
-                  p: this.context.page!,
-                  t: this.signals.timestamp,
+                  p: context.page!,
+                  t: signals.timestamp,
                   m: s.matched,
                   mm: s.minMatches,
                 },
@@ -199,63 +175,67 @@ export class CalculateSignals {
   }
 
   constructor(private context: PersonalizationContext) {
+    const { currentPage, log, manifest, pageViews, previousPage } = context;
+
     // Find the signals from the last page view
     const previousSignals =
-      this.context.pageViews.length > 1
-        ? this.context.pageViews[this.context.pageViews.length - 2]?.[2]
-            ?.signals
+      pageViews.length > 1
+        ? pageViews[pageViews.length - 2]?.[2]?.signals
         : undefined;
 
     // Hold the signals for this page view and a referrer
-    this.signals = new Signals(
-      this.context.currentPage,
-      previousSignals || this.context.previousPage
+    this.signals = RouteSignalsSnapshot(
+      currentPage,
+      previousSignals || previousPage
     );
 
     if (isSSR()) return; // Don't compute signals in SSR
 
-    const signals = this.context.manifest?.signals || [];
-    this.context.log(
-      `[CalculateSignals] checking ${signals.length} signals in manifest version "${this.context.manifest?.version.versionNo}"`
-    );
+    const signals = manifest?.signals || [];
+    // log(
+    //   `[Signals] checking ${signals.length} signals in manifest version "${manifest?.version.versionNo}"`
+    // );
     const timeStart = +new Date();
     for (const signal of signals) {
       this.computed.push({
         ...signal,
-        matched: this.checkSignal(signal),
+        matched: this.check(signal.where),
       });
     }
-    const timeEnd = +new Date();
-    this.context.log(
-      `[CalculateSignals] checked ${signals.length} signals in ${
-        timeEnd - timeStart
-      }ms`
+    log(
+      `[Signals] ${signals.length} checked in ${
+        +new Date() - timeStart
+      }ms, manifest version "${manifest?.version.versionNo}`
     );
     if (this.matched.length)
-      this.context.log(
-        `${this.matched.length} signals matched: ${this.matched.map(
+      log(
+        `[Signals] ${this.matched.length} matched: ${this.matched.map(
           (m) =>
             `${m.id}(${
-              (this.context.state.signals?.matched?.[m.id]?.length || 0) + 1
-            }/${m.minMatches})`
+              (context.state.signals?.matched?.[m.id]?.length || 0) + 1
+            }/${m.minMatches}) `
         )}`
       );
   }
   /**
    * A signal will contain a collection of criteria wrapped
-   * in a single and/or array. Iterate criteria and evaluate
+   * in an and/or array. Iterate criteria and evaluate
    * each to produce a final boolean match
    */
-  checkSignal = (signal: ISignal) => {
-    if ("and" in signal.where && signal.where.and.length) {
+  check = (criteria: Where) => {
+    if ("and" in criteria && criteria.and.length) {
       // All criteria must evaluate true
-      for (const and of signal.where.and) {
-        if ("not" in and) {
-          const match = this.evaluateCriteria(and.not);
+      for (const and of criteria.and) {
+        if ("and" in and || "or" in and) {
+          const match = this.check(and);
+          // first failed match will fail the "and" criteria
+          if (!match) return false;
+        } else if ("not" in and) {
+          const match = this.evaluate(and.not);
           // first successful match will fail the "not" and the outer "and" criteria
           if (match) return false;
         } else {
-          const match = this.evaluateCriteria(and);
+          const match = this.evaluate(and);
           // first failed match will fail the "and" criteria
           if (!match) return false;
         }
@@ -265,15 +245,19 @@ export class CalculateSignals {
       return true;
     }
 
-    if ("or" in signal.where) {
+    if ("or" in criteria) {
       // Only one of the criteria must evaluate true
-      for (const or of signal.where.or) {
-        if ("not" in or) {
-          const notMatch = !this.evaluateCriteria(or.not);
+      for (const or of criteria.or) {
+        if ("and" in or || "or" in or) {
+          const match = this.check(or);
+          // first match will satisfy the "or" criteria
+          if (match) return true;
+        } else if ("not" in or) {
+          const notMatch = !this.evaluate(or.not);
           // first successful match will satisfy the "not" and the outer "or" criteria
           if (!notMatch) return true;
         } else {
-          const match = this.evaluateCriteria(or);
+          const match = this.evaluate(or);
           // first match will satisfy the "or" criteria
           if (match) return true;
         }
@@ -287,15 +271,16 @@ export class CalculateSignals {
   };
 
   /** Evaluate one where criteria and return a boolean match */
-  evaluateCriteria = (crit: WhereCriteria) => {
-    const [attribute, key] = this.checkNamedAttribute(crit.attribute);
-    const signalValue = this.getSignalValue(attribute, key);
-    const evaluation = new SignalCriteriaEvaluation(crit, signalValue);
+  evaluate = (criteria: WhereCriteria) => {
+    const [attribute, key] = this.keyedAttribute(criteria.attribute);
+    const signalValue = this.getSignal(attribute, key);
+    const evaluation = new Evaluate(criteria, signalValue);
     return evaluation.result;
   };
 
   /** Find the value(s) for a given signal attribute */
-  getSignalValue = (attribute: string, key = "") => {
+  getSignal = (attribute: string, key = "") => {
+    const { signals } = this;
     switch (attribute) {
       case "pageUrl":
       case "page.url":
@@ -311,12 +296,12 @@ export class CalculateSignals {
       case "referrer.subdomain":
       case "referrer.baseUrl":
       case "cookie":
-        return this.signals[attribute];
+        return signals[attribute];
       case "cookie.*":
-        return this.signals[attribute]?.[key];
+        return signals[attribute]?.[key];
       case "page.queryParams.*":
       case "referrer.queryParams.*":
-        return this.signals[attribute](key);
+        return signals[attribute](key);
       default:
         // some other attribute type
         break;
@@ -330,7 +315,7 @@ export class CalculateSignals {
    * returning a tuple of [attribute, key] so we can provide the key
    * separately when we find the value for that signal attribute
    */
-  checkNamedAttribute = (attribute: string) => {
+  keyedAttribute = (attribute: string) => {
     let slices = 0;
     if (attribute.includes(".queryParams.")) slices = 2;
     if (attribute.includes("cookie.")) slices = 1;
@@ -345,33 +330,34 @@ export class CalculateSignals {
 
 type SignalValue = string | number | undefined;
 
-class SignalCriteriaEvaluation<T extends SignalValue | SignalValue[]> {
+class Evaluate<T extends SignalValue | SignalValue[]> {
   result = false;
   constructor(public criteria: WhereCriteria, public value: T) {
-    if (Array.isArray(value))
-      this.result = this.processCriteriaFromArray(value);
-    else this.result = this.processCriteria(value);
+    this.result = this.process(value);
   }
 
   /** Evaluate a single criteria from an array of resolved values and return a boolean match */
-  private processCriteriaFromArray = (arr: SignalValue[]) => {
+  private process = (value: SignalValue | SignalValue[]) => {
     let match = false;
-    for (const item of arr) {
-      match = this.processCriteria(item);
-      if (match) break;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        match = this.eval(item);
+        if (match) break;
+      }
+    } else {
+      match = this.eval(value);
     }
     return match;
   };
 
   /** Evaluate a single criteria with a resolved value and return a boolean match */
-  private processCriteria = (value: SignalValue) => {
+  private eval = (value: SignalValue) => {
     const {
       contains,
-      equals,
       equalTo,
       exists,
       greaterThan,
-      in: equalsIn, // can't use a var called "in"
+      in: equalsIn, // can't have a var called "in"
       lessThan,
       matchesRegex,
       startsWith,
@@ -380,10 +366,6 @@ class SignalCriteriaEvaluation<T extends SignalValue | SignalValue[]> {
     // check for known operator types
     if (!isUndefined(contains) && isString(value))
       return value.includes(contains);
-
-    if (!isUndefined(equals) && !isUndefined(value))
-      if (isString(value)) return trimToLower(value) === trimToLower(equals);
-      else return value == (equals as unknown);
 
     if (!isUndefined(equalTo) && !isUndefined(value))
       if (isString(value)) return trimToLower(value) === trimToLower(equalTo);

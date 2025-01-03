@@ -125,6 +125,14 @@
             "startsWith": "/arts/"
           },
           {
+            "and": [
+              {
+                "attribute": "referrer.path",
+                "startsWith": "/apps/html/arts/"
+              }
+            ]
+          },
+          {
             "attribute": "pageUrl",
             "startsWith": "/courses/arts/"
           }
@@ -148,6 +156,10 @@
             "startsWith": "/arts/"
           },
           {
+            "attribute": "referrer.path",
+            "startsWith": "/apps/html/arts/"
+          },
+          {
             "attribute": "pageUrl",
             "startsWith": "/courses/arts/"
           }
@@ -168,7 +180,7 @@
         "and": [
           {
             "attribute": "purchaseCategory",
-            "equals": "sports"
+            "equalTo": "sports"
           },
           {
             "attribute": "purchaseAmount",

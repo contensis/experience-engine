@@ -6,7 +6,10 @@ import { IStoreOptions, Store } from "./providers/store";
 import { isArray, isSSR, isStore } from "./util";
 
 export type PersonalizationContextOptions = {
-  client?: { alias: string; projectId: string };
+  client?:
+    | { alias: string; projectId: string }
+    | { rootUrl: string; projectId: string };
+  debug?: boolean;
   manifest?: IManifest;
   session?: true;
 };
@@ -118,9 +121,14 @@ export class PersonalizationContext {
 
   constructor({
     client,
+    debug,
     manifest,
     session,
   }: PersonalizationContextOptions = {}) {
+    const { log, onManifestReady } = this;
+
+    this.debug = debug || false;
+
     this.currentPage = this.page;
     this.store = new Store({ persist: !session });
     // Get the current state from the store
@@ -133,7 +141,7 @@ export class PersonalizationContext {
     this.cpid = state.cpid;
     this.percentile = state.pc / 100; // percentile is a number with precision of 2 e.g. 42.75%
 
-    this.log(
+    log(
       `visitorId: ${this.cpid}, percentile: ${this.percentile}%, pageViews: ${state.pageViews}`
     );
 
@@ -144,20 +152,19 @@ export class PersonalizationContext {
 
     // Ensure we have a manifest
     if (manifest) {
-      this.log(`Initialising manifest with supplied manifest`, manifest);
+      log(`Initialising manifest with supplied manifest`, manifest);
       this.manifest = new Manifest(
         manifest,
-        this.onManifestReady,
-        this.log,
+        onManifestReady,
+        log,
         state.manifest
       );
-    }
-    if (client) {
-      this.log(`Initialising manifest with client`);
+    } else if (client) {
+      log(`Initialising manifest with client`);
       this.manifest = new Manifest(
-        { alias: client.alias, projectId: client.projectId || "website" },
-        this.onManifestReady,
-        this.log,
+        client,
+        onManifestReady,
+        log,
         state.manifest
       );
     }
@@ -174,18 +181,19 @@ export class PersonalizationContext {
   };
 
   onManifestReady = (manifest: IManifest) => {
+    const { log } = this;
     const state = this.state;
 
     const stateVersion = state.manifest?.version.versionNo;
     const manifestVersion = manifest?.version.versionNo;
 
     if (manifestVersion && manifestVersion !== stateVersion) {
-      this.log(
-        `Manifest updated ${
+      log(
+        `[onManifestReady] Manifest updated ${
           stateVersion ? `from version ${stateVersion} ` : ""
         }to version ${manifestVersion}`
       );
-      this.persist = { ...this.state, manifest };
+      this.persist = { ...state, manifest };
 
       // Retrospectively calculate signals for any pageViews[][2] that are null
       const toCheck = this.pageViews.filter((pv) => pv[2] === null);
@@ -198,7 +206,7 @@ export class PersonalizationContext {
 
         // If we have matched new signals...
         if (hasNewSignals) {
-          this.log(`Matched new signals from updated manifest`);
+          log(`[onManifestReady] Matched new signals from updated manifest`);
         }
         // Persist new signals state (including signals calculated for the first time after manifest is available)
         this.persist = {
@@ -217,7 +225,7 @@ export class PersonalizationContext {
           audiences.active.length !== this.state.audiences?.active.length;
         // If we have matched new audiences...
         if (hasNewAudiences) {
-          this.log(`Matched new audiences from updated manifest`);
+          log(`[onManifestReady] Matched new audiences from updated manifest`);
         }
         // Persist new audiences state
         this.persist = {
@@ -232,14 +240,15 @@ export class PersonalizationContext {
   };
 
   pageView = (url = this.page) => {
-    this.pageViews.push([this.page!, new Date(), null]);
+    const { log } = this;
+    this.pageViews.push([url, new Date(), null]);
 
     const state = this.state;
 
     // If no current page in state
     if (!state.currentPage) {
-      this.log(
-        `no current page in state; referrer: ${
+      log(
+        `[pageView] no current page in state; referrer: ${
           !isSSR() ? window.document.referrer : undefined
         }`
       );
@@ -253,8 +262,8 @@ export class PersonalizationContext {
     }
     // If current page has changed
     else if (state.currentPage !== url) {
-      this.log(
-        `current page in state has changed; referrer: ${
+      log(
+        `[pageView] current page in state has changed; referrer: ${
           !isSSR() ? window.document.referrer : undefined
         }`
       );
@@ -263,8 +272,8 @@ export class PersonalizationContext {
         (!isSSR() ? window.document.referrer : undefined) || state.currentPage;
       this.currentPage = state.currentPage = url;
     } else {
-      this.log(
-        `current page in state has not changed; referrer: ${
+      log(
+        `[pageView] current page in state has not changed; referrer: ${
           !isSSR() ? window.document.referrer : undefined
         }`
       );
@@ -278,7 +287,7 @@ export class PersonalizationContext {
 
     // Record page view
     state.pageViews++;
-    this.log(`pageViews: ${state.pageViews}`, this.pageViews);
+    log(`[pageView] pageViews: ${state.pageViews}`, this.pageViews);
 
     // Persist new state
     this.persist = state;
@@ -306,7 +315,7 @@ export class PersonalizationContext {
         audiences: audiences.state,
       };
     } else {
-      this.log(`manifest is not ready yet`);
+      log(`[pageView] manifest is not ready yet`);
     }
 
     // Call event handler

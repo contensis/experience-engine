@@ -9,19 +9,18 @@ export interface ISignal {
 export type Where = WhereAnd | WhereOr;
 
 export interface WhereAnd {
-  and: (WhereCriteria | WhereNot)[];
+  and: (WhereCriteria | WhereNotCriteria | Where)[];
 }
 export interface WhereOr {
-  or: (WhereCriteria | WhereNot)[];
+  or: (WhereCriteria | WhereNotCriteria | Where)[];
 }
-export interface WhereNot {
+export interface WhereNotCriteria {
   not: WhereCriteria;
 }
 
 export interface WhereCriteria {
   attribute: string;
   contains?: string;
-  equals?: string;
   equalTo?: string;
   exists?: boolean;
   in?: string[];
@@ -30,4 +29,3 @@ export interface WhereCriteria {
   greaterThan?: number;
   startsWith?: string;
 }
-

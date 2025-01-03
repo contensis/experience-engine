@@ -168,7 +168,7 @@
         "and": [
           {
             "attribute": "purchaseCategory",
-            "equals": "sports"
+            "equalTo": "sports"
           },
           {
             "attribute": "purchaseAmount",

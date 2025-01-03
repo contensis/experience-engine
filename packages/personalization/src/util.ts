@@ -1,4 +1,5 @@
 import { IPersonalizationStore } from "./models";
+import { ManifestClient } from "./providers/manifest-client";
 
 export const isSSR = () => typeof window === "undefined";
 
@@ -27,3 +28,8 @@ export const isString = (val: unknown): val is string =>
   typeof val === "string";
 export const isUndefined = (val: unknown): val is undefined =>
   typeof val === "undefined";
+
+export const isManifestClient = (
+  client: unknown
+): client is ReturnType<typeof ManifestClient> =>
+  !!client && typeof client === "object" && "get" in client;
