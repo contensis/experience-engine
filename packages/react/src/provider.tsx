@@ -57,7 +57,12 @@ export const PersonalizationProvider = (
     // To avoid double-rendering issues check for a cpcontext in global
     const context: PersonalizationContext =
       globalAny.cpcontext ||
-      new PersonalizationContext({ client, debug, manifest, session });
+      new PersonalizationContext({
+        client: client as PersonalizationContextOptions["client"],
+        debug,
+        manifest,
+        session,
+      });
 
     // Hoist the context to global scope so we can pick it back up in subsequent re-renders
     globalAny.cpcontext = context;
