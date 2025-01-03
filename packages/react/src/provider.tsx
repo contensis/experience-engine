@@ -1,19 +1,15 @@
 import React, { useMemo } from "react";
-import {
-  PersonalizationContext,
-  IManifest,
-  PersonalizationContextOptions,
-} from "@contensis/personalization";
+import { PersonalizationContext, IManifest } from "@contensis/personalization";
 import { PersonalizationReactContext } from "./context";
 
 export type PersonalizationProviderClientProps =
   | {
-      alias?: string;
+      alias: string;
       projectId?: string;
     }
   | {
+      rootUrl: string;
       projectId?: string;
-      rootUrl?: string;
     };
 
 export type PersonalizationProviderContextProps = {
@@ -22,7 +18,8 @@ export type PersonalizationProviderContextProps = {
 } & Partial<PersonalizationContext["handlers"]>;
 
 export type PersonalizationProviderInstantiationProps =
-  PersonalizationProviderContextProps & PersonalizationProviderClientProps;
+  PersonalizationProviderContextProps &
+    Partial<PersonalizationProviderClientProps>;
 
 export type PersonalizationProviderProps =
   | PersonalizationProviderInstantiationProps
@@ -40,7 +37,7 @@ export const PersonalizationProvider = (
       return props.context;
     }
     // Unwrap props to PersonalizationContext constructor arguments
-    const client: PersonalizationContextOptions["client"] =
+    const client: PersonalizationProviderClientProps | undefined =
       "alias" in props && props.alias
         ? { alias: props.alias }
         : "rootUrl" in props && props.rootUrl
@@ -58,7 +55,7 @@ export const PersonalizationProvider = (
     const context: PersonalizationContext =
       globalAny.cpcontext ||
       new PersonalizationContext({
-        client: client as PersonalizationContextOptions["client"],
+        client,
         debug,
         manifest,
         session,
