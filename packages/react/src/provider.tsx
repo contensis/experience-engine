@@ -1,5 +1,9 @@
 import React, { useMemo } from "react";
-import { PersonalizationContext, IManifest } from "@contensis/personalization";
+import {
+  PersonalizationContext,
+  IManifest,
+  PersonalizationContextOptions,
+} from "@contensis/personalization";
 import { PersonalizationReactContext } from "./context";
 
 export type PersonalizationProviderClientProps =
@@ -36,7 +40,7 @@ export const PersonalizationProvider = (
       return props.context;
     }
     // Unwrap props to PersonalizationContext constructor arguments
-    const client =
+    const client: PersonalizationContextOptions["client"] =
       "alias" in props && props.alias
         ? { alias: props.alias, projectId: props.projectId }
         : "rootUrl" in props && props.rootUrl
