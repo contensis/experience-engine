@@ -38,9 +38,9 @@ export const PersonalizationProvider = (
     // Unwrap props to PersonalizationContext constructor arguments
     const client =
       "alias" in props && props.alias
-        ? { alias: props.alias || "", projectId: props.projectId || "" }
+        ? { alias: props.alias, projectId: props.projectId }
         : "rootUrl" in props && props.rootUrl
-        ? { rootUrl: props.rootUrl || "", projectId: props.projectId || "" }
+        ? { rootUrl: props.rootUrl, projectId: props.projectId }
         : undefined;
     const debug = props.debug;
     const manifest =

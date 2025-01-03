@@ -6,11 +6,11 @@ import { isManifestClient } from "../util";
 export type IManifestClientArgs =
   | {
       alias: string;
-      projectId: string;
+      projectId?: string;
     }
   | {
       rootUrl: string;
-      projectId: string;
+      projectId?: string;
     };
 
 export type IManifestOnReady = (manifest: IManifest) => unknown;
@@ -48,7 +48,7 @@ export class Manifest implements IManifest {
   constructor(
     client: IManifestClientArgs | IManifestClient | IManifest,
     public onReady: IManifestOnReady,
-    private log: PersonalizationContext["log"],
+    log: PersonalizationContext["log"],
     state?: IManifest
   ) {
     // Initialise with an instance of ManifestClient
