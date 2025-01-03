@@ -17,7 +17,8 @@
   ],
   "scripts": {
     "start": "npm run build",
-    "build": "tsup --dts-resolve && tsup --minify",
+    "prebuild": "npm run tsc",
+    "build": "tsup --dts-resolve",
     "tsc": "tsc --build --verbose --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
