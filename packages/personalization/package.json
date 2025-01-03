@@ -18,7 +18,7 @@
   "scripts": {
     "start": "npm run build",
     "prebuild": "rimraf dist && npm run tsc",
-    "build": "tsup",
+    "build": "tsup && tsup --minify",
     "tsc": "tsc --noEmit",
     "test": "jest -c ../../jest.config.js"
   },
