@@ -39,11 +39,10 @@ export const PersonalizationProvider = (
     // Unwrap props to PersonalizationContext constructor arguments
     const client: PersonalizationProviderClientProps | undefined =
       "alias" in props && props.alias
-        ? { alias: props.alias }
+        ? { alias: props.alias, projectId: props.projectId }
         : "rootUrl" in props && props.rootUrl
-        ? { rootUrl: props.rootUrl }
+        ? { rootUrl: props.rootUrl, projectId: props.projectId }
         : undefined;
-    if (client && props.projectId) client.projectId = props.projectId;
     const debug = props.debug;
     const manifest =
       "manifest" in props && props.manifest ? props.manifest : undefined;

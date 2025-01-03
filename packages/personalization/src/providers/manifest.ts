@@ -1,4 +1,4 @@
-import { IManifestClient, ManifestClient } from "./manifest-client";
+import { ManifestClient } from "./manifest-client";
 import { IAudience, IManifest, IManifestVersion, ISignal } from "../models";
 import { PersonalizationContext } from "../personalization";
 import { isManifestClient } from "../util";
@@ -14,6 +14,11 @@ export type IManifestClientArgs =
     };
 
 export type IManifestOnReady = (manifest: IManifest) => unknown;
+
+export interface IManifestClient {
+  alias: string;
+  projectId?: string;
+}
 
 export class Manifest implements IManifest {
   private _isReady = false;
@@ -67,9 +72,7 @@ export class Manifest implements IManifest {
 
     // Fallback to manifest from state if available before we initialise any client
     if (state && this.client) {
-      log(
-        `[Manifest] Fallback to manifest found in state while we initialise`
-      );
+      log(`[Manifest] Fallback to manifest found in state while we initialise`);
       this.audiences = state.audiences || [];
       this.signals = state.signals || [];
       this.version = state.version || ({} as IManifestVersion);

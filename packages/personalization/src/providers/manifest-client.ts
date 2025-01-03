@@ -1,15 +1,6 @@
 import { IManifest } from "../models";
 import { tryParse } from "../util";
 
-export interface IManifestClientConstructor {
-  new (alias: string, projectId: string): IManifestClient;
-}
-
-export interface IManifestClient {
-  alias: string;
-  projectId: string;
-}
-
 export const ManifestClient = (alias: string, projectId = "website") => {
   const rootUrl = alias.startsWith("http")
     ? alias
