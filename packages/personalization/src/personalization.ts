@@ -7,8 +7,9 @@ import { isArray, isSSR, isStore } from "./util";
 
 export type PersonalizationContextOptions = {
   client?:
-    | { alias: string; projectId: string }
-    | { rootUrl: string; projectId: string };
+    | { alias: string; projectId?: string }
+    | { rootUrl: string; projectId?: string }
+    | undefined;
   debug?: boolean;
   manifest?: IManifest;
   session?: true;
