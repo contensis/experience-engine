@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Static HTML Home Page</title>
+  </head>
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "@contensis/personalization": "/../../packages/personalization/dist/personalization.min.mjs"
+        }
+      }
+    </script>
+    <script type="module">
+      import { PersonalizationContext } from "@contensis/personalization";
+      fetch("/../../cypress/fixtures/signals.page.path-manifest.json")
+        .then((response) => response.json())
+        .then((json) => {
+          console.log(
+            `HTML app fetched manifest json ${json.version.versionNo}`
+          );
+
+          const context = new PersonalizationContext({
+            debug: true,
+            manifest: json,
+          });
+
+          window.cpcontext = context;
+        });
+    </script>
+    <h1>Home page</h1>
+    <p>Welcome to the static example site</p>
+    <ul>
+      <li><a href="page1.html">Navigate to Page 1</a></li>
+      <li><a href="arts/index.html">Navigate to Arts home page</a></li>
+    </ul>
+  </body>
+</html>

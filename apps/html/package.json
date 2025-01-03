@@ -1,0 +1,15 @@
+{
+  "name": "html-example",
+  "version": "1.0.0",
+  "description": "Example project using static html pages",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server ../../ -p 3000 -o /apps/html -c-1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@contensis/personalization": "^1.0.0-alpha.0",
+    "http-server": "^14.1.1"
+  }
+}
