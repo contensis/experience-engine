@@ -51,7 +51,7 @@ export class Manifest implements IManifest {
   );
 
   constructor(
-    client: IManifestClientArgs | IManifestClient | IManifest,
+    client: IManifestClientArgs | IManifest,
     public onReady: IManifestOnReady,
     log: PersonalizationContext["log"],
     state?: IManifest
