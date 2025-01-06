@@ -54,10 +54,7 @@ export const PersonalizationProvider = (
     const context: PersonalizationContext =
       globalAny.cpcontext ||
       new PersonalizationContext({
-        client: client as
-          | { alias: string; projectId: string }
-          | { rootUrl: string; projectId: string }
-          | undefined,
+        client,
         debug,
         manifest,
         session,

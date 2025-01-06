@@ -42,6 +42,8 @@ export default function App() {
     <PersonalizationProvider
       // Use a specific alias to intercept manifest calls in Cypress tests
       alias={ifCypressTest("cypress-test")}
+      // We need debug flag set to true when running Cypress tests
+      debug={ifCypressTest(true, false)}
       // Use a mock manifest when running the app outside of Cypress tests
       manifest={ifCypressTest(undefined, MOCK_MANIFEST)}
     >

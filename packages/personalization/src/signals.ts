@@ -104,10 +104,12 @@ export class CalculateSignals {
   /** Return the state of the signals, merging newly matched signals with those previously matched */
   get state() {
     const { computed, context, matched: matchedThis, signals } = this;
+    const { debug, manifest, page: p, state } = context;
+    const { timestamp: t } = signals;
+
     // Merge signal matches from this instance into any previously matched
     // const matchedThis = this.matched;
-    const matchedPrev: ISignalsStore["matched"] =
-      context.state.signals?.matched || {};
+    const matchedPrev: ISignalsStore["matched"] = state.signals?.matched || {};
 
     const allIds = new Set<string>([
       ...matchedThis.map((m) => m.id),
@@ -122,13 +124,13 @@ export class CalculateSignals {
       const currentMatch = matchedThis.find((m) => m.id === signalId);
       if (currentMatch) {
         matched[signalId] = [
-          { p: context.page!, t: signals.timestamp },
+          { p, t },
           // Add prev match(es)s
           ...(matchedPrev[signalId] || []),
         ];
       } else {
         // No changes just assign prev, if the signalId is included in the manifest
-        if (context.manifest?.signals.find((s) => s.id === signalId))
+        if (manifest?.signals.find((s) => s.id === signalId))
           matched[signalId] = matchedPrev[signalId];
       }
     }
@@ -139,9 +141,7 @@ export class CalculateSignals {
     // Iterate all signal matches and add id to active array if all conditions met
     for (const [matchedId, match] of Object.entries(matched)) {
       // Get signal from manifest
-      const signalManifest = context.manifest?.signals.find(
-        (s) => s.id === matchedId
-      );
+      const signalManifest = manifest?.signals.find((s) => s.id === matchedId);
 
       // Check have we matched the signal enough times to activate it
       if (
@@ -152,21 +152,15 @@ export class CalculateSignals {
     }
 
     const nextState: ISignalsStore = {
-      computed: computed.length
-        ? Object.fromEntries(
-            computed.map((s) => [
-              s.id,
-              [
-                {
-                  p: context.page!,
-                  t: signals.timestamp,
-                  m: s.matched,
-                  mm: s.minMatches,
-                },
-              ],
-            ])
-          )
-        : undefined,
+      computed:
+        debug && computed.length
+          ? Object.fromEntries(
+              computed.map((s) => [
+                s.id,
+                [{ p, t, m: s.matched, mm: s.minMatches }],
+              ])
+            )
+          : undefined,
       matched,
       active,
     };

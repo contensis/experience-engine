@@ -14,10 +14,12 @@ export class CalculateAudiences {
 
   /** Return the state of the audiences, checking for newly matched audiences we may not have detected earlier */
   get state() {
-    const { computed, context, matched: matchedThis, timestamp } = this;
+    const { computed, context, matched: matchedThis, timestamp: t } = this;
+    const { debug, manifest, page: p, state } = context;
+
     // Merge audience matches from this instance into any previously matched
     const matchedPrev: IAudiencesStore["matched"] =
-      context.state.audiences?.matched || {};
+      state.audiences?.matched || {};
 
     // Create a distinct list of all audience ids
     const allIds = new Set<string>([
@@ -32,13 +34,13 @@ export class CalculateAudiences {
       // Did we match this audienceId in this request?
       if (matchedThis.find((m) => m.id === audienceId)) {
         matched[audienceId] = [
-          { p: context.page!, t: timestamp },
+          { p, t },
           // // Add prev match(es)
           // ...(matchedPrev[audienceId] || []),
         ];
       } else {
         // Assign previously matched audience, if the audienceId is still available in the manifest
-        if (context.manifest?.audiences.find((a) => a.id === audienceId))
+        if (manifest?.audiences.find((a) => a.id === audienceId))
           matched[audienceId] = matchedPrev[audienceId];
       }
     }
@@ -48,18 +50,9 @@ export class CalculateAudiences {
 
     const nextState: IAudiencesStore = {
       computed:
-        context.debug && computed.length
+        debug && computed.length
           ? Object.fromEntries(
-              computed.map((a) => [
-                a.id,
-                [
-                  {
-                    p: context.page!,
-                    t: timestamp,
-                    m: a.matched,
-                  },
-                ],
-              ])
+              computed.map((a) => [a.id, [{ p, t, m: a.matched }]])
             )
           : undefined,
       matched,
@@ -92,9 +85,7 @@ export class CalculateAudiences {
     }
     if (matchLen)
       context.log(
-        `[Audiences] ${matchLen} matched: ${this.matched.map(
-          (m) => m.id
-        )}`
+        `[Audiences] ${matchLen} matched: ${this.matched.map((m) => m.id)}`
       );
   }
   /**
