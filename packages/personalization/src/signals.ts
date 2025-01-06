@@ -6,9 +6,11 @@ import {
   isArray,
   isNullOrUndefined,
   isNumber,
+  isObject,
   isSSR,
   isString,
   isUndefined,
+  now,
   trimToLower,
 } from "./util";
 
@@ -59,11 +61,11 @@ export const RouteSignalsSnapshot = (
 
   // Gather signals for a referrer using previously collected signals or
   // new signals based on a previous or referrer url
-  if (typeof referrer === "object") _referrer = referrer;
+  if (isObject(referrer)) _referrer = referrer;
   else if (referrer) _referrer = RouteSignalsSnapshot(referrer);
 
   const attributes: ISignalAttributes = {
-    timestamp: +new Date(),
+    timestamp: now(),
     "page.url": _url.href(),
     "page.path": _url.path(),
     pageUrl: _url.path(),
@@ -187,7 +189,7 @@ export class CalculateSignals {
     // log(
     //   `[Signals] checking ${signals.length} signals in manifest version "${manifest?.version.versionNo}"`
     // );
-    const timeStart = +new Date();
+    const timeStart = now();
     for (const signal of signals) {
       this.computed.push({
         ...signal,
@@ -196,15 +198,10 @@ export class CalculateSignals {
     }
     // log(
     //   `[Signals] ${signals.length} checked in ${
-    //     +new Date() - timeStart
+    //     now() - timeStart
     //   }ms, manifest version "${manifest?.version.versionNo}`
     // );
-    l(
-      "sc",
-      signals.length,
-      +new Date() - timeStart,
-      manifest?.version.versionNo
-    );
+    l("sc", signals.length, now() - timeStart, manifest?.version.versionNo);
 
     const matches = this.matched.length;
     if (matches) {

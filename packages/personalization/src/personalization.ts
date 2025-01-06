@@ -137,7 +137,7 @@ export class PersonalizationContext {
     const state = this.state;
 
     // Check for a cpid cookie we will use that if one is found
-    const cookieId = this.store.get<string>({ type: "cookie", key: "cpid" });
+    const cookieId = this.store.get<string>({ type: "c", key: "cpid" });
     if (cookieId) state.cpid = cookieId;
 
     this.cpid = state.cpid;
@@ -151,7 +151,7 @@ export class PersonalizationContext {
     this.save = state;
 
     // Set cpid cookie
-    this.save = [state.cpid, { type: "cookie", key: "cpid" }];
+    this.save = [state.cpid, { type: "c", key: "cpid" }];
 
     // Dynamically import logging if we have set debug flag
     l("init", this.cpid, this.percentile, state.pageViews);

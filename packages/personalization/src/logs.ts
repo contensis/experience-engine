@@ -1,4 +1,4 @@
-import { isUndefined } from "./util";
+import { isObject, isUndefined } from "./util";
 
 export const messages = {
   pre: `@contensis/personalization:`,
@@ -35,7 +35,7 @@ export const logger = (key: keyof typeof messages, ...values: unknown[]) => {
       matched++;
       return isUndefined(values[index])
         ? match
-        : typeof values[index] === "object"
+        : isObject(values[index])
         ? JSON.stringify(values[index], null, 2)
         : (values[index] as string);
     }) || key,

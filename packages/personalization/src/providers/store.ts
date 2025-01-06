@@ -1,4 +1,4 @@
-import { isSSR, tryParse } from "../util";
+import { isObject, isSSR, now, tryParse, utcDate } from "../util";
 
 export type StoreConstructorArgs = { persist?: boolean; type?: Store["type"] };
 
@@ -9,16 +9,12 @@ export interface IStoreOptions {
 
 export class Store {
   private key = "cp";
-  type: "localStorage" | "sessionStorage" | "cookie" = "localStorage";
+  // type: "localStorage" | "sessionStorage" | "cookie" = "localStorage";
+  type: "localStorage" | "sessionStorage" | "c" = "localStorage";
   persist = true;
 
   /** Use sessionStorage or localStorage if persist is false or true (default: true) */
-  constructor(
-    { persist = true, type = "localStorage" }: StoreConstructorArgs = {
-      persist: true,
-      type: "localStorage",
-    }
-  ) {
+  constructor({ persist = true, type = "localStorage" }: StoreConstructorArgs) {
     this.persist = persist;
     this.type = type;
 
@@ -31,14 +27,13 @@ export class Store {
   }: IStoreOptions = {}): T | undefined => {
     if (isSSR()) return undefined;
 
-    let stringified: string | null = "";
-
-    if (type === "cookie")
-      stringified = document.cookie
-        .split(";")
-        .filter((cookie) => cookie.trim().startsWith(`${key}=`))
-        .map((cookie) => cookie.trim().substring(key.length + 1))?.[0];
-    else stringified = window[type].getItem(key);
+    const stringified =
+      type === "c"
+        ? document.cookie
+            .split(";")
+            .filter((cookie) => cookie.trim().startsWith(`${key}=`))
+            .map((cookie) => cookie.trim().substring(key.length + 1))?.[0]
+        : window[type].getItem(key);
 
     if (stringified) {
       return tryParse(stringified);
@@ -48,18 +43,17 @@ export class Store {
   getAll = ({ type = this.type }: IStoreOptions = {}): Storage | undefined => {
     if (isSSR()) return undefined;
 
-    if (type === "cookie")
-      return Object.fromEntries(
-        document.cookie.split(";").map((cookie) => cookie.split("="))
-      );
-    return window[type];
+    return type === "c"
+      ? Object.fromEntries(
+          document.cookie.split(";").map((cookie) => cookie.split("="))
+        )
+      : window[type];
   };
 
   getString = ({ type = this.type }: IStoreOptions = {}): string => {
     if (isSSR()) return "";
 
-    if (type === "cookie") return document.cookie.toString();
-    return JSON.stringify(window[type]);
+    return type === "c" ? `${document.cookie}` : JSON.stringify(window[type]);
   };
 
   set = <T = unknown>(
@@ -68,13 +62,12 @@ export class Store {
   ) => {
     if (isSSR()) return undefined;
 
-    const stringified =
-      value && typeof value === "object" ? JSON.stringify(value) : value;
+    const stringified = isObject(value) ? JSON.stringify(value) : value;
 
-    if (type === "cookie") {
-      const expires = new Date().getTime() + 30 * 24 * 60 * 60 * 1000;
+    if (type === "c") {
+      const expires = now() + 30 * 24 * 60 * 60 * 1000;
       return (document.cookie = `${key}=${stringified};${
-        this.persist ? `expires=${new Date(expires).toUTCString()};` : ""
+        this.persist ? `expires=${utcDate(expires)};` : ""
       }SameSite=Lax`);
     }
 
@@ -84,10 +77,10 @@ export class Store {
   clear = ({ type = this.type, key = this.key } = {}) => {
     if (isSSR()) return undefined;
 
-    if (type === "cookie")
-      return (document.cookie = `${key}=;expires=${new Date(0).toUTCString()}`);
-    return window[type].removeItem(key);
+    return type === "c"
+      ? (document.cookie = `${key}=;expires=${utcDate(0)}`)
+      : window[type].removeItem(key);
   };
 }
 
-export const cookieStore = new Store({ type: "cookie" });
+export const cookieStore = new Store({ type: "c" });

@@ -1,11 +1,11 @@
 import { Condition, Conditions, IAudience, IAudiencesStore } from "./models";
 import { PersonalizationContext } from "./personalization";
-import { isSSR } from "./util";
+import { isSSR, now } from "./util";
 
 export type ComputedAudience = IAudience & { matched: boolean };
 
 export class CalculateAudiences {
-  private timestamp = new Date().getTime();
+  private timestamp = now();
   computed: ComputedAudience[] = [];
 
   get matched() {
@@ -87,7 +87,11 @@ export class CalculateAudiences {
       // context.log(
       //   `[Audiences] ${matchLen} matched: ${this.matched.map((m) => m.id)}`
       // );
-      context.l("am", matchLen, this.matched.map((m) => m.id));
+      context.l(
+        "am",
+        matchLen,
+        this.matched.map((m) => m.id)
+      );
     }
   }
   /**

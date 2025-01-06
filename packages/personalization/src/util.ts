@@ -3,6 +3,10 @@ import { ManifestClient } from "./providers/manifest-client";
 
 export const isSSR = () => typeof window === "undefined";
 
+export const now = () => +new Date();
+
+export const utcDate = (value: number) => new Date(value).toUTCString();
+
 export const tryParse = <T>(stringified: string) => {
   try {
     // try to unstringify a found value
@@ -22,8 +26,9 @@ export const isNullOrUndefined = (val: unknown): val is null | undefined =>
   val === null || typeof val === "undefined";
 export const isNumber = (val: unknown): val is number =>
   typeof val === "number";
+export const isObject = (val: unknown) => !!val && typeof val === "object";
 export const isStore = (store: unknown): store is IPersonalizationStore =>
-  !!store && typeof store === "object" && "cpid" in store;
+  isObject(store) && "cpid" in store;
 export const isString = (val: unknown): val is string =>
   typeof val === "string";
 export const isUndefined = (val: unknown): val is undefined =>
@@ -32,4 +37,4 @@ export const isUndefined = (val: unknown): val is undefined =>
 export const isManifestClient = (
   client: unknown
 ): client is ReturnType<typeof ManifestClient> =>
-  !!client && typeof client === "object" && "get" in client;
+  isObject(client) && "get" in client;
