@@ -12,51 +12,49 @@ import {
   trimToLower,
 } from "./util";
 
-export class CookieSignals {
-  cookies: { [name: string]: string };
-  string: string;
+export const CookieSignals = () => {
+  const string = cookieStore.getString() || "";
+  const cookies = cookieStore.getAll() || ({} as { [key: string]: string });
 
-  constructor() {
-    this.string = cookieStore.getString() || "";
-    this.cookies = cookieStore.getAll() || {};
-  }
-  get = (name: string) => this.cookies[name];
-}
-
-export class UrlSignals {
-  url: URL;
-
-  constructor(url: string) {
-    this.url = !isSSR() ? new URL(url) : new URL("ssr://");
-  }
-
-  href = () => this.url.href;
-  domain = () => this.url.hostname;
-  path = () => this.url.pathname;
-  subdomain = () => {
-    const parts = this.url.hostname.split(".");
-    // searching for all valid tlds will add approx 40KB to the bundle
-    // instead we will just return the first portion of the subdomain
-    // my.example.company.co.uk will return just "my"
-    return parts?.[0];
+  return {
+    cookies,
+    get: (name: string) => cookies[name],
+    string,
   };
-  baseUrl = () => `${this.url.origin}${this.url.pathname}`;
-  querystring = () => this.url.search;
-  queryParam = (name: string) => this.url.searchParams.getAll(name);
-  queryParams = () => {
-    const params = this.url.searchParams;
-    params.sort();
-    return Object.fromEntries(params.entries());
+};
+
+export const UrlSignals = (page: string) => {
+  const url = !isSSR() ? new URL(page) : new URL("ssr://");
+  return {
+    url,
+    href: () => url.href,
+    domain: () => url.hostname,
+    path: () => url.pathname,
+    subdomain: () => {
+      const parts = url.hostname.split(".");
+      // searching for all valid tlds will add approx 40KB to the bundle
+      // instead we will just return the first portion of the subdomain
+      // my.example.company.co.uk will return just "my"
+      return parts?.[0];
+    },
+    baseUrl: () => `${url.origin}${url.pathname}`,
+    querystring: () => url.search,
+    queryParam: (name: string) => url.searchParams.getAll(name),
+    queryParams: () => {
+      const params = url.searchParams;
+      params.sort();
+      return Object.fromEntries(params.entries());
+    },
   };
-}
+};
 
 /** A call to RouteSignals instance will return a snapshot of the signals for a given url */
 export const RouteSignalsSnapshot = (
   url: string,
   referrer?: string | ISignalAttributes
 ): ISignalAttributes => {
-  const _cookie = new CookieSignals();
-  const _url = new UrlSignals(url);
+  const _cookie = CookieSignals();
+  const _url = UrlSignals(url);
   let _referrer: ISignalAttributes | undefined;
 
   // Gather signals for a referrer using previously collected signals or
@@ -169,7 +167,7 @@ export class CalculateSignals {
   }
 
   constructor(private context: PersonalizationContext) {
-    const { currentPage, log, manifest, pageViews, previousPage } = context;
+    const { currentPage, l, manifest, pageViews, previousPage } = context;
 
     // Find the signals from the last page view
     const previousSignals =
@@ -196,20 +194,39 @@ export class CalculateSignals {
         matched: this.check(signal.where),
       });
     }
-    log(
-      `[Signals] ${signals.length} checked in ${
-        +new Date() - timeStart
-      }ms, manifest version "${manifest?.version.versionNo}`
+    // log(
+    //   `[Signals] ${signals.length} checked in ${
+    //     +new Date() - timeStart
+    //   }ms, manifest version "${manifest?.version.versionNo}`
+    // );
+    l(
+      "sc",
+      signals.length,
+      +new Date() - timeStart,
+      manifest?.version.versionNo
     );
-    if (this.matched.length)
-      log(
-        `[Signals] ${this.matched.length} matched: ${this.matched.map(
+
+    const matches = this.matched.length;
+    if (matches) {
+      // log(
+      //   `[Signals] ${matches} matched: ${this.matched.map(
+      //     (m) =>
+      //       `${m.id}(${
+      //         (context.state.signals?.matched?.[m.id]?.length || 0) + 1
+      //       }/${m.minMatches}) `
+      //   )}`
+      // );
+      l(
+        "sm",
+        matches,
+        this.matched.map(
           (m) =>
             `${m.id}(${
               (context.state.signals?.matched?.[m.id]?.length || 0) + 1
             }/${m.minMatches}) `
-        )}`
+        )
       );
+    }
   }
   /**
    * A signal will contain a collection of criteria wrapped
@@ -275,31 +292,28 @@ export class CalculateSignals {
   /** Find the value(s) for a given signal attribute */
   getSignal = (attribute: string, key = "") => {
     const { signals } = this;
-    switch (attribute) {
-      case "pageUrl":
-      case "page.url":
-      case "page.path":
-      case "page.querystring":
-      case "page.domain":
-      case "page.subdomain":
-      case "page.baseUrl":
-      case "referrer.url":
-      case "referrer.path":
-      case "referrer.querystring":
-      case "referrer.domain":
-      case "referrer.subdomain":
-      case "referrer.baseUrl":
-      case "cookie":
-        return signals[attribute];
-      case "cookie.*":
-        return signals[attribute]?.[key];
-      case "page.queryParams.*":
-      case "referrer.queryParams.*":
-        return signals[attribute](key);
-      default:
-        // some other attribute type
-        break;
-    }
+    if (attribute === "cookie.*") return signals[attribute]?.[key];
+    if (attribute.endsWith(".queryParams.*"))
+      return signals[
+        attribute as "page.queryParams.*" | "referrer.queryParams.*"
+      ](key);
+    return signals[
+      attribute as
+        | "cookie"
+        | "pageUrl"
+        | "page.url"
+        | "page.path"
+        | "page.querystring"
+        | "page.domain"
+        | "page.subdomain"
+        | "page.baseUrl"
+        | "referrer.url"
+        | "referrer.path"
+        | "referrer.querystring"
+        | "referrer.domain"
+        | "referrer.subdomain"
+        | "referrer.baseUrl"
+    ];
   };
 
   /**

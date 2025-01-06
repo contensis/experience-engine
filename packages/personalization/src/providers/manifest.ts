@@ -34,26 +34,26 @@ export class Manifest implements IManifest {
   constructor(
     client: IManifestClientArgs,
     onReady: IManifestOnReady,
-    log: PersonalizationContext["log"],
+    log: PersonalizationContext["l"],
     state?: IManifest
   );
   constructor(
     client: IManifestClient,
     onReady: IManifestOnReady,
-    log: PersonalizationContext["log"],
+    log: PersonalizationContext["l"],
     state?: IManifest
   );
   constructor(
     manifest: IManifest,
     onReady: IManifestOnReady,
-    log: PersonalizationContext["log"],
+    log: PersonalizationContext["l"],
     state?: IManifest
   );
 
   constructor(
     client: IManifestClientArgs | IManifest,
-    public onReady: IManifestOnReady,
-    log: PersonalizationContext["log"],
+    onReady: IManifestOnReady,
+    log: PersonalizationContext["l"],
     state?: IManifest
   ) {
     // Initialise with an instance of ManifestClient
@@ -72,17 +72,18 @@ export class Manifest implements IManifest {
 
     // Fallback to manifest from state if available before we initialise any client
     if (state && this.client) {
-      log(`[Manifest] Fallback to manifest found in state while we initialise`);
+      // log(`[Manifest] Fallback to manifest found in state while we initialise`);
+      log("m");
       this.audiences = state.audiences || [];
       this.signals = state.signals || [];
       this.version = state.version || ({} as IManifestVersion);
       this._isReady = (state as Manifest)._isReady;
     }
 
-    this.init(); // not awaitable in constructor
+    this.init(onReady); // not awaitable in constructor
   }
 
-  init = async () => {
+  init = async (onReady: IManifestOnReady) => {
     if (this.client) {
       const manifest = await this.client.get();
       if (manifest) {
@@ -96,6 +97,6 @@ export class Manifest implements IManifest {
     this._isReady = true;
 
     // On Ready callback
-    this.onReady(this);
+    onReady(this);
   };
 }

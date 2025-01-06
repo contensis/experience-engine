@@ -83,10 +83,12 @@ export class CalculateAudiences {
       }
       matchLen = this.matched.length;
     }
-    if (matchLen)
-      context.log(
-        `[Audiences] ${matchLen} matched: ${this.matched.map((m) => m.id)}`
-      );
+    if (matchLen) {
+      // context.log(
+      //   `[Audiences] ${matchLen} matched: ${this.matched.map((m) => m.id)}`
+      // );
+      context.l("am", matchLen, this.matched.map((m) => m.id));
+    }
   }
   /**
    * An audience will contain a collection of conditions wrapped

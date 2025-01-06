@@ -4,6 +4,7 @@ import { IManifest, IPersonalizationStore } from "./models";
 import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
 import { isArray, isSSR, isStore } from "./util";
+import { logger, messages } from "./logs";
 
 export type PersonalizationContextOptions = {
   client?:
@@ -36,11 +37,25 @@ export class PersonalizationContext {
     onPageView: () => {},
     onManifestReady: () => {},
   };
+  logger?: typeof logger;
+  // messages?: typeof messages;
+  // /** Log debug messages */
+  // log = (...messages: unknown[]) =>
+  //   this.debug
+  //     ? console.log(`@contensis/personalization:`, ...messages)
+  //     : void 0;
+
   /** Log debug messages */
-  log = (...messages: unknown[]) =>
-    this.debug
-      ? console.log(`@contensis/personalization:`, ...messages)
-      : void 0;
+  l = (message: keyof typeof messages, ...values: unknown[]) => {
+    if (this.debug)
+      if (this.logger) this.logger(message, ...values);
+      else
+        this.logs(true)
+          .then(() => this.l(message, ...values))
+          .catch(() => {
+            console.log("cp", message, values);
+          });
+  };
 
   manifest?: Manifest;
   pageViews: [string, Date, CalculateSignals | null][] = [];
@@ -66,19 +81,22 @@ export class PersonalizationContext {
   private observeNavigation = () => {
     let lastHref = "";
     const observer = new MutationObserver(() => {
+      const { currentPage, l, page } = this;
       // If page has changed (or is initial page load)
-      if (this.page !== lastHref) {
-        this.log(
-          lastHref
-            ? `Route change detected: from ${this.currentPage} to: ${this.page}`
-            : `Initial page view: ${this.page}`
-        );
-        lastHref = this.page!;
+      if (page !== lastHref) {
+        if (!lastHref) l("n1", page);
+        else l("n2", currentPage, page);
+        // this.log(
+        //   lastHref
+        //     ? `Route change detected: from ${this.currentPage} to: ${this.page}`
+        //     : `Initial page view: ${this.page}`
+        // );
+        lastHref = page;
         // Record the page view
         this.pageView();
 
         // Call navigate handler
-        this.handlers.onNavigate(this.page!, lastHref);
+        this.handlers.onNavigate(page, lastHref);
       }
     });
 
@@ -112,7 +130,8 @@ export class PersonalizationContext {
 
   /** Gets the computed signals for the current route */
   get signals() {
-    return this.pageViews[this.pageViews.length - 1]?.[2];
+    const { pageViews: pv } = this;
+    return pv[pv.length - 1]?.[2];
   }
 
   /** Check the store for an existing entry or initialise a new state */
@@ -126,7 +145,7 @@ export class PersonalizationContext {
     manifest,
     session,
   }: PersonalizationContextOptions = {}) {
-    const { log, onManifestReady } = this;
+    const { l, onManifestReady } = this;
 
     this.debug = debug || false;
 
@@ -142,34 +161,40 @@ export class PersonalizationContext {
     this.cpid = state.cpid;
     this.percentile = state.pc / 100; // percentile is a number with precision of 2 e.g. 42.75%
 
-    log(
-      `visitorId: ${this.cpid}, percentile: ${this.percentile}%, pageViews: ${state.pageViews}`
-    );
+    // log(
+    //   `visitorId: ${this.cpid}, percentile: ${this.percentile}%, pageViews: ${state.pageViews}`
+    // );
 
     // Update store with new state
     this.persist = state;
+
     // Set cpid cookie
     this.persist = [state.cpid, { type: "cookie", key: "cpid" }];
 
+    // Dynamically import logging if we have set debug flag
+    l("init", this.cpid, this.percentile, state.pageViews);
+    // this.logs(debug)
+    //   .catch((ex: unknown) => console.error(ex))
+    //   .finally(() => {
+    //     // Continue initialisation after we have imported logging (or not in most cases)
+    //     l("init", this.cpid, this.percentile, state.pageViews);
+    //   });
+
     // Ensure we have a manifest
     if (manifest) {
-      log(`Initialising manifest with supplied manifest`, manifest);
+      // log(`Initialising manifest with supplied manifest`, manifest);
+      l("im1", manifest);
       this.manifest = new Manifest(
         manifest,
         onManifestReady,
-        log,
+        l,
         state.manifest
       );
     } else if (client) {
-      log(`Initialising manifest with client`);
-      this.manifest = new Manifest(
-        client,
-        onManifestReady,
-        log,
-        state.manifest
-      );
+      // log(`Initialising manifest with client`);
+      l("im2");
+      this.manifest = new Manifest(client, onManifestReady, l, state.manifest);
     }
-
     this.init();
   }
 
@@ -181,18 +206,34 @@ export class PersonalizationContext {
     this.handlers.onInit();
   };
 
+  logs = async (debug?: boolean) => {
+    if (debug && !this.logger)
+      // Dynamically import logging if we have set debug flag
+      return import("./logs").then(({ logger }) => {
+        this.logger = logger;
+        // this.messages = messages;
+      });
+
+    return void 0;
+  };
+
   onManifestReady = (manifest: IManifest) => {
-    const { log } = this;
+    const { l } = this;
     const state = this.state;
 
     const stateVersion = state.manifest?.version.versionNo;
     const manifestVersion = manifest?.version.versionNo;
 
     if (manifestVersion && manifestVersion !== stateVersion) {
-      log(
-        `[onManifestReady] Manifest updated ${
-          stateVersion ? `from version ${stateVersion} ` : ""
-        }to version ${manifestVersion}`
+      // log(
+      //   `[onManifestReady] Manifest updated ${
+      //     stateVersion ? `from version ${stateVersion} ` : ""
+      //   }to version ${manifestVersion}`
+      // );
+      l(
+        "m1",
+        stateVersion ? `from version ${stateVersion} ` : "",
+        manifestVersion
       );
       this.persist = { ...state, manifest };
 
@@ -207,7 +248,8 @@ export class PersonalizationContext {
 
         // If we have matched new signals...
         if (hasNewSignals) {
-          log(`[onManifestReady] Matched new signals from updated manifest`);
+          // log(`[onManifestReady] Matched new signals from updated manifest`);
+          l("m2");
         }
         // Persist new signals state (including signals calculated for the first time after manifest is available)
         this.persist = {
@@ -226,7 +268,8 @@ export class PersonalizationContext {
           audiences.active.length !== this.state.audiences?.active.length;
         // If we have matched new audiences...
         if (hasNewAudiences) {
-          log(`[onManifestReady] Matched new audiences from updated manifest`);
+          // log(`[onManifestReady] Matched new audiences from updated manifest`);
+          l("m3");
         }
         // Persist new audiences state
         this.persist = {
@@ -241,54 +284,46 @@ export class PersonalizationContext {
   };
 
   pageView = (url = this.page) => {
-    const { log } = this;
+    const { l } = this;
     this.pageViews.push([url, new Date(), null]);
 
     const state = this.state;
+    const referrer = !isSSR() ? window.document.referrer : undefined;
 
     // If no current page in state
     if (!state.currentPage) {
-      log(
-        `[pageView] no current page in state; referrer: ${
-          !isSSR() ? window.document.referrer : undefined
-        }`
-      );
+      // log(`[pageView] no current page in state; referrer: ${referrer}`);
+      l("pv1", referrer);
       // Set currentPage
       this.currentPage = state.currentPage = url;
 
       // Set previousPage as document referrer
-      this.previousPage = state.previousPage = !isSSR()
-        ? window.document.referrer
-        : undefined;
+      this.previousPage = state.previousPage = referrer;
     }
     // If current page has changed
     else if (state.currentPage !== url) {
-      log(
-        `[pageView] current page in state has changed; referrer: ${
-          !isSSR() ? window.document.referrer : undefined
-        }`
-      );
+      // log(
+      //   `[pageView] current page in state has changed; referrer: ${referrer}`
+      // );
+      l("pv2", referrer);
       // Set current and previousPage
-      this.previousPage = state.previousPage =
-        (!isSSR() ? window.document.referrer : undefined) || state.currentPage;
+      this.previousPage = state.previousPage = referrer || state.currentPage;
       this.currentPage = state.currentPage = url;
     } else {
-      log(
-        `[pageView] current page in state has not changed; referrer: ${
-          !isSSR() ? window.document.referrer : undefined
-        }`
-      );
+      // log(
+      //   `[pageView] current page in state has not changed; referrer: ${referrer}`
+      // );
+      l("pv3", referrer);
       // Current page has not changed
       // Use state values
       this.currentPage = state.currentPage;
-      this.previousPage = state.previousPage = !isSSR()
-        ? window.document.referrer
-        : undefined;
+      this.previousPage = state.previousPage = referrer;
     }
 
     // Record page view
     state.pageViews++;
-    log(`[pageView] pageViews: ${state.pageViews}`, this.pageViews);
+    // log(`[pageView] pageViews: ${state.pageViews}`, this.pageViews);
+    l("pv4", state.pageViews, this.pageViews);
 
     // Persist new state
     this.persist = state;
@@ -316,7 +351,8 @@ export class PersonalizationContext {
         audiences: audiences.state,
       };
     } else {
-      log(`[pageView] manifest is not ready yet`);
+      // log(`[pageView] manifest is not ready yet`);
+      l("pv5");
     }
 
     // Call event handler
