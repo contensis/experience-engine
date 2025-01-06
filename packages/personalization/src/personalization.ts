@@ -20,7 +20,7 @@ export class PersonalizationContext {
   private store: Store;
   private cpid: string;
   private percentile: number;
-  private _audiences?: CalculateAudiences;
+  audiences?: CalculateAudiences;
   currentPage: string = "";
   previousPage?: string;
   /** Output console.log messaging */
@@ -38,12 +38,6 @@ export class PersonalizationContext {
     onManifestReady: () => {},
   };
   logger?: typeof logger;
-  // messages?: typeof messages;
-  // /** Log debug messages */
-  // log = (...messages: unknown[]) =>
-  //   this.debug
-  //     ? console.log(`@contensis/personalization:`, ...messages)
-  //     : void 0;
 
   /** Log debug messages */
   l = (message: keyof typeof messages, ...values: unknown[]) => {
@@ -60,25 +54,8 @@ export class PersonalizationContext {
   manifest?: Manifest;
   pageViews: [string, Date, CalculateSignals | null][] = [];
 
-  /** generate a personalisation uuid and a percentile for random bucketing */
-  private initialState = (): IPersonalizationStore => {
-    return {
-      cpid: this.newId(),
-      pc: this.newPc(),
-      pageViews: 0,
-      signals: { active: [] },
-      audiences: { active: [] },
-    };
-  };
-
-  /** New visitor uuid */
-  private newId = () => crypto.randomUUID();
-
-  /** New percentile random bucketing to 2 dp */
-  private newPc = () => Math.floor(Math.random() * 10000);
-
   /** Monitor for DOM mutations and subsequent href changes */
-  private observeNavigation = () => {
+  private observe = () => {
     let lastHref = "";
     const observer = new MutationObserver(() => {
       const { currentPage, l, page } = this;
@@ -108,11 +85,6 @@ export class PersonalizationContext {
     });
   };
 
-  /** Get the computed audiences for the current route  */
-  get audiences() {
-    return this._audiences;
-  }
-
   /** Safely return the current location.href */
   get page() {
     if (isSSR()) return "";
@@ -120,7 +92,7 @@ export class PersonalizationContext {
   }
 
   /** Assign any state or [value, options] to persist the value */
-  set persist(state: IPersonalizationStore | [unknown, IStoreOptions]) {
+  set save(state: IPersonalizationStore | [unknown, IStoreOptions]) {
     if (isStore(state)) this.store.set(state);
     if (isArray(state) && state.length === 2) {
       const [value, opts] = state;
@@ -136,7 +108,17 @@ export class PersonalizationContext {
 
   /** Check the store for an existing entry or initialise a new state */
   get state() {
-    return this.store.get<IPersonalizationStore>() || this.initialState();
+    return (
+      this.store.get<IPersonalizationStore>() /** generate a personalisation uuid and a percentile for random bucketing */ || {
+        /** New visitor uuid */
+        cpid: crypto.randomUUID(),
+        /** New percentile random bucketing to 2 dp */
+        pc: Math.floor(Math.random() * 10000),
+        pageViews: 0,
+        signals: { active: [] },
+        audiences: { active: [] },
+      }
+    );
   }
 
   constructor({
@@ -166,10 +148,10 @@ export class PersonalizationContext {
     // );
 
     // Update store with new state
-    this.persist = state;
+    this.save = state;
 
     // Set cpid cookie
-    this.persist = [state.cpid, { type: "cookie", key: "cpid" }];
+    this.save = [state.cpid, { type: "cookie", key: "cpid" }];
 
     // Dynamically import logging if we have set debug flag
     l("init", this.cpid, this.percentile, state.pageViews);
@@ -201,7 +183,7 @@ export class PersonalizationContext {
   init = () => {
     if (isSSR()) return;
 
-    this.observeNavigation();
+    this.observe();
 
     this.handlers.onInit();
   };
@@ -230,12 +212,8 @@ export class PersonalizationContext {
       //     stateVersion ? `from version ${stateVersion} ` : ""
       //   }to version ${manifestVersion}`
       // );
-      l(
-        "m1",
-        stateVersion ? `from version ${stateVersion} ` : "",
-        manifestVersion
-      );
-      this.persist = { ...state, manifest };
+      l("m1", manifestVersion, stateVersion);
+      this.save = { ...state, manifest };
 
       // Retrospectively calculate signals for any pageViews[][2] that are null
       const toCheck = this.pageViews.filter((pv) => pv[2] === null);
@@ -252,7 +230,7 @@ export class PersonalizationContext {
           l("m2");
         }
         // Persist new signals state (including signals calculated for the first time after manifest is available)
-        this.persist = {
+        this.save = {
           ...this.state,
           signals: signalState,
         };
@@ -261,8 +239,8 @@ export class PersonalizationContext {
         check[2] = signals;
 
         // Determine audiences, evaluate conditions
-        this._audiences = new CalculateAudiences(this);
-        const audiences = this._audiences.state;
+        this.audiences = new CalculateAudiences(this);
+        const audiences = this.audiences.state;
 
         const hasNewAudiences =
           audiences.active.length !== this.state.audiences?.active.length;
@@ -272,7 +250,7 @@ export class PersonalizationContext {
           l("m3");
         }
         // Persist new audiences state
-        this.persist = {
+        this.save = {
           ...this.state,
           audiences,
         };
@@ -284,21 +262,24 @@ export class PersonalizationContext {
   };
 
   pageView = (url = this.page) => {
-    const { l } = this;
-    this.pageViews.push([url, new Date(), null]);
+    const { handlers, l, pageViews } = this;
+    pageViews.push([url, new Date(), null]);
 
     const state = this.state;
     const referrer = !isSSR() ? window.document.referrer : undefined;
+
+    let currentPage: string | undefined;
+    let previousPage: string | undefined;
 
     // If no current page in state
     if (!state.currentPage) {
       // log(`[pageView] no current page in state; referrer: ${referrer}`);
       l("pv1", referrer);
       // Set currentPage
-      this.currentPage = state.currentPage = url;
+      currentPage = state.currentPage = url;
 
       // Set previousPage as document referrer
-      this.previousPage = state.previousPage = referrer;
+      previousPage = state.previousPage = referrer;
     }
     // If current page has changed
     else if (state.currentPage !== url) {
@@ -307,8 +288,8 @@ export class PersonalizationContext {
       // );
       l("pv2", referrer);
       // Set current and previousPage
-      this.previousPage = state.previousPage = referrer || state.currentPage;
-      this.currentPage = state.currentPage = url;
+      previousPage = state.previousPage = referrer || state.currentPage;
+      currentPage = state.currentPage = url;
     } else {
       // log(
       //   `[pageView] current page in state has not changed; referrer: ${referrer}`
@@ -316,17 +297,20 @@ export class PersonalizationContext {
       l("pv3", referrer);
       // Current page has not changed
       // Use state values
-      this.currentPage = state.currentPage;
-      this.previousPage = state.previousPage = referrer;
+      currentPage = state.currentPage;
+      previousPage = state.previousPage = referrer;
     }
+
+    this.currentPage = currentPage;
+    this.previousPage = previousPage;
 
     // Record page view
     state.pageViews++;
-    // log(`[pageView] pageViews: ${state.pageViews}`, this.pageViews);
-    l("pv4", state.pageViews, this.pageViews);
+    // log(`[pageView] pageViews: ${state.pageViews}`, pageViews);
+    l("pv4", state.pageViews, pageViews);
 
     // Persist new state
-    this.persist = state;
+    this.save = state;
 
     // If the manifest is available, compute signals for this page
     if (this.manifest?.isReady) {
@@ -334,19 +318,19 @@ export class PersonalizationContext {
       const signals = new CalculateSignals(this);
 
       // Persist current signals state
-      this.persist = {
+      this.save = {
         ...this.state,
         signals: signals.state,
       };
 
       // Add signal state to pageViews array so we know it does not require recalculation
-      this.pageViews[this.pageViews.length - 1][2] = signals;
+      pageViews[pageViews.length - 1][2] = signals;
 
       // Determine audiences, evaluate conditions
-      const audiences = (this._audiences = new CalculateAudiences(this));
+      const audiences = (this.audiences = new CalculateAudiences(this));
 
       // Persist current audiences state
-      this.persist = {
+      this.save = {
         ...this.state,
         audiences: audiences.state,
       };
@@ -356,6 +340,6 @@ export class PersonalizationContext {
     }
 
     // Call event handler
-    this.handlers.onPageView(this.currentPage, this.previousPage);
+    handlers.onPageView(currentPage, previousPage);
   };
 }
