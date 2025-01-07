@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Link } from "react-router";
 import Audiences from "~/audiences";
 
@@ -8,7 +9,9 @@ const page1 = () => {
       <p>
         <Link to={"/"}>Navigate to Home Page</Link>
       </p>
-      <Audiences />
+      <Suspense fallback={<h2>🌀 Loading...</h2>}>
+        <Audiences />
+      </Suspense>
     </>
   );
 };

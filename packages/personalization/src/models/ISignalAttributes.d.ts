@@ -1,5 +1,5 @@
 export interface ISignalAttributes {
-  timestamp: number;
+  t: number;
   pageUrl: string;
   "page.url": string;
   "page.path": string;

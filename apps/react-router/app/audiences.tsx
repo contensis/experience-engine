@@ -1,80 +1,66 @@
 import { usePersonalizationContext } from "@contensis/personalization-react";
-import { useEffect, useState } from "react";
-import { getRelativeTime } from "./util";
 
 const Audiences = () => {
-  const { context } = usePersonalizationContext();
+  const { active, matched, pageViews } = usePersonalizationContext();
 
-  const [getSignals, setSignals] = useState<[string, number, number][]>([]);
-  const [getAudiences, setAudiences] = useState<[string, number][]>([]);
-  const [getSession, setSession] = useState<number>(0);
-  const [getTotal, setTotal] = useState<number>(0);
+  // context.handlers.onPageView = () => {
+  //   setPvc(context.pageViews.length);
+  // };
 
-  useEffect(() => {
-    if (
-      context.audiences?.matched &&
-      context.audiences.matched.length !== getAudiences?.length
-    )
-      setAudiences(
-        context.audiences.matched.map((a) => [
-          a.id,
-          context.state.audiences?.matched?.[a.id]?.[0].t || 0,
-        ])
-      );
-    if (
-      context.signals?.matched &&
-      context.signals.matched.length !== getSignals?.length
-    ) {
-      setSignals(
-        context.signals.matched.map((s) => [
-          s.id,
-          context.state.signals?.matched?.[s.id]?.length || 0,
-          s.minMatches,
-        ])
-      );
-    }
-    setSession(context.pageViews.length);
-    setTotal(context.state.pageViews);
-  }, [context.pageViews, context.audiences?.matched, context.signals?.matched]);
+  console.log(`render AudiencesJSX`);
 
-  const audiencesJSX = getAudiences?.length ? (
-    <>
-      <div>
-        <h3>Active audiences: {getAudiences.length}</h3>
-        <ul>
-          {getAudiences.map(([audienceId, timestamp]) => (
-            <li key={audienceId}>
-              - {audienceId} <span>({getRelativeTime(timestamp)})</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
+  const className =
+    "flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700";
+
+  const activeAudiencesJSX = active.audiences.length ? (
+    <div className={className}>
+      <h3>Active audiences: {active.audiences.length}</h3>
+      <ul>
+        {active.audiences.map((audienceId) => (
+          <li key={audienceId}>- {audienceId}</li>
+        ))}
+      </ul>
+    </div>
   ) : null;
 
-  const signalsJSX = getSignals?.length ? (
-    <>
-      <div>
-        <h3>Matched signals: {getSignals.length}</h3>
-        <ul>
-          {getSignals.map(([signalId, numMatches, minMatches]) => (
-            <li key={signalId}>
-              - {signalId}{" "}
-              <span>
-                ({numMatches}/{minMatches})
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
+  const activeSignalsJSX = active.signals.length ? (
+    <div className={className}>
+      <h3>Active signals: {active.signals.length}</h3>
+      <ul>
+        {active.signals.map((signalId) => (
+          <li key={signalId}>- {signalId}</li>
+        ))}
+      </ul>
+    </div>
   ) : null;
+
+  const signalsJSX = matched?.length ? (
+    <div className={className}>
+      <h3>Matched signals: {matched.length}</h3>
+      <ul>
+        {matched.map((signal) => (
+          <li key={signal.id}>
+            - {signal.id}
+            <span>
+              ({signal.times}/{signal.minMatches})
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : null;
+
   return (
-    <div className="justify-center">
-      <h2>Session page views: {getSession}</h2>
-      <h2>Total page views: {getTotal}</h2>
-      {audiencesJSX}
-      {signalsJSX}
+    <div className="">
+      <div className="flex flex-col items-center gap-1 p-6">
+        <h2>Session page views: {pageViews.session}</h2>
+        <h2>Total page views: {pageViews.total}</h2>
+      </div>
+      <div className="flex justify-center gap-4">
+        {activeAudiencesJSX}
+        {activeSignalsJSX}
+        {signalsJSX}
+      </div>
     </div>
   );
 };

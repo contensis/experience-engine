@@ -20,6 +20,9 @@ export interface IManifestClient {
   projectId?: string;
 }
 
+export const findSignal = (id: string, signals?: ISignal[]) =>
+  signals?.find((signal) => signal.id === id);
+
 export class Manifest implements IManifest {
   private _isReady = false;
   client?: ReturnType<typeof ManifestClient>;

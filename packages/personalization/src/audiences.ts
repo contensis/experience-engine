@@ -5,8 +5,8 @@ import { isSSR, now } from "./util";
 export type ComputedAudience = IAudience & { matched: boolean };
 
 export class CalculateAudiences {
-  private timestamp = now();
   computed: ComputedAudience[] = [];
+  t = now();
 
   get matched() {
     return this.computed.filter((s) => s.matched);
@@ -14,7 +14,7 @@ export class CalculateAudiences {
 
   /** Return the state of the audiences, checking for newly matched audiences we may not have detected earlier */
   get state() {
-    const { computed, context, matched: matchedThis, timestamp: t } = this;
+    const { computed, context, matched: matchedThis, t } = this;
     const { debug, manifest, page: p, state } = context;
 
     // Merge audience matches from this instance into any previously matched

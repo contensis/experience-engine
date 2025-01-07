@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from "react";
 import { PersonalizationContext, IManifest } from "@contensis/personalization";
 import { PersonalizationReactContext } from "./context";
@@ -47,7 +48,6 @@ export const PersonalizationProvider = (
     const manifest =
       "manifest" in props && props.manifest ? props.manifest : undefined;
     const session = props.session || undefined;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globalAny = globalThis as any;
 
     // To avoid double-rendering issues check for a cpcontext in global

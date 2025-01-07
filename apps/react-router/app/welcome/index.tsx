@@ -1,8 +1,8 @@
+import { Suspense } from "react";
 import { Link } from "react-router";
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
 import Audiences from "~/audiences";
-import { Suspense } from "react";
 
 export function Welcome() {
   return (

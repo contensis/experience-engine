@@ -3,7 +3,7 @@ import { Manifest } from "./providers/manifest";
 import { IManifest, IPersonalizationStore } from "./models";
 import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
-import { isArray, isSSR, isStore } from "./util";
+import { isArray, isSSR, isStore, now } from "./util";
 import { logger, messages } from "./logs";
 
 export type PersonalizationContextOptions = {
@@ -23,8 +23,10 @@ export class PersonalizationContext {
   audiences?: CalculateAudiences;
   currentPage: string = "";
   previousPage?: string;
+  signals?: CalculateSignals;
+  t = 0;
   /** Output console.log messaging */
-  debug = true;
+  debug: boolean;
   /** User-supplied event handlers */
   handlers: {
     onInit: () => void;
@@ -43,12 +45,14 @@ export class PersonalizationContext {
   l = (message: keyof typeof messages, ...values: unknown[]) => {
     if (this.debug)
       if (this.logger) this.logger(message, ...values);
-      else
+      else {
+        console.log("cp", message, values);
         this.logs(true)
           .then(() => this.l(message, ...values))
           .catch(() => {
             console.log("cp", message, values);
           });
+      }
   };
 
   manifest?: Manifest;
@@ -100,11 +104,11 @@ export class PersonalizationContext {
     }
   }
 
-  /** Gets the computed signals for the current route */
-  get signals() {
-    const { pageViews: pv } = this;
-    return pv[pv.length - 1]?.[2];
-  }
+  // /** Gets the computed signals for the current route */
+  // get signals() {
+  //   const { pageViews: pv } = this;
+  //   return pv[pv.length - 1]?.[2];
+  // }
 
   /** Check the store for an existing entry or initialise a new state */
   get state() {
@@ -219,7 +223,7 @@ export class PersonalizationContext {
       const toCheck = this.pageViews.filter((pv) => pv[2] === null);
       for (const check of toCheck) {
         // Compute signals
-        const signals = new CalculateSignals(this);
+        const signals = (this.signals = new CalculateSignals(this));
         const signalState = signals.state;
         const hasNewSignals =
           signalState.matched?.length !== this.state.signals?.matched?.length;
@@ -315,7 +319,7 @@ export class PersonalizationContext {
     // If the manifest is available, compute signals for this page
     if (this.manifest?.isReady) {
       // Compute signals
-      const signals = new CalculateSignals(this);
+      const signals = (this.signals = new CalculateSignals(this));
 
       // Persist current signals state
       this.save = {
@@ -339,6 +343,7 @@ export class PersonalizationContext {
       l("pv5");
     }
 
+    this.t = now();
     // Call event handler
     handlers.onPageView(currentPage, previousPage);
   };

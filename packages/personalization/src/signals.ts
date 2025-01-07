@@ -1,6 +1,8 @@
-import { ISignal, ISignalsStore, Where, WhereCriteria } from "./models";
+import { ISignalsStore, Where, WhereCriteria } from "./models";
 import { ISignalAttributes } from "./models/ISignalAttributes";
+import { ComputedSignal } from "./models/Signals";
 import { PersonalizationContext } from "./personalization";
+import { findSignal } from "./providers/manifest";
 import { cookieStore } from "./providers/store";
 import {
   isArray,
@@ -65,7 +67,7 @@ export const RouteSignalsSnapshot = (
   else if (referrer) _referrer = RouteSignalsSnapshot(referrer);
 
   const attributes: ISignalAttributes = {
-    timestamp: now(),
+    t: now(),
     "page.url": _url.href(),
     "page.path": _url.path(),
     pageUrl: _url.path(),
@@ -91,21 +93,20 @@ export const RouteSignalsSnapshot = (
   return attributes;
 };
 
-export type ComputedSignal = ISignal & { matched: boolean };
-
 export class CalculateSignals {
   computed: ComputedSignal[] = [];
+  matched: ComputedSignal[] = [];
   signals: ISignalAttributes;
+  t = now();
 
-  get matched() {
-    return this.computed.filter((s) => s.matched);
-  }
+  // get matched() {
+  //   return this.computed.filter((s) => s.matched);
+  // }
 
   /** Return the state of the signals, merging newly matched signals with those previously matched */
   get state() {
     const { computed, context, matched: matchedThis, signals } = this;
     const { debug, manifest, page: p, state } = context;
-    const { timestamp: t } = signals;
 
     // Merge signal matches from this instance into any previously matched
     // const matchedThis = this.matched;
@@ -121,16 +122,16 @@ export class CalculateSignals {
     // Iterate all signal keys from this instance and persisted history
     for (const signalId of allIds) {
       // Did we match this signalId in this request?
-      const currentMatch = matchedThis.find((m) => m.id === signalId);
+      const currentMatch = findSignal(signalId, matchedThis);
       if (currentMatch) {
         matched[signalId] = [
-          { p, t },
+          { p, t: signals.t },
           // Add prev match(es)s
           ...(matchedPrev[signalId] || []),
         ];
       } else {
         // No changes just assign prev, if the signalId is included in the manifest
-        if (manifest?.signals.find((s) => s.id === signalId))
+        if (findSignal(signalId, manifest?.signals))
           matched[signalId] = matchedPrev[signalId];
       }
     }
@@ -141,7 +142,7 @@ export class CalculateSignals {
     // Iterate all signal matches and add id to active array if all conditions met
     for (const [matchedId, match] of Object.entries(matched)) {
       // Get signal from manifest
-      const signalManifest = manifest?.signals.find((s) => s.id === matchedId);
+      const signalManifest = findSignal(matchedId, manifest?.signals);
 
       // Check have we matched the signal enough times to activate it
       if (
@@ -157,7 +158,7 @@ export class CalculateSignals {
           ? Object.fromEntries(
               computed.map((s) => [
                 s.id,
-                [{ p, t, m: s.matched, mm: s.minMatches }],
+                [{ p, t: signals.t, m: s.matched, mm: s.minMatches }],
               ])
             )
           : undefined,
@@ -189,19 +190,21 @@ export class CalculateSignals {
     // log(
     //   `[Signals] checking ${signals.length} signals in manifest version "${manifest?.version.versionNo}"`
     // );
-    const timeStart = now();
+    // const timeStart = now();
     for (const signal of signals) {
-      this.computed.push({
-        ...signal,
-        matched: this.check(signal.where),
-      });
+      const matched = this.check(signal.where);
+      const times =
+        (context.state.signals?.matched?.[signal.id]?.length || 0) + 1;
+      const computed = { ...signal, matched, times };
+      if (matched) this.matched.push(computed);
+      this.computed.push(computed);
     }
     // log(
     //   `[Signals] ${signals.length} checked in ${
     //     now() - timeStart
     //   }ms, manifest version "${manifest?.version.versionNo}`
     // );
-    l("sc", signals.length, now() - timeStart, manifest?.version.versionNo);
+    l("sc", signals.length, now() - this.t, manifest?.version.versionNo);
 
     const matches = this.matched.length;
     if (matches) {
@@ -217,10 +220,7 @@ export class CalculateSignals {
         "sm",
         matches,
         this.matched.map(
-          (m) =>
-            `${m.id}(${
-              (context.state.signals?.matched?.[m.id]?.length || 0) + 1
-            }/${m.minMatches}) `
+          (signal) => `${signal.id}(${signal.times}/${signal.minMatches}) `
         )
       );
     }
