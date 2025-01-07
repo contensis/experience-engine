@@ -1,6 +1,6 @@
 import { type RouteConfig, index } from "@react-router/dev/routes";
 
-export const routes: RouteConfig = [
+const routes: RouteConfig = [
   index("routes/home.tsx"),
   {
     path: "/page1",
@@ -12,3 +12,5 @@ export const routes: RouteConfig = [
     file: "./pages/page1.tsx",
   },
 ];
+
+export default routes;
