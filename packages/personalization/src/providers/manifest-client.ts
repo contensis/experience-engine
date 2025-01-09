@@ -20,9 +20,7 @@ export const ManifestClient = (alias: string, projectId = "website") => {
       const statusCode =
         isObject(ex) && "statusCode" in ex ? ex.statusCode : "";
       console.error(
-        `ManifestClient[get]:${
-          statusCode ? ` ${statusCode}` : ""
-        } failed with ${ex}`
+        `ManifestClient[get]:${statusCode ? ` ${statusCode}` : ""} ${ex}`
       );
     }
   };
