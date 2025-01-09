@@ -12,6 +12,7 @@ export type PersonalizationContextOptions = {
     | { rootUrl: string; projectId?: string }
     | undefined;
   debug?: boolean;
+  handlers?: Partial<PersonalizationContext["handlers"]>;
   manifest?: IManifest;
   session?: true;
 };
@@ -29,7 +30,7 @@ export class PersonalizationContext {
   debug: boolean;
   /** User-supplied event handlers */
   handlers: {
-    onInit: () => void;
+    onInit: (context: PersonalizationContext) => void;
     onNavigate: (current: string, previous?: string) => void;
     onPageView: (current: string, previous?: string) => void;
     onManifestReady: (manifest: IManifest) => void;
@@ -103,13 +104,7 @@ export class PersonalizationContext {
       this.store.set(value, opts);
     }
   }
-
-  // /** Gets the computed signals for the current route */
-  // get signals() {
-  //   const { pageViews: pv } = this;
-  //   return pv[pv.length - 1]?.[2];
-  // }
-
+  
   /** Check the store for an existing entry or initialise a new state */
   get state() {
     return (
@@ -128,12 +123,19 @@ export class PersonalizationContext {
   constructor({
     client,
     debug,
+    handlers,
     manifest,
     session,
   }: PersonalizationContextOptions = {}) {
     const { l, onManifestReady } = this;
 
     this.debug = debug || false;
+
+    for (const h in handlers) {
+      const method = h as keyof PersonalizationContext["handlers"];
+      if (typeof handlers[method] === "function")
+        (this.handlers[method] as unknown) = handlers[method];
+    }
 
     this.currentPage = this.page;
     this.store = new Store({ persist: !session });
@@ -146,10 +148,6 @@ export class PersonalizationContext {
 
     this.cpid = state.cpid;
     this.percentile = state.pc / 100; // percentile is a number with precision of 2 e.g. 42.75%
-
-    // log(
-    //   `visitorId: ${this.cpid}, percentile: ${this.percentile}%, pageViews: ${state.pageViews}`
-    // );
 
     // Update store with new state
     this.save = state;
@@ -168,8 +166,7 @@ export class PersonalizationContext {
 
     // Ensure we have a manifest
     if (manifest) {
-      // log(`Initialising manifest with supplied manifest`, manifest);
-      l("im1", manifest);
+      l("im", manifest);
       this.manifest = new Manifest(
         manifest,
         onManifestReady,
@@ -177,9 +174,10 @@ export class PersonalizationContext {
         state.manifest
       );
     } else if (client) {
-      // log(`Initialising manifest with client`);
-      l("im2");
+      l("ic");
       this.manifest = new Manifest(client, onManifestReady, l, state.manifest);
+    } else {
+      console.warn(`cp: client or manifest required`);
     }
     this.init();
   }
@@ -189,19 +187,16 @@ export class PersonalizationContext {
 
     this.observe();
 
-    this.handlers.onInit();
+    this.handlers.onInit(this);
   };
 
-  logs = async (debug?: boolean) => {
-    if (debug && !this.logger)
-      // Dynamically import logging if we have set debug flag
-      return import("./logs").then(({ logger }) => {
-        this.logger = logger;
-        // this.messages = messages;
-      });
-
-    return void 0;
-  };
+  logs = async (debug?: boolean) =>
+    debug && !this.logger
+      ? // Dynamically import logging if we have set debug flag
+        import("./logs").then(({ logger }) => {
+          this.logger = logger;
+        })
+      : void 0;
 
   onManifestReady = (manifest: IManifest) => {
     const { l } = this;
@@ -211,12 +206,7 @@ export class PersonalizationContext {
     const manifestVersion = manifest?.version.versionNo;
 
     if (manifestVersion && manifestVersion !== stateVersion) {
-      // log(
-      //   `[onManifestReady] Manifest updated ${
-      //     stateVersion ? `from version ${stateVersion} ` : ""
-      //   }to version ${manifestVersion}`
-      // );
-      l("m1", manifestVersion, stateVersion);
+      l("mv", manifestVersion, stateVersion);
       this.save = { ...state, manifest };
 
       // Retrospectively calculate signals for any pageViews[][2] that are null
@@ -230,8 +220,7 @@ export class PersonalizationContext {
 
         // If we have matched new signals...
         if (hasNewSignals) {
-          // log(`[onManifestReady] Matched new signals from updated manifest`);
-          l("m2");
+          l("ms");
         }
         // Persist new signals state (including signals calculated for the first time after manifest is available)
         this.save = {
@@ -250,8 +239,7 @@ export class PersonalizationContext {
           audiences.active.length !== this.state.audiences?.active.length;
         // If we have matched new audiences...
         if (hasNewAudiences) {
-          // log(`[onManifestReady] Matched new audiences from updated manifest`);
-          l("m3");
+          l("ma");
         }
         // Persist new audiences state
         this.save = {
@@ -277,8 +265,7 @@ export class PersonalizationContext {
 
     // If no current page in state
     if (!state.currentPage) {
-      // log(`[pageView] no current page in state; referrer: ${referrer}`);
-      l("pv1", referrer);
+      l("pn", referrer);
       // Set currentPage
       currentPage = state.currentPage = url;
 
@@ -287,19 +274,13 @@ export class PersonalizationContext {
     }
     // If current page has changed
     else if (state.currentPage !== url) {
-      // log(
-      //   `[pageView] current page in state has changed; referrer: ${referrer}`
-      // );
-      l("pv2", referrer);
+      l("pc", referrer);
       // Set current and previousPage
       previousPage = state.previousPage = referrer || state.currentPage;
       currentPage = state.currentPage = url;
     } else {
-      // log(
-      //   `[pageView] current page in state has not changed; referrer: ${referrer}`
-      // );
-      l("pv3", referrer);
       // Current page has not changed
+      l("ps", referrer);
       // Use state values
       currentPage = state.currentPage;
       previousPage = state.previousPage = referrer;
@@ -310,8 +291,7 @@ export class PersonalizationContext {
 
     // Record page view
     state.pageViews++;
-    // log(`[pageView] pageViews: ${state.pageViews}`, pageViews);
-    l("pv4", state.pageViews, pageViews);
+    l("pv", state.pageViews, pageViews);
 
     // Persist new state
     this.save = state;
@@ -338,10 +318,7 @@ export class PersonalizationContext {
         ...this.state,
         audiences: audiences.state,
       };
-    } else {
-      // log(`[pageView] manifest is not ready yet`);
-      l("pv5");
-    }
+    } else l("pm");
 
     this.t = now();
     // Call event handler

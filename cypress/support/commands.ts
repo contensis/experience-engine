@@ -108,7 +108,10 @@ Cypress.Commands.add(
     })
 );
 
-type ContextWindow = typeof window & { cpcontext: PersonalizationContext };
+type ContextWindow = typeof window & {
+  CONTENSIS_PERSONALIZATION: { context?: PersonalizationContext };
+};
+
 /**
  * Custom getContext command is needed to wait for the personalisation
  * context to be added to the window global and then return the context
@@ -118,8 +121,15 @@ Cypress.Commands.add("getContext", () => {
   return cy.waitUntil(() =>
     cy
       .window()
-      .then((window: ContextWindow) => (window.cpcontext ? window : false))
-      .then(({ cpcontext }: ContextWindow) => (cpcontext ? cpcontext : false))
+      .then((window: ContextWindow) =>
+        window.CONTENSIS_PERSONALIZATION &&
+        window.CONTENSIS_PERSONALIZATION.context
+          ? window
+          : false
+      )
+      .then(({ CONTENSIS_PERSONALIZATION: { context } = {} }: ContextWindow) =>
+        context ? context : false
+      )
   );
 });
 /**

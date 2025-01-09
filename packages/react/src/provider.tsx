@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from "react";
 import { PersonalizationContext, IManifest } from "@contensis/personalization";
 import { PersonalizationReactContext } from "./context";
@@ -29,6 +28,9 @@ export type PersonalizationProviderProps =
     })
   | (PersonalizationProviderInstantiationProps & { manifest: IManifest });
 
+/** Global context object name */
+const GLOBAL = "CONTENSIS_PERSONALIZATION";
+
 export const PersonalizationProvider = (
   props: React.PropsWithChildren<PersonalizationProviderProps>
 ) => {
@@ -36,33 +38,39 @@ export const PersonalizationProvider = (
     if ("context" in props) {
       // We have been provided a context already
       return props.context;
+    } else {
+      // Unwrap props to PersonalizationContext constructor arguments
+      const client: PersonalizationProviderClientProps | undefined =
+        "alias" in props && props.alias
+          ? { alias: props.alias, projectId: props.projectId }
+          : "rootUrl" in props && props.rootUrl
+          ? { rootUrl: props.rootUrl, projectId: props.projectId }
+          : undefined;
+      const manifest =
+        "manifest" in props && props.manifest ? props.manifest : undefined;
+
+      // Create object in global scope
+      const g = (globalThis[GLOBAL] =
+        typeof globalThis[GLOBAL] === "object" ? globalThis[GLOBAL] : {});
+
+      // Check for an existing context in global before instantiating a new one
+      const context: PersonalizationContext = (g.context =
+        g.context ||
+        new PersonalizationContext({
+          client,
+          debug: props.debug,
+          manifest,
+          session: props.session || undefined,
+          handlers: {
+            onInit: props.onInit,
+            onManifestReady: props.onManifestReady,
+            onNavigate: props.onNavigate,
+            onPageView: props.onPageView,
+          },
+        }));
+
+      return context;
     }
-    // Unwrap props to PersonalizationContext constructor arguments
-    const client: PersonalizationProviderClientProps | undefined =
-      "alias" in props && props.alias
-        ? { alias: props.alias, projectId: props.projectId }
-        : "rootUrl" in props && props.rootUrl
-        ? { rootUrl: props.rootUrl, projectId: props.projectId }
-        : undefined;
-    const debug = props.debug;
-    const manifest =
-      "manifest" in props && props.manifest ? props.manifest : undefined;
-    const session = props.session || undefined;
-    const globalAny = globalThis as any;
-
-    // To avoid double-rendering issues check for a cpcontext in global
-    const context: PersonalizationContext =
-      globalAny.cpcontext ||
-      new PersonalizationContext({
-        client,
-        debug,
-        manifest,
-        session,
-      });
-
-    // Hoist the context to global scope so we can pick it back up in subsequent re-renders
-    globalAny.cpcontext = context;
-    return context;
   }, []);
 
   const { children } = props;
