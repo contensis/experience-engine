@@ -45,7 +45,7 @@ export class Store {
 
     return type === "c"
       ? Object.fromEntries(
-          document.cookie.split(";").map((cookie) => cookie.split("="))
+          document.cookie.split(";").map((cookie) => cookie.trim().split("="))
         )
       : window[type];
   };
