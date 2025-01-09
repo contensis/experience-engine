@@ -3,32 +3,83 @@
   <head>
     <meta charset="UTF-8" />
     <title>Static HTML Home Page</title>
+    <script type="module">
+      /** Initialise the CONTENSIS_PERSONALIZATION object in global context so we can specify options */
+      if (!window.CONTENSIS_PERSONALIZATION)
+        window.CONTENSIS_PERSONALIZATION = {};
+
+      if (!window.CONTENSIS_PERSONALIZATION.context)
+        // Fetch a hard-coded manifest from test fixtures
+        fetch("/../../cypress/fixtures/signals.page.path-manifest.json")
+          .then((response) => response.json())
+          .then((json) => {
+            console.log(
+              `HTML app fetched manifest json ${json.version.versionNo}`
+            );
+
+            // Output console logs and extra info
+            window.CONTENSIS_PERSONALIZATION.debug = true;
+
+            // Use the manifest we have just fetched
+            window.CONTENSIS_PERSONALIZATION.manifest = json;
+
+            // Boilerplate to get active audiences
+            const getAudiences = (context) =>
+              (window.CONTENSIS_PERSONALIZATION?.context || context)?.state
+                .audiences?.active || [];
+
+            let personalised = []; // Keep track of audiences we've made personalisations for
+
+            /** Render personalised content for any audiences we have activated */
+            const personalise = (context) => {
+              const audiences = getAudiences(context);
+
+              if (audiences.length !== personalised.length) {
+                const personalisedElement = document.createElement("p");
+                personalisedElement.setAttribute(
+                  "id",
+                  `personalised-audiences-${audiences.join("-")}`
+                );
+                personalisedElement.innerHTML = `Personalised content for ${audiences.join(
+                  ", "
+                )} audience${audiences.length > 1 ? "s" : ""}`;
+
+                document.body.appendChild(personalisedElement);
+                personalised.push(...audiences);
+              }
+            };
+
+            /** Remove personalised content we've added */
+            const cleanup = () => {
+              const existingElement = document.querySelector(
+                `#personalised-audiences-${personalised.join("-")}`
+              );
+              if (existingElement) document.body.removeChild(existingElement);
+            };
+
+            /** Trigger personalisatons after specific events by setting handlers */
+
+            // Render personalisations based on any previously active audiences
+            window.CONTENSIS_PERSONALIZATION.onInit = personalise;
+
+            // Update personalised content if we matched a new audience by visiting this page
+            window.CONTENSIS_PERSONALIZATION.onPageView = () => {
+              const audiences = getAudiences();
+              if (audiences.length !== personalised.length) {
+                cleanup();
+                personalise();
+              }
+            };
+
+            // Import our helper script to embed a script tag
+            // that creates a personalisation context
+            import("/../../apps/html/personalization.js").then(() => {
+              console.log(`HTML app imported personalization.js script`);
+            });
+          });
+    </script>
   </head>
   <body>
-    <script type="importmap">
-      {
-        "imports": {
-          "@contensis/personalization": "/../../packages/personalization/dist/personalization.min.mjs"
-        }
-      }
-    </script>
-    <script type="module">
-      import { PersonalizationContext } from "@contensis/personalization";
-      fetch("/../../cypress/fixtures/signals.page.path-manifest.json")
-        .then((response) => response.json())
-        .then((json) => {
-          console.log(
-            `HTML app fetched manifest json ${json.version.versionNo}`
-          );
-
-          const context = new PersonalizationContext({
-            debug: true,
-            manifest: json,
-          });
-
-          window.cpcontext = context;
-        });
-    </script>
     <h1>Home page</h1>
     <p>Welcome to the static example site</p>
     <ul>
