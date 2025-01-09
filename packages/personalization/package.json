@@ -10,6 +10,11 @@
       "types": "./dist/personalization.d.ts",
       "require": "./dist/personalization.js",
       "import": "./dist/personalization.mjs"
+    },
+    "./browser": {
+      "types": "./dist/personalization.d.ts",
+      "require": "./dist/personalization.browser.js",
+      "import": "./dist/personalization.browser.mjs"
     }
   },
   "files": [
@@ -18,7 +23,8 @@
   "scripts": {
     "start": "npm run build",
     "prebuild": "rimraf dist && npm run tsc",
-    "build": "tsup && tsup --minify",
+    "build": "tsup && tsup --minify && npm run build:browser",
+    "build:browser": "tsup --config tsup.browser.config.js && tsup --config tsup.browser.config.js --minify",
     "tsc": "tsc --noEmit",
     "test": "jest -c ../../jest.config.js"
   },
