@@ -7,10 +7,12 @@ export type IManifestClientArgs =
   | {
       alias: string;
       projectId?: string;
+      token?: string;
     }
   | {
       rootUrl: string;
       projectId?: string;
+      token?: string;
     };
 
 export type IManifestOnReady = (manifest: IManifest) => unknown;
@@ -24,15 +26,11 @@ export const findSignal = (id: string, signals?: ISignal[]) =>
   signals?.find((signal) => signal.id === id);
 
 export class Manifest implements IManifest {
-  private _isReady = false;
   client?: ReturnType<typeof ManifestClient>;
   audiences: IAudience[] = [];
   signals: ISignal[] = [];
   version: IManifestVersion = {} as IManifestVersion;
-
-  get isReady() {
-    return this._isReady;
-  }
+  isReady = false;
 
   constructor(
     client: IManifestClientArgs,
@@ -63,9 +61,17 @@ export class Manifest implements IManifest {
     if (isManifestClient(client)) this.client = client;
     // Initialise with a new client (alias and projectId supplied)
     else if ("alias" in client)
-      this.client = ManifestClient(client.alias, client.projectId);
+      this.client = ManifestClient(
+        client.alias,
+        client.projectId,
+        client.token
+      );
     else if ("rootUrl" in client)
-      this.client = ManifestClient(client.rootUrl, client.projectId);
+      this.client = ManifestClient(
+        client.rootUrl,
+        client.projectId,
+        client.token
+      );
     else {
       // Initialise with an IManifest object
       this.audiences = client.audiences || this.audiences;
@@ -75,12 +81,11 @@ export class Manifest implements IManifest {
 
     // Fallback to manifest from state if available before we initialise any client
     if (state && this.client) {
-      // log(`[Manifest] Fallback to manifest found in state while we initialise`);
       log("m");
       this.audiences = state.audiences || [];
       this.signals = state.signals || [];
       this.version = state.version || ({} as IManifestVersion);
-      this._isReady = (state as Manifest)._isReady;
+      this.isReady = (state as Manifest).isReady;
     }
 
     this.init(onReady); // not awaitable in constructor
@@ -94,12 +99,17 @@ export class Manifest implements IManifest {
         this.audiences = manifest.audiences;
         this.signals = manifest.signals;
         this.version = manifest.version;
+
+        this.isReady = true;
+
+        // PersonalizatonContent.onManifestReady callback
+        onReady(this);
       }
+    } else {
+      this.isReady = true;
+
+      // PersonalizatonContent.onManifestReady callback
+      onReady(this);
     }
-
-    this._isReady = true;
-
-    // On Ready callback
-    onReady(this);
   };
 }

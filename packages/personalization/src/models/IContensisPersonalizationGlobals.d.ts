@@ -1,6 +1,7 @@
 import { PersonalizationContext } from "../personalization";
 
 export interface IContensisPersonalizationGlobals {
+  token?: string; // TODO: remove this
   context?: PersonalizationContext;
   debug?: true;
   rootUrl?: string;

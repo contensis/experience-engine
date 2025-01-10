@@ -14,6 +14,8 @@ export type PersonalizationContextOptions = {
   session?: true;
 };
 
+type PageView = [string, Date, CalculateSignals | null];
+
 export class PersonalizationContext {
   private store: Store;
   private cpid: string;
@@ -68,7 +70,7 @@ export class PersonalizationContext {
   };
 
   manifest?: Manifest;
-  pageViews: [string, Date, CalculateSignals | null][] = [];
+  pageViews: PageView[] = [];
 
   /** Monitor for DOM mutations and subsequent href changes */
   private observe = () => {
@@ -77,13 +79,9 @@ export class PersonalizationContext {
       const { currentPage, l, page } = this;
       // If page has changed (or is initial page load)
       if (page !== lastHref) {
+        // Log the page view (debug only)
         if (!lastHref) l("n1", page);
         else l("n2", currentPage, page);
-        // this.log(
-        //   lastHref
-        //     ? `Route change detected: from ${this.currentPage} to: ${this.page}`
-        //     : `Initial page view: ${this.page}`
-        // );
         lastHref = page;
         // Record the page view
         this.pageView();
@@ -168,12 +166,6 @@ export class PersonalizationContext {
 
     // Dynamically import logging if we have set debug flag
     l("init", this.cpid, this.percentile, state.pageViews);
-    // this.logs(debug)
-    //   .catch((ex: unknown) => console.error(ex))
-    //   .finally(() => {
-    //     // Continue initialisation after we have imported logging (or not in most cases)
-    //     l("init", this.cpid, this.percentile, state.pageViews);
-    //   });
 
     // Ensure we have a manifest
     if (manifest) {
@@ -226,41 +218,21 @@ export class PersonalizationContext {
 
       // Retrospectively calculate signals for any pageViews[][2] that are null
       const toCheck = this.pageViews.filter((pv) => pv[2] === null);
-      for (const check of toCheck) {
-        // Compute signals
-        const signals = (this.signals = new CalculateSignals(this));
-        const signalState = signals.state;
-        const hasNewSignals =
-          signalState.matched?.length !== this.state.signals?.matched?.length;
+      for (const pageView of toCheck) {
+        const existingSignals = this.signals?.matched?.length || 0;
+        const existingAudiences = this.audiences?.active.length || 0;
 
+        // Compute signals and audiences
+        this.compute(pageView);
+
+        const hasNewSignals = this.signals?.matched?.length !== existingSignals;
         // If we have matched new signals...
-        if (hasNewSignals) {
-          l("ms");
-        }
-        // Persist new signals state (including signals calculated for the first time after manifest is available)
-        this.save = {
-          ...this.state,
-          signals: signalState,
-        };
-
-        // Add signal state to pageViews array so we know it has been calculated
-        check[2] = signals;
-
-        // Determine audiences, evaluate conditions
-        this.audiences = new CalculateAudiences(this);
-        const audiences = this.audiences.state;
+        if (hasNewSignals) l("ms");
 
         const hasNewAudiences =
-          audiences.active.length !== this.state.audiences?.active.length;
+          this.audiences?.active.length !== existingAudiences;
         // If we have matched new audiences...
-        if (hasNewAudiences) {
-          l("ma");
-        }
-        // Persist new audiences state
-        this.save = {
-          ...this.state,
-          audiences,
-        };
+        if (hasNewAudiences) l("ma");
       }
     }
 
@@ -313,30 +285,35 @@ export class PersonalizationContext {
 
     // If the manifest is available, compute signals for this page
     if (this.manifest?.isReady) {
-      // Compute signals
-      const signals = (this.signals = new CalculateSignals(this));
-
-      // Persist current signals state
-      this.save = {
-        ...this.state,
-        signals: signals.state,
-      };
-
-      // Add signal state to pageViews array so we know it does not require recalculation
-      pageViews[pageViews.length - 1][2] = signals;
-
-      // Determine audiences, evaluate conditions
-      const audiences = (this.audiences = new CalculateAudiences(this));
-
-      // Persist current audiences state
-      this.save = {
-        ...this.state,
-        audiences: audiences.state,
-      };
+      // Compute signals and audiences
+      this.compute(pageViews[pageViews.length - 1]);
     } else l("pm");
 
     this.t = now();
     // Call event handler
     handlers.onPageView(this, currentPage, previousPage);
+  };
+
+  compute = (pageView: PageView) => {
+    // Compute signals
+    const signals = (this.signals = new CalculateSignals(this));
+
+    // Persist current signals state
+    this.save = {
+      ...this.state,
+      signals: signals.state,
+    };
+
+    // Add signal state to pageViews array so we know it does not require recalculation
+    pageView[2] = signals;
+
+    // Determine audiences, evaluate conditions
+    const audiences = (this.audiences = new CalculateAudiences(this));
+
+    // Persist current audiences state
+    this.save = {
+      ...this.state,
+      audiences: audiences.state,
+    };
   };
 }
