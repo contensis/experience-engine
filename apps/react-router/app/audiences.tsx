@@ -1,13 +1,11 @@
 import { usePersonalizationContext } from "@contensis/personalization-react";
 
 const Audiences = () => {
-  const { active, matched, pageViews } = usePersonalizationContext();
+  const { active, matched, manifest, pageViews } = usePersonalizationContext();
 
   // context.handlers.onPageView = () => {
   //   setPvc(context.pageViews.length);
   // };
-
-  console.log(`render AudiencesJSX`);
 
   const className =
     "flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700";
@@ -27,9 +25,16 @@ const Audiences = () => {
     <div className={className}>
       <h3>Active signals: {active.signals.length}</h3>
       <ul>
-        {active.signals.map((signalId) => (
-          <li key={signalId}>- {signalId}</li>
-        ))}
+        {active.signals.map((signalId) => {
+          const m = manifest?.signals.find((s) => s.id === signalId);
+          return (
+            <li key={signalId} className="text-sm pb-3">
+              - {signalId}
+              <br />
+              <span className="text-sm pl-3">{m?.name}</span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   ) : null;
@@ -39,11 +44,13 @@ const Audiences = () => {
       <h3>Matched signals: {matched.length}</h3>
       <ul>
         {matched.map((signal) => (
-          <li key={signal.id}>
+          <li key={signal.id} className="text-sm pb-3">
             - {signal.id}
             <span>
               ({signal.times}/{signal.minMatches})
             </span>
+            <br />
+            <span className="text-sm pl-3">{signal.name}</span>
           </li>
         ))}
       </ul>

@@ -1,71 +1,87 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext, useEffect, useState } from "react";
-import { PersonalizationReactContext } from "./context";
-import { ComputedSignal } from "@contensis/personalization";
+import {
+  IPersonalizationReactContext,
+  PersonalizationReactContext,
+} from "./context";
+import { IManifest, PersonalizationContext } from "@contensis/personalization";
+
+let eOnPageView: (
+  context: PersonalizationContext,
+  current: string,
+  previous?: string | undefined
+) => void | undefined;
+let eOnManifestReady: (
+  context: PersonalizationContext,
+  manifest: IManifest
+) => void | undefined;
 
 export const usePersonalizationContext = () => {
   const context = useContext(PersonalizationReactContext);
 
-  const [active, setActive] = useState<{
-    audiences: string[];
-    signals: string[];
-  }>({ audiences: [], signals: [] });
-
-  const [pageViews, setPageViews] = useState<{
-    session: number;
-    total: number;
-  }>({ session: 0, total: 0 });
-  const [matched, setMatched] = useState<ComputedSignal[]>();
-  const [timestamp, setTimestamp] = useState<number>(0);
+  const [state, setState] = useState<IPersonalizationReactContext>({
+    active: {
+      audiences: [],
+      signals: [],
+    },
+    context,
+    matched: [],
+    pageViews: {
+      session: 0,
+      total: 0,
+    },
+    t: 0,
+  });
 
   const updateState = () => {
     if (context) {
-      console.log(`updateState`, context.pageViews.length, context?.t);
-      setTimestamp(context.t);
-      setPageViews({
-        session: context.pageViews.length,
-        total: context.state.pageViews,
+      setState({
+        active: {
+          audiences: context.state.audiences?.active || [],
+          signals: context.state.signals?.active || [],
+        },
+        context,
+        matched: context.signals?.matched || [],
+        manifest: context.manifest,
+        pageViews: {
+          session: context.pageViews.length,
+          total: context.state.pageViews,
+        },
+        state: context.state,
+        t: context.t,
       });
-      setActive({
-        audiences: context?.state.audiences?.active || [],
-        signals: context?.state.signals?.active || [],
-      });
-      setMatched(context?.signals?.matched || []);
     }
   };
 
   useEffect(() => {
-    if (!context?.t) {
-      updateState();
-
-      const timeoutId = setTimeout(() => {
-        console.log(`useEffect timeout`, timestamp, context?.t);
-        if (context && timestamp !== context.t) {
-          updateState();
-        } else console.log(`no context`);
-      }, 500);
-      return () => {
-        clearTimeout(timeoutId);
+    if (context) {
+      if (!eOnPageView) eOnPageView = context.handlers.onPageView;
+      context.handlers.onPageView = (context, c, p) => {
+        (context.l as any)(`handlers.onPageView`, context?.pageViews.length);
+        updateState();
+        eOnPageView(context, c, p);
+      };
+      if (!eOnManifestReady)
+        eOnManifestReady = context.handlers.onManifestReady;
+      context.handlers.onManifestReady = (context, manifest) => {
+        (context.l as any)(
+          `handlers.onManifestReady`,
+          context?.pageViews.length
+        );
+        updateState();
+        eOnManifestReady(context, manifest);
       };
     }
   }, []);
 
   useEffect(() => {
-    if (context?.t) {
-      console.log(`useEffect context.t`, context?.t);
-      updateState();
-    }
-  }, [context?.t]);
+    updateState();
+  }, [context?.pageViews.length]);
 
   if (!context) {
     throw new Error(
       "usePersonalizationContext must be used within a <PersonalizationContext> provider"
     );
   }
-  return {
-    active,
-    matched,
-    context,
-    pageViews,
-    t: timestamp,
-  };
+  return state;
 };

@@ -1,5 +1,5 @@
 import { CalculateAudiences } from "./audiences";
-import { Manifest } from "./providers/manifest";
+import { IManifestClientArgs, Manifest } from "./providers/manifest";
 import { IManifest, IPersonalizationStore } from "./models";
 import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
@@ -7,11 +7,8 @@ import { isArray, isSSR, isStore, now } from "./util";
 import { logger, messages } from "./logs";
 
 export type PersonalizationContextOptions = {
-  client?:
-    | { alias: string; projectId?: string }
-    | { rootUrl: string; projectId?: string }
-    | undefined;
-  debug?: boolean;
+  client?: IManifestClientArgs | undefined;
+  debug?: PersonalizationContext["debug"];
   handlers?: Partial<PersonalizationContext["handlers"]>;
   manifest?: IManifest;
   session?: true;
@@ -26,14 +23,25 @@ export class PersonalizationContext {
   previousPage?: string;
   signals?: CalculateSignals;
   t = 0;
-  /** Output console.log messaging */
-  debug: boolean;
+  /** Output console.log messaging, true or v=verbose */
+  debug: boolean | "v";
   /** User-supplied event handlers */
   handlers: {
     onInit: (context: PersonalizationContext) => void;
-    onNavigate: (current: string, previous?: string) => void;
-    onPageView: (current: string, previous?: string) => void;
-    onManifestReady: (manifest: IManifest) => void;
+    onNavigate: (
+      context: PersonalizationContext,
+      current: string,
+      previous?: string
+    ) => void;
+    onPageView: (
+      context: PersonalizationContext,
+      current: string,
+      previous?: string
+    ) => void;
+    onManifestReady: (
+      context: PersonalizationContext,
+      manifest: IManifest
+    ) => void;
   } = {
     onInit: () => {},
     onNavigate: () => {},
@@ -47,7 +55,10 @@ export class PersonalizationContext {
     if (this.debug)
       if (this.logger) this.logger(message, ...values);
       else {
-        console.log("cp", message, values);
+        // Verbose messaging will output raw console.logs synchronously
+        // before the logging bundle has finished async loading so the timing
+        // of events can be accurately observed
+        if (this.debug == "v") console.log("cp", message, values);
         this.logs(true)
           .then(() => this.l(message, ...values))
           .catch(() => {
@@ -78,7 +89,7 @@ export class PersonalizationContext {
         this.pageView();
 
         // Call navigate handler
-        this.handlers.onNavigate(page, lastHref);
+        this.handlers.onNavigate(this, page, lastHref);
       }
     });
 
@@ -104,7 +115,7 @@ export class PersonalizationContext {
       this.store.set(value, opts);
     }
   }
-  
+
   /** Check the store for an existing entry or initialise a new state */
   get state() {
     return (
@@ -205,7 +216,11 @@ export class PersonalizationContext {
     const stateVersion = state.manifest?.version.versionNo;
     const manifestVersion = manifest?.version.versionNo;
 
-    if (manifestVersion && manifestVersion !== stateVersion) {
+    if (
+      (manifestVersion && manifestVersion !== stateVersion) ||
+      manifestVersion === "draft" ||
+      !manifestVersion
+    ) {
       l("mv", manifestVersion, stateVersion);
       this.save = { ...state, manifest };
 
@@ -250,7 +265,7 @@ export class PersonalizationContext {
     }
 
     // Call event handler
-    this.handlers.onManifestReady(manifest!);
+    this.handlers.onManifestReady(this, manifest!);
   };
 
   pageView = (url = this.page) => {
@@ -322,6 +337,6 @@ export class PersonalizationContext {
 
     this.t = now();
     // Call event handler
-    handlers.onPageView(currentPage, previousPage);
+    handlers.onPageView(this, currentPage, previousPage);
   };
 }

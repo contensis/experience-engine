@@ -3,7 +3,7 @@ import { ManifestClient } from "./providers/manifest-client";
 
 export const isSSR = () => typeof window === "undefined";
 
-export const now = () => +new Date();
+export const now = (): EpochTimeStamp => +new Date();
 
 export const utcDate = (value: number) => new Date(value).toUTCString();
 

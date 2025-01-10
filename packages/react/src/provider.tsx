@@ -1,25 +1,18 @@
 import React, { useMemo } from "react";
-import { PersonalizationContext, IManifest } from "@contensis/personalization";
+import {
+  PersonalizationContext,
+  IManifest,
+  IManifestClientArgs,
+} from "@contensis/personalization";
 import { PersonalizationReactContext } from "./context";
 
-export type PersonalizationProviderClientProps =
-  | {
-      alias: string;
-      projectId?: string;
-    }
-  | {
-      rootUrl: string;
-      projectId?: string;
-    };
-
 export type PersonalizationProviderContextProps = {
-  debug?: boolean;
+  debug?: PersonalizationContext["debug"];
   session?: boolean;
 } & Partial<PersonalizationContext["handlers"]>;
 
 export type PersonalizationProviderInstantiationProps =
-  PersonalizationProviderContextProps &
-    Partial<PersonalizationProviderClientProps>;
+  PersonalizationProviderContextProps & Partial<IManifestClientArgs>;
 
 export type PersonalizationProviderProps =
   | PersonalizationProviderInstantiationProps
@@ -39,19 +32,27 @@ export const PersonalizationProvider = (
       // We have been provided a context already
       return props.context;
     } else {
-      // Unwrap props to PersonalizationContext constructor arguments
-      const client: PersonalizationProviderClientProps | undefined =
-        "alias" in props && props.alias
-          ? { alias: props.alias, projectId: props.projectId }
-          : "rootUrl" in props && props.rootUrl
-          ? { rootUrl: props.rootUrl, projectId: props.projectId }
-          : undefined;
-      const manifest =
-        "manifest" in props && props.manifest ? props.manifest : undefined;
-
       // Create object in global scope
       const g = (globalThis[GLOBAL] =
         typeof globalThis[GLOBAL] === "object" ? globalThis[GLOBAL] : {});
+
+      // Unwrap props to PersonalizationContext constructor arguments
+      const client: IManifestClientArgs | undefined =
+        "alias" in props && props.alias
+          ? {
+              alias: props.alias,
+              projectId: props.projectId,
+              token: props.token || g.token,
+            }
+          : "rootUrl" in props && props.rootUrl
+          ? {
+              rootUrl: props.rootUrl,
+              projectId: props.projectId,
+              token: props.token || g.token,
+            }
+          : undefined;
+      const manifest =
+        "manifest" in props && props.manifest ? props.manifest : undefined;
 
       // Check for an existing context in global before instantiating a new one
       const context: PersonalizationContext = (g.context =
