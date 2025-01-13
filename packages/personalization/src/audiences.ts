@@ -74,26 +74,28 @@ export class CalculateAudiences {
       if (matched) matches.push(a);
       computed.push(a);
     }
-    const num = matches.length;
-    let matchLen = -1;
-    while (matchLen === -1 || matchLen > num) {
+    let matchLen = matches.length;
+    let prevLen = 0;
+    while (matchLen > prevLen) {
+      prevLen = matchLen;
       // Keep checking unmatched audiences to see if we can match
       // further audiences based on a match we've just made
       for (const audience of computed.filter((a) => !a.matched)) {
         const matched = check(audience.conditions);
-        const a = { ...audience, matched };
-        if (matched) matches.push(a);
-        computed.push(a);
+        if (matched) {
+          // mutate the array item here to update computed array
+          audience.matched = true;
+          matches.push(audience);
+          ++matchLen;
+        }
       }
-      matchLen = matches.length;
     }
-    if (matchLen) {
+    if (matchLen)
       context.l(
         "am",
         matchLen,
         matches.map((m) => m.id)
       );
-    }
   }
   /**
    * An audience will contain a collection of conditions wrapped
@@ -152,15 +154,13 @@ export class CalculateAudiences {
 
   /** Evaluate one audience condition and return a boolean match */
   evaluate = (condition: Condition): boolean => {
-    const { audiences, signals } = this.context.state;
-
     if (condition.type === "audience") {
-      const match = !!audiences?.active.find(
+      const match = !!this.active.find(
         (audienceId) => audienceId === condition.id
       );
       return match;
     } else if (condition.type === "signal") {
-      const match = !!signals?.active.find(
+      const match = !!this.context.state.signals?.active.find(
         (signalId) => signalId === condition.id
       );
       return match;
