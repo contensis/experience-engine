@@ -1,97 +1,16 @@
-import { ISignalsStore, Where, WhereCriteria } from "./models";
-import { ISignalAttributes } from "./models/ISignalAttributes";
-import { ComputedSignal } from "./models/Signals";
-import { PersonalizationContext } from "./personalization";
-import { findSignal } from "./providers/manifest";
-import { cookieStore } from "./providers/store";
+import { EvaluateSignal } from "./evaluate";
+import { RouteSignalsSnapshot } from "./route";
+import { PersonalizationContext } from "../personalization";
+import { findSignal } from "../providers/manifest";
+import { isSSR, now } from "../util";
 import {
-  isArray,
-  isNullOrUndefined,
-  isNumber,
-  isObject,
-  isSSR,
-  isString,
-  isUndefined,
-  now,
-  trimToLower,
-} from "./util";
-
-export const CookieSignals = () => {
-  const string = cookieStore.getString() || "";
-  const cookies = cookieStore.getAll() || ({} as { [key: string]: string });
-
-  return {
-    cookies,
-    get: (name: string) => cookies[name],
-    string,
-  };
-};
-
-export const UrlSignals = (page: string) => {
-  const url = !isSSR() ? new URL(page) : new URL("ssr://");
-  return {
-    url,
-    href: () => url.href,
-    domain: () => url.hostname,
-    path: () => url.pathname,
-    subdomain: () => {
-      const parts = url.hostname.split(".");
-      // searching for all valid tlds will add approx 40KB to the bundle
-      // instead we will just return the first portion of the subdomain
-      // my.example.company.co.uk will return just "my"
-      return parts?.[0];
-    },
-    baseUrl: () => `${url.origin}${url.pathname}`,
-    querystring: () => url.search,
-    queryParam: (name: string) => url.searchParams.getAll(name),
-    queryParams: () => {
-      const params = url.searchParams;
-      params.sort();
-      return Object.fromEntries(params.entries());
-    },
-  };
-};
-
-/** A call to RouteSignals instance will return a snapshot of the signals for a given url */
-export const RouteSignalsSnapshot = (
-  url: string,
-  referrer?: string | ISignalAttributes
-): ISignalAttributes => {
-  const _cookie = CookieSignals();
-  const _url = UrlSignals(url);
-  let _referrer: ISignalAttributes | undefined;
-
-  // Gather signals for a referrer using previously collected signals or
-  // new signals based on a previous or referrer url
-  if (isObject(referrer)) _referrer = referrer;
-  else if (referrer) _referrer = RouteSignalsSnapshot(referrer);
-
-  const attributes: ISignalAttributes = {
-    t: now(),
-    "page.url": _url.href(),
-    "page.path": _url.path(),
-    pageUrl: _url.path(),
-    "page.querystring": _url.querystring(),
-    "page.queryParams.*": (name: string) => _url.queryParam(name),
-    // "page.queryParams.*": _url.queryParams(),
-    "page.domain": _url.domain(),
-    "page.subdomain": _url.subdomain(),
-    "page.baseUrl": _url.baseUrl(),
-    "referrer.url": _referrer?.["page.url"],
-    "referrer.path": _referrer?.["page.path"],
-    "referrer.querystring": _referrer?.["page.querystring"],
-    "referrer.queryParams.*": (name: string) =>
-      _referrer?.["page.queryParams.*"](name),
-    // "referrer.queryParams.*": _referrer?._url.queryParams(),
-    "referrer.domain": _referrer?.["page.domain"],
-    "referrer.subdomain": _referrer?.["page.subdomain"],
-    "referrer.baseUrl": _referrer?.["page.baseUrl"],
-    cookie: _cookie.string,
-    "cookie.*": _cookie.cookies,
-  };
-
-  return attributes;
-};
+  ComputedSignal,
+  ISignalAttributes,
+  ISignalsStore,
+  Where,
+  WhereAttribute,
+  WhereCriteria,
+} from "../models";
 
 export class CalculateSignals {
   computed: ComputedSignal[] = [];
@@ -105,7 +24,6 @@ export class CalculateSignals {
     const { debug, manifest, page: p, state } = context;
 
     // Merge signal matches from this instance into any previously matched
-    // const matchedThis = this.matched;
     const matchedPrev: ISignalsStore["matched"] = state.signals?.matched || {};
 
     const allIds = new Set<string>([
@@ -202,7 +120,7 @@ export class CalculateSignals {
         matches,
         this.matched
           .map(
-            (signal) => `${signal.id} (${signal.times}/${signal.minMatches})`
+            (signal) => `${signal.id}(${signal.minMatches}): ${signal.times}`
           )
           .join(", ")
       );
@@ -263,37 +181,24 @@ export class CalculateSignals {
 
   /** Evaluate one where criteria and return a boolean match */
   evaluate = (criteria: WhereCriteria) => {
-    const [attribute, key] = this.keyedAttribute(criteria.attribute);
+    const [attribute, key] = this.keyedAttribute(
+      criteria.attribute as WhereAttribute
+    );
     const signalValue = this.getSignal(attribute, key);
-    const evaluation = new Evaluate(criteria, signalValue);
-    return evaluation.result;
+    const result = EvaluateSignal(criteria, signalValue);
+    return result;
   };
 
   /** Find the value(s) for a given signal attribute */
-  getSignal = (attribute: string, key = "") => {
+  getSignal = (attribute: WhereAttribute, key = "") => {
     const { signals } = this;
     if (attribute === "cookie.*") return signals[attribute]?.[key];
-    if (attribute.endsWith(".queryParams.*"))
-      return signals[
-        attribute as "page.queryParams.*" | "referrer.queryParams.*"
-      ](key);
-    return signals[
-      attribute as
-        | "cookie"
-        | "pageUrl"
-        | "page.url"
-        | "page.path"
-        | "page.querystring"
-        | "page.domain"
-        | "page.subdomain"
-        | "page.baseUrl"
-        | "referrer.url"
-        | "referrer.path"
-        | "referrer.querystring"
-        | "referrer.domain"
-        | "referrer.subdomain"
-        | "referrer.baseUrl"
-    ];
+    if (
+      attribute === "page.queryParams.*" ||
+      attribute === "referrer.queryParams.*"
+    )
+      return signals[attribute](key);
+    return signals[attribute];
   };
 
   /**
@@ -303,78 +208,18 @@ export class CalculateSignals {
    * returning a tuple of [attribute, key] so we can provide the key
    * separately when we find the value for that signal attribute
    */
-  keyedAttribute = (attribute: string) => {
+  keyedAttribute = (attribute: WhereAttribute): [WhereAttribute, string] => {
     let slices = 0;
     if (attribute.includes(".queryParams.")) slices = 2;
     if (attribute.includes("cookie.")) slices = 1;
     const att = slices
-      ? `${attribute.split(".").slice(0, slices).join(".")}.*`
+      ? (`${attribute
+          .split(".")
+          .slice(0, slices)
+          .join(".")}.*` as WhereAttribute)
       : attribute;
     const key = slices ? attribute.split(".").slice(slices).join(".") : "";
 
     return [att, key];
-  };
-}
-
-type SignalValue = string | number | undefined;
-
-class Evaluate<T extends SignalValue | SignalValue[]> {
-  result = false;
-  constructor(public criteria: WhereCriteria, public value: T) {
-    this.result = this.process(value);
-  }
-
-  /** Evaluate a single criteria from an array of resolved values and return a boolean match */
-  private process = (value: SignalValue | SignalValue[]) => {
-    let match = false;
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        match = this.eval(item);
-        if (match) break;
-      }
-    } else {
-      match = this.eval(value);
-    }
-    return match;
-  };
-
-  /** Evaluate a single criteria with a resolved value and return a boolean match */
-  private eval = (value: SignalValue) => {
-    const {
-      contains,
-      equalTo,
-      exists,
-      greaterThan,
-      in: equalsIn, // can't have a var called "in"
-      lessThan,
-      matchesRegex,
-      startsWith,
-    } = this.criteria;
-
-    // check for known operator types
-    if (!isUndefined(contains) && isString(value))
-      return value.includes(contains);
-
-    if (!isUndefined(equalTo) && !isUndefined(value))
-      if (isString(value)) return trimToLower(value) === trimToLower(equalTo);
-      else return value == (equalTo as unknown);
-
-    if (!isUndefined(equalsIn) && isArray(equalsIn) && !isUndefined(value))
-      return equalsIn.map((ic) => trimToLower(ic)).includes(trimToLower(value));
-
-    if (!isUndefined(exists)) return !isNullOrUndefined(value);
-
-    if (!isUndefined(greaterThan) && isNumber(value))
-      return value > greaterThan;
-
-    if (!isUndefined(lessThan) && isNumber(value)) return value < lessThan;
-
-    if (!isUndefined(matchesRegex) && !isUndefined(value))
-      new RegExp(matchesRegex).test(`${value}`);
-
-    if (!isUndefined(startsWith) && isString(value))
-      return trimToLower(value).startsWith(trimToLower(startsWith));
-
-    return false;
   };
 }
