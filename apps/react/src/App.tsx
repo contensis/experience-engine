@@ -2,10 +2,25 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import ContentPage from "./ContentPage";
+import {
+  PersonalizationProvider,
+  usePersonalizationContext,
+} from "@contensis/personalization-react";
+import { MOCK_MANIFEST } from "./mock/mock-manifest";
 
-function App() {
+const App = () => {
+  return (
+    <PersonalizationProvider manifest={MOCK_MANIFEST}>
+      <MainLayout />
+      <ContentPage />
+    </PersonalizationProvider>
+  );
+};
+
+const MainLayout = () => {
   const [count, setCount] = useState(0);
-
+  const { percentile } = usePersonalizationContext();
   return (
     <>
       <div>
@@ -21,6 +36,9 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+        <button onClick={() => setCount((count) => count + 1)}>
+          percentile is {percentile}
+        </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMRxx
         </p>
@@ -30,6 +48,6 @@ function App() {
       </p>
     </>
   );
-}
+};
 
 export default App;
