@@ -1,54 +1,68 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { IManifest, PersonalizationContext } from "@contensis/personalization";
 import {
   IPersonalizationReactContext,
   PersonalizationReactContext,
 } from "./context";
-import { IManifest, PersonalizationContext } from "@contensis/personalization";
 
-let eOnPageView: (
-  context: PersonalizationContext,
-  current: string,
-  previous?: string | undefined
-) => void | undefined;
-let eOnManifestReady: (
-  context: PersonalizationContext,
-  manifest: IManifest
-) => void | undefined;
+type PersonalizationLogger = (message: string, ...values: unknown[]) => void;
 
+let eOnPageView:
+  | ((
+      context: PersonalizationContext,
+      current: string,
+      previous?: string | undefined
+    ) => void)
+  | undefined;
+
+let eOnManifestReady:
+  | ((context: PersonalizationContext, manifest: IManifest) => void)
+  | undefined;
+
+/** React hook that returns personalization state for you to provide personalized experiences in your components */
 export const usePersonalizationContext = () => {
   const context = useContext(PersonalizationReactContext);
 
   const [state, setState] = useState<IPersonalizationReactContext>({
-    active: {
-      audiences: [],
-      signals: [],
-    },
+    audiences: [],
+    signals: [],
     context,
+    isAudience: () => false,
     matched: [],
     pageViews: {
       session: 0,
       total: 0,
     },
+    percentile: 0,
     t: 0,
   });
 
+  const isAudience = useCallback(
+    (id: string | string[]) =>
+      Array.isArray(id)
+        ? id.some((item) => state.audiences.includes(item))
+        : state.audiences.includes(id),
+    [state.audiences.join("~")]
+  );
+
   const updateState = () => {
     if (context) {
+      const { manifest, pageViews, percentile, state, t } = context;
+      const { audiences, signals } = state;
       setState({
-        active: {
-          audiences: context.state.audiences?.active || [],
-          signals: context.state.signals?.active || [],
-        },
+        audiences: audiences?.active || [],
+        signals: signals?.active || [],
         context,
+        isAudience,
         matched: context.signals?.matched || [],
-        manifest: context.manifest,
+        manifest,
         pageViews: {
-          session: context.pageViews.length,
-          total: context.state.pageViews,
+          session: pageViews.length,
+          total: state.pageViews,
         },
-        state: context.state,
-        t: context.t,
+        percentile,
+        state,
+        t,
       });
     }
   };
@@ -57,26 +71,29 @@ export const usePersonalizationContext = () => {
     if (context) {
       if (!eOnPageView) eOnPageView = context.handlers.onPageView;
       context.handlers.onPageView = (context, c, p) => {
-        (context.l as any)(`handlers.onPageView`, context?.pageViews.length);
+        (context.l as PersonalizationLogger)(
+          `handlers.onPageView`,
+          context?.pageViews.length
+        );
         updateState();
-        eOnPageView(context, c, p);
+        eOnPageView?.(context, c, p);
       };
       if (!eOnManifestReady)
         eOnManifestReady = context.handlers.onManifestReady;
       context.handlers.onManifestReady = (context, manifest) => {
-        (context.l as any)(
+        (context.l as PersonalizationLogger)(
           `handlers.onManifestReady`,
           context?.pageViews.length
         );
         updateState();
-        eOnManifestReady(context, manifest);
+        eOnManifestReady?.(context, manifest);
       };
     }
   }, []);
 
   useEffect(() => {
     updateState();
-  }, [context?.pageViews.length]);
+  }, [context?.pageViews.length, isAudience]);
 
   if (!context) {
     throw new Error(

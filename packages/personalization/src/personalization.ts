@@ -18,8 +18,8 @@ type PageView = [string, Date, CalculateSignals | null];
 
 export class PersonalizationContext {
   private store: Store;
-  private cpid: string;
-  private percentile: number;
+  cpid: string;
+  percentile: number;
   audiences?: CalculateAudiences;
   currentPage: string = "";
   previousPage?: string;
@@ -29,17 +29,21 @@ export class PersonalizationContext {
   debug: boolean | "v";
   /** User-supplied event handlers */
   handlers: {
+    /** onInit event handler, called when the context is initialized */
     onInit: (context: PersonalizationContext) => void;
+    /** onNavigate event handler, called when client-side navigation has been detected */
     onNavigate: (
       context: PersonalizationContext,
       current: string,
       previous?: string
     ) => void;
+    /** onPageView event handler, called when a pageView has been registered and signals have been calculated */
     onPageView: (
       context: PersonalizationContext,
       current: string,
       previous?: string
     ) => void;
+    /** onManifestReady event handler, called when a manifest has been loaded and signals have been calculated */
     onManifestReady: (
       context: PersonalizationContext,
       manifest: IManifest

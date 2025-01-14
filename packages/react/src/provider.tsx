@@ -7,6 +7,7 @@ import {
 import { PersonalizationReactContext } from "./context";
 
 export type PersonalizationProviderContextProps = {
+  /** Output console.log messaging, true or v=verbose */
   debug?: PersonalizationContext["debug"];
   session?: boolean;
 } & Partial<PersonalizationContext["handlers"]>;
@@ -19,7 +20,10 @@ export type PersonalizationProviderProps =
   | (PersonalizationProviderInstantiationProps & {
       context: PersonalizationContext;
     })
-  | (PersonalizationProviderInstantiationProps & { manifest: IManifest });
+  | (PersonalizationProviderInstantiationProps & {
+      /** The manifest we will use to calculate signals and audiences */
+      manifest: IManifest;
+    });
 
 /** Global context object name */
 const GLOBAL = "CONTENSIS_PERSONALIZATION";
