@@ -1,31 +1,35 @@
 import { usePersonalizationContext } from "@contensis/personalization-react";
 
 const Audiences = () => {
-  const { active, matched, manifest, pageViews } = usePersonalizationContext();
-
-  // context.handlers.onPageView = () => {
-  //   setPvc(context.pageViews.length);
-  // };
+  const { audiences, isAudience, matched, manifest, pageViews, signals } =
+    usePersonalizationContext();
 
   const className =
     "flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700";
 
-  const activeAudiencesJSX = active.audiences.length ? (
+  const activeAudiencesJSX = audiences.length ? (
     <div className={className}>
-      <h3>Active audiences: {active.audiences.length}</h3>
+      <h3>Active audiences: {audiences.length}</h3>
       <ul>
-        {active.audiences.map((audienceId) => (
-          <li key={audienceId}>- {audienceId}</li>
-        ))}
+        {audiences.map((audienceId) => {
+          const m = manifest?.audiences.find((a) => a.id === audienceId);
+          return (
+            <li key={audienceId} className="text-sm pb-3">
+              - {audienceId}
+              <br />
+              <span className="text-sm pl-3">{m?.name}</span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   ) : null;
 
-  const activeSignalsJSX = active.signals.length ? (
+  const activeSignalsJSX = signals.length ? (
     <div className={className}>
-      <h3>Active signals: {active.signals.length}</h3>
+      <h3>Active signals: {signals.length}</h3>
       <ul>
-        {active.signals.map((signalId) => {
+        {signals.map((signalId) => {
           const m = manifest?.signals.find((s) => s.id === signalId);
           return (
             <li key={signalId} className="text-sm pb-3">
@@ -63,6 +67,12 @@ const Audiences = () => {
         <h2>Session page views: {pageViews.session}</h2>
         <h2>Total page views: {pageViews.total}</h2>
       </div>
+      {isAudience(["loggedInUser"]) && (
+        <div>
+          <h2>Welcome back! 😎</h2>
+          <p>A special message just for our users</p>
+        </div>
+      )}
       <div className="flex justify-center gap-4">
         {activeAudiencesJSX}
         {activeSignalsJSX}

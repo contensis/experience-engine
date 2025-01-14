@@ -2,7 +2,10 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import type { LinksFunction } from "react-router";
 
 import "./app.css";
-import { PersonalizationProvider } from "@contensis/personalization-react";
+import {
+  PersonalizationProvider,
+  usePersonalizationContext,
+} from "@contensis/personalization-react";
 import { MOCK_MANIFEST } from "./mocks/manifest-1";
 import { ifCypressTest } from "./util";
 
@@ -29,7 +32,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <PersonalizationProvider
+          // Use a specific alias to intercept manifest calls in Cypress tests
+          alias={ifCypressTest("cypress-test")}
+          // We need debug flag set to true when running Cypress tests
+          debug={ifCypressTest(true, false)}
+          // Use a mock manifest when running the app outside of Cypress tests
+          manifest={ifCypressTest(undefined, MOCK_MANIFEST)}
+        >
+          {children}
+        </PersonalizationProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -38,16 +50,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const { isAudience } = usePersonalizationContext();
   return (
-    <PersonalizationProvider
-      // Use a specific alias to intercept manifest calls in Cypress tests
-      alias={ifCypressTest("cypress-test")}
-      // We need debug flag set to true when running Cypress tests
-      debug={ifCypressTest(true, false)}
-      // Use a mock manifest when running the app outside of Cypress tests
-      manifest={ifCypressTest(undefined, MOCK_MANIFEST)}
-    >
+    <>
+      {isAudience(["loggedInUser"]) && (
+        <div className="pr-6 text-right">
+          <h2>Welcome back! 😎</h2>
+          <p>A special message just for our users</p>
+        </div>
+      )}
       <Outlet />
-    </PersonalizationProvider>
+    </>
   );
 }

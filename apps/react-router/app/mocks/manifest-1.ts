@@ -53,6 +53,25 @@ export const MOCK_MANIFEST: IManifest = {
       },
     },
     {
+      id: "loggedInUser",
+      name: "Logged In User",
+      description: "A user who is or has logged into the site",
+      conditions: {
+        and: [
+          {
+            type: "signal",
+            id: "isLoggedIn",
+          },
+        ],
+      },
+      version: {
+        created: new Date("2025-01-10T00:00:00Z"),
+        createdBy: "n.flatley",
+        modified: new Date("2025-01-10T00:00:00Z"),
+        modifiedBy: "n.flatley",
+      },
+    },
+    {
       id: "sportsEnthusiasts",
       name: "Active Sports Enthusiasts",
       description: "Users actively engaged with sports-related content",
@@ -164,6 +183,29 @@ export const MOCK_MANIFEST: IManifest = {
       },
     },
     {
+      id: "isLoggedIn",
+      name: "Is Logged in?",
+      minMatches: 1,
+      where: {
+        or: [
+          {
+            attribute: "cookie.RefreshToken",
+            exists: true,
+          },
+          {
+            attribute: "cookie.ContensisSecurityBearerToken",
+            exists: true,
+          },
+        ],
+      },
+      version: {
+        created: "2025-01-10T00:00:00Z",
+        createdBy: "n.flatley",
+        modified: "2025-01-10T00:00:00Z",
+        modifiedBy: "n.flatley",
+      },
+    },
+    {
       id: "purchasedSportsGear",
       name: "Purchased Sports Gear",
       minMatches: 1,
@@ -171,7 +213,7 @@ export const MOCK_MANIFEST: IManifest = {
         and: [
           {
             attribute: "purchaseCategory",
-            equals: "sports",
+            equalTo: "sports",
           },
           {
             attribute: "purchaseAmount",
