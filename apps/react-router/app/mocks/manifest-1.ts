@@ -143,11 +143,11 @@ export const MOCK_MANIFEST: IManifest = {
       where: {
         or: [
           {
-            attribute: "pageUrl",
+            attribute: "page.path",
             startsWith: "/arts/",
           },
           {
-            attribute: "pageUrl",
+            attribute: "page.path",
             startsWith: "/courses/arts/",
           },
         ],
@@ -166,11 +166,11 @@ export const MOCK_MANIFEST: IManifest = {
       where: {
         or: [
           {
-            attribute: "pageUrl",
+            attribute: "page.path",
             startsWith: "/arts/",
           },
           {
-            attribute: "pageUrl",
+            attribute: "page.path",
             startsWith: "/courses/arts/",
           },
         ],
@@ -235,7 +235,7 @@ export const MOCK_MANIFEST: IManifest = {
       where: {
         or: [
           {
-            attribute: "pageUrl",
+            attribute: "page.path",
             contains: "techblog",
           },
           {

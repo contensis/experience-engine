@@ -1,6 +1,4 @@
 export interface ISignalAttributes {
-  t: number;
-  pageUrl: string;
   "page.url": string;
   "page.path": string;
   "page.querystring": string;

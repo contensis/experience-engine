@@ -121,7 +121,7 @@
       "where": {
         "or": [
           {
-            "attribute": "pageUrl",
+            "attribute": "page.path",
             "startsWith": "/arts/"
           },
           {
@@ -133,7 +133,7 @@
             ]
           },
           {
-            "attribute": "pageUrl",
+            "attribute": "page.path",
             "startsWith": "/courses/arts/"
           }
         ]
@@ -152,7 +152,7 @@
       "where": {
         "or": [
           {
-            "attribute": "pageUrl",
+            "attribute": "page.path",
             "startsWith": "/arts/"
           },
           {
@@ -160,7 +160,7 @@
             "startsWith": "/apps/html/arts/"
           },
           {
-            "attribute": "pageUrl",
+            "attribute": "page.path",
             "startsWith": "/courses/arts/"
           }
         ]
@@ -202,7 +202,7 @@
       "where": {
         "or": [
           {
-            "attribute": "pageUrl",
+            "attribute": "page.path",
             "contains": "techblog"
           },
           {

@@ -190,7 +190,7 @@
       "where": {
         "or": [
           {
-            "attribute": "pageUrl",
+            "attribute": "page.path",
             "contains": "techblog"
           },
           {

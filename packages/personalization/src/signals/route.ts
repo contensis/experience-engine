@@ -1,7 +1,7 @@
 import { CookieSignals } from "./cookies";
 import { UrlSignals } from "./url";
 import { ISignalAttributes } from "../models";
-import { isObject, now } from "../util";
+import { isObject } from "../util";
 
 /** A call to RouteSignalsSnapshot will return a snapshot of the signals for a given url */
 export const RouteSignalsSnapshot = (
@@ -18,10 +18,8 @@ export const RouteSignalsSnapshot = (
   else if (referrer) _referrer = RouteSignalsSnapshot(referrer);
 
   const attributes: ISignalAttributes = {
-    t: now(),
     "page.url": _url.href(),
     "page.path": _url.path(),
-    pageUrl: _url.path(),
     "page.querystring": _url.querystring(),
     "page.queryParams.*": (name: string) => _url.queryParam(name),
     // "page.queryParams.*": _url.queryParams(),
