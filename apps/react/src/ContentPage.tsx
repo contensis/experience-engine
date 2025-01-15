@@ -1,20 +1,17 @@
 import { useState } from "react";
-import { abTestContent, audienceContent } from "./mock/mock-content";
-import Experiment from "./components/Experiment";
+import { Experiment, Personalize } from "@contensis/personalization-react";
 import LeadText from "./components/LeadText";
-import Personalize from "./components/Personalize";
+
+import { abTestContent, audienceContent } from "./mock/mock-content";
 
 const ContentPage = () => {
   const [experiment] = useState(abTestContent);
   const [personalized] = useState(audienceContent);
 
-  // Add a cookie called `RefreshToken` to activate `isLoggedIn` audience
-  // Add a cookie called `art` and refresh the page 3 times to activate `artsVisitor` audience
-
   return (
     <>
-      <h2>{audienceContent.title}</h2>
-      <h3>{audienceContent.subtitle}</h3>
+      <h1>{audienceContent.title}</h1>
+      <h2>{audienceContent.subtitle}</h2>
 
       <Experiment experiments={experiment.content}>
         {(props) => <LeadText {...props} />}

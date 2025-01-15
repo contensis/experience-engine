@@ -17,6 +17,9 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
+.logo.contensis:hover {
+  filter: drop-shadow(0 0 2em #37bfa7);
+}
 
 @keyframes logo-spin {
   from {
@@ -34,7 +37,7 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 1em;
 }
 
 .read-the-docs {
