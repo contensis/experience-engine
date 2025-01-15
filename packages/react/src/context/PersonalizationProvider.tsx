@@ -4,7 +4,7 @@ import {
   IManifest,
   IManifestClientArgs,
 } from "@contensis/personalization";
-import { PersonalizationReactContext } from "./context";
+import { PersonalizationReactContext } from "./PersonalizationReactContext";
 
 export type PersonalizationProviderContextProps = {
   /** Output console.log messaging, true or v=verbose */

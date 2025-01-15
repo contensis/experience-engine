@@ -3,7 +3,7 @@ import { IManifest, PersonalizationContext } from "@contensis/personalization";
 import {
   IPersonalizationReactContext,
   PersonalizationReactContext,
-} from "./context";
+} from "../context/PersonalizationReactContext";
 
 type PersonalizationLogger = (message: string, ...values: unknown[]) => void;
 
@@ -89,6 +89,18 @@ export const usePersonalizationContext = () => {
         eOnManifestReady?.(context, manifest);
       };
     }
+    // Reassign existing/original "on" handlers when this component
+    // is unmounted
+    return () => {
+      if (eOnPageView && context) {
+        context.handlers.onPageView = eOnPageView;
+        eOnPageView = undefined;
+      }
+      if (eOnManifestReady && context) {
+        context.handlers.onManifestReady = eOnManifestReady;
+        eOnManifestReady = undefined;
+      }
+    };
   }, []);
 
   useEffect(() => {
