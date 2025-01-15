@@ -20,7 +20,7 @@ export class CalculateSignals {
 
   /** Return the state of the signals, merging newly matched signals with those previously matched */
   get state() {
-    const { computed, context, matched: matchedThis, signals } = this;
+    const { computed, context, matched: matchedThis, t } = this;
     const { debug, manifest, page: p, state } = context;
 
     // Merge signal matches from this instance into any previously matched
@@ -39,7 +39,7 @@ export class CalculateSignals {
       const currentMatch = findSignal(signalId, matchedThis);
       if (currentMatch) {
         matched[signalId] = [
-          { p, t: signals.t },
+          { p, t },
           // Add prev match(es)s
           ...(matchedPrev[signalId] || []),
         ];
@@ -74,7 +74,7 @@ export class CalculateSignals {
           ? Object.fromEntries(
               computed.map((s) => [
                 s.id,
-                [{ p, t: signals.t, m: s.matched, mm: s.minMatches }],
+                [{ p, t, m: s.matched, mm: s.minMatches }],
               ])
             )
           : undefined,
