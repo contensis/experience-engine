@@ -17,7 +17,7 @@ export const tryParse = <T>(stringified: string) => {
   }
 };
 
-export const trimToLower = (val: string | number) =>
+export const trimToLower = (val: string | number | boolean) =>
   `${val}`.trim().toLowerCase();
 
 export const isArray = (arr: unknown): arr is Array<unknown> =>
@@ -38,3 +38,7 @@ export const isManifestClient = (
   client: unknown
 ): client is ReturnType<typeof ManifestClient> =>
   isObject(client) && "get" in client;
+
+export const objectKeys = Object.keys;
+export const objectFromEntries = Object.fromEntries;
+export const stringify = JSON.stringify;

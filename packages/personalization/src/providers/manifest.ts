@@ -3,17 +3,12 @@ import { IAudience, IManifest, IManifestVersion, ISignal } from "../models";
 import { PersonalizationContext } from "../personalization";
 import { isManifestClient } from "../util";
 
-export type IManifestClientArgs =
-  | {
-      alias: string;
-      projectId?: string;
-      token?: string;
-    }
-  | {
-      rootUrl: string;
-      projectId?: string;
-      token?: string;
-    };
+export type IManifestClientArgs = {
+  alias: string;
+  rootUrl?: string;
+  projectId?: string;
+  token?: string;
+};
 
 export type IManifestOnReady = (manifest: IManifest) => unknown;
 
@@ -63,11 +58,6 @@ export class Manifest implements IManifest {
     else if ("alias" in client)
       this.client = ManifestClient(
         client.alias,
-        client.projectId,
-        client.token
-      );
-    else if ("rootUrl" in client)
-      this.client = ManifestClient(
         client.rootUrl,
         client.projectId,
         client.token

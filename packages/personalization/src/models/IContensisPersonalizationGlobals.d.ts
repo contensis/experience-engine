@@ -7,6 +7,7 @@ export interface IContensisPersonalizationGlobals {
   rootUrl?: string;
   alias?: string;
   projectId?: string;
+  onComputed?: PersonalizationContext["handlers"]["onComputed"];
   onInit?: PersonalizationContext["handlers"]["onInit"];
   onManifestReady?: PersonalizationContext["handlers"]["onManifestReady"];
   onNavigate?: PersonalizationContext["handlers"]["onNavigate"];

@@ -1,4 +1,4 @@
-import { WhereCriteria } from "../models";
+import { SignalValue, WhereCriteria } from "../models";
 import {
   isArray,
   isNullOrUndefined,
@@ -16,8 +16,6 @@ const GREATER_THAN = "greaterThan";
 const LESS_THAN = "lessThan";
 const MATCHES_REGEX = "matchesRegex";
 const STARTS_WITH = "startsWith";
-
-type SignalValue = string | number | undefined;
 
 export const EvaluateSignal = <T extends SignalValue | SignalValue[]>(
   criteria: WhereCriteria,
@@ -48,7 +46,7 @@ export const EvaluateSignal = <T extends SignalValue | SignalValue[]>(
         return trimToLower(value) === trimToLower(criteria[EQUAL_TO]);
       else return value == (criteria[EQUAL_TO] as unknown);
 
-    if (IN in criteria && isArray(criteria[IN]) && !isUndefined(value))
+    if (IN in criteria && isArray(criteria[IN]) && !isNullOrUndefined(value))
       return criteria[IN].map((ic) => trimToLower(ic)).includes(
         trimToLower(value)
       );
@@ -62,7 +60,7 @@ export const EvaluateSignal = <T extends SignalValue | SignalValue[]>(
       return value < criteria[LESS_THAN];
 
     if (MATCHES_REGEX in criteria && !isUndefined(value))
-      new RegExp(criteria[MATCHES_REGEX]).test(`${value}`);
+      return new RegExp(criteria[MATCHES_REGEX]).test(`${value}`);
 
     if (STARTS_WITH in criteria && isString(value))
       return trimToLower(value).startsWith(trimToLower(criteria[STARTS_WITH]));

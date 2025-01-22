@@ -1,4 +1,4 @@
-import { isSSR } from "../util";
+import { isSSR, objectFromEntries } from "../util";
 
 export const UrlSignals = (page: string) => {
   const url = !isSSR() ? new URL(page) : new URL("ssr://");
@@ -20,7 +20,7 @@ export const UrlSignals = (page: string) => {
     queryParams: () => {
       const params = url.searchParams;
       params.sort();
-      return Object.fromEntries(params.entries());
+      return objectFromEntries(params.entries());
     },
   };
 };

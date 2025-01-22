@@ -1,7 +1,9 @@
 import {
+  GLOBAL,
   PersonalizationContext,
   PersonalizationContextOptions,
 } from "./personalization";
+import { IManifestClientArgs } from "./providers/manifest";
 import { isObject } from "./util";
 
 /** Add complete HTML Attribute Name Prefix */
@@ -20,11 +22,10 @@ const getAttributes = (element: Element): PersonalizationContextOptions => {
   const rootUrl = getDataAttribute("root-url");
   const projectId = getDataAttribute("project-id");
   const debug = ["true", "1"].includes(getDataAttribute("debug", ""));
-  const client = rootUrl
-    ? { rootUrl, projectId }
-    : alias
-    ? { alias, projectId }
-    : undefined;
+  const client =
+    rootUrl || alias
+      ? ({ alias, rootUrl, projectId } as IManifestClientArgs)
+      : undefined;
   return {
     client,
     debug,
@@ -41,24 +42,26 @@ const element =
 
 if (element) constructor = getAttributes(element);
 
-/** Global context object name */
-const GLOBAL = "CONTENSIS_PERSONALIZATION";
+/** Declare const for effective minification */
+const w = window;
+const g = w[GLOBAL];
 
-if (isObject(window[GLOBAL])) {
+if (isObject(g)) {
   /** Add any options previously set in the globalThis/window context */
-  constructor.manifest = window[GLOBAL].manifest;
-  constructor.debug = window[GLOBAL].debug;
+  constructor.manifest = g.manifest;
+  constructor.debug = g.debug;
   constructor.handlers = {
-    onInit: window[GLOBAL].onInit,
-    onManifestReady: window[GLOBAL].onManifestReady,
-    onNavigate: window[GLOBAL].onNavigate,
-    onPageView: window[GLOBAL].onPageView,
+    onComputed: g.onComputed,
+    onInit: g.onInit,
+    onManifestReady: g.onManifestReady,
+    onNavigate: g.onNavigate,
+    onPageView: g.onPageView,
   };
-} else window[GLOBAL] = {};
+} else w[GLOBAL] = {};
 
 /**
  * Instantiate a personalization context and add it to the global context
  * or use an existing context stored in the global if it exists
  */
-window[GLOBAL].context =
-  window[GLOBAL].context || new PersonalizationContext(constructor);
+w[GLOBAL].context =
+  w[GLOBAL].context || new PersonalizationContext(constructor);

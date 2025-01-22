@@ -1,3 +1,5 @@
+import { SignalValue } from "./Signals";
+
 export interface ISignalAttributes {
   "page.url": string;
   "page.path": string;
@@ -17,4 +19,8 @@ export interface ISignalAttributes {
   "referrer.baseUrl"?: string;
   cookie: string;
   "cookie.*": { [key: string]: string };
+}
+
+export interface IAppSignalAttributes {
+  "app.*": { [key: string]: SignalValue | SignalValue[] };
 }
