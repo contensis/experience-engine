@@ -9,7 +9,7 @@ import {
   utcDate,
 } from "../util";
 
-const w = window;
+const w = (isSSR() ? undefined : window) as Window & typeof globalThis;
 const cookie = (
   set?: string
 ): typeof set extends string ? undefined : string => {
