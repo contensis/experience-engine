@@ -22,14 +22,57 @@ export const MOCK_MANIFEST: IManifest = {
       },
     },
     {
-      id: "loggedInUser",
-      name: "Logged In User",
+      id: "userHasLoggedIn",
+      name: "User has Logged In",
       description: "A user who is or has logged into the site",
       conditions: {
         and: [
           {
             type: "signal",
             id: "isLoggedIn",
+          },
+        ],
+      },
+      version: {
+        created: new Date("2025-01-10T00:00:00Z"),
+        createdBy: "n.flatley",
+        modified: new Date("2025-01-10T00:00:00Z"),
+        modifiedBy: "n.flatley",
+      },
+    },
+    {
+      id: "disallowWebsiteSignup",
+      name: "Disallow website sign-up",
+      description:
+        "Not allowed to signup via the website and are instead signposted to contact us",
+      conditions: {
+        and: [
+          {
+            type: "signal",
+            id: "blacklistCountryCode",
+          },
+        ],
+      },
+      version: {
+        created: new Date("2025-01-10T00:00:00Z"),
+        createdBy: "n.flatley",
+        modified: new Date("2025-01-10T00:00:00Z"),
+        modifiedBy: "n.flatley",
+      },
+    },
+    {
+      id: "allowWebsiteSignup",
+      name: "Allow website sign-up",
+      description:
+        "Allow signup via the website only if we have not matched a blacklist country code",
+      conditions: {
+        and: [
+          { type: "signal", id: "countryCodeIsKnown" },
+          {
+            not: {
+              type: "audience",
+              id: "disallowWebsiteSignup",
+            },
           },
         ],
       },
@@ -116,18 +159,65 @@ export const MOCK_MANIFEST: IManifest = {
       },
     },
     {
+      id: "blacklistCountryCode",
+      name: "Blacklist Country Code",
+      minMatches: 1,
+      where: {
+        and: [
+          {
+            attribute: "custom.country_code",
+            in: ["GB", "NG"],
+          },
+          {
+            not: {
+              attribute: "app.country_code",
+              equalTo: "GB",
+            },
+          },
+        ],
+      },
+      version: {
+        created: "2025-01-10T00:00:00Z",
+        createdBy: "n.flatley",
+        modified: "2025-01-10T00:00:00Z",
+        modifiedBy: "n.flatley",
+      },
+    },
+    {
+      id: "countryCodeIsKnown",
+      name: "Country Code is known",
+      minMatches: 1,
+      where: {
+        and: [
+          {
+            attribute: "app.country_code",
+            exists: true,
+          },
+          {
+            attribute: "app.country_code",
+            matchesRegex: "^[A-Z]{2,}$",
+          },
+        ],
+      },
+      version: {
+        created: "2025-01-10T00:00:00Z",
+        createdBy: "n.flatley",
+        modified: "2025-01-10T00:00:00Z",
+        modifiedBy: "n.flatley",
+      },
+    },
+    {
       id: "purchasedSportsGear",
       name: "Purchased Sports Gear",
       minMatches: 1,
       where: {
         and: [
           {
-            attribute: "purchaseCategory",
-            in: ["sports"],
+            attribute: "app.purchaseCategory",
             equalTo: "sports",
           },
           {
-            attribute: "purchaseAmount",
+            attribute: "app.purchaseAmount",
             greaterThan: 50,
           },
         ],

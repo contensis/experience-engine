@@ -14,11 +14,19 @@ const ContentPage = () => {
       <h2>{audienceContent.subtitle}</h2>
 
       <Experiment experiments={experiment.content}>
-        {(props) => <LeadText {...props} />}
+        {(props) => (
+          <>
+            <LeadText {...props} />
+          </>
+        )}
       </Experiment>
 
       <Personalize variants={personalized.content}>
-        {(props) => <LeadText {...props} />}
+        {(props) => (
+          <>
+            <LeadText {...props} />
+          </>
+        )}
       </Personalize>
 
       <hr />

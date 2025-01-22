@@ -4,9 +4,12 @@ import { usePersonalizationContext } from "../hooks/usePersonalizationContext";
 const DEFAULT_AUDIENCE_KEY = "audiences";
 
 type AudienceKey = typeof DEFAULT_AUDIENCE_KEY;
+type Optional<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]?: T[P];
+};
 
-type PersonalizeBase<T extends string = AudienceKey> = {
-  [audienceKey in T]: string | string[];
+type PersonalizeBase<K extends string = AudienceKey> = {
+  [audienceKey in K]: string | string[];
 };
 
 export type PersonalizeProps<
@@ -20,12 +23,12 @@ export type PersonalizeProps<
    */
   variants: T[];
   /** Set the content to render if we haven't matched a personalized variant  */
-  defaultContent?: Omit<T, K>;
+  defaultContent?: Optional<T, K>;
   /** The content field id to look for that contains audience ids in every variant, defaults to: `audiences`  */
   audienceKey?: K;
-  children?: React.ComponentType<Omit<T, K>>;
+  children?: React.ComponentType<T>;
   /** The component to render with the variant/default content */
-  render?: React.ComponentType<Omit<T, K>>;
+  render?: React.ComponentType<T>;
 };
 
 export const Personalize = <
@@ -53,7 +56,7 @@ export const Personalize = <
   // Set the defaultContent to be either defaultContent prop
   // or a variant that has no audiences set
   const [defaultContent] = useState(
-    props.defaultContent ||
+    (props.defaultContent as TVariant | null) ||
       props.variants?.find(
         (variant) =>
           (audiences in variant && !variant[audiences]) ||

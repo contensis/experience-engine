@@ -22,8 +22,8 @@ export type ExperimentProps<
   /** The content field id to look for that contains the relational split for every variant, defaults to: `split`  */
   splitKey?: K;
   /** The component to render with the variant/default content */
-  render?: React.ComponentType<Omit<T, K>>;
-  children?: React.ComponentType<Omit<T, K>>;
+  render?: React.ComponentType<T>;
+  children?: React.ComponentType<T>;
 };
 
 export const Experiment = <

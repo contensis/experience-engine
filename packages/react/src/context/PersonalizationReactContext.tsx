@@ -45,6 +45,9 @@ export interface IPersonalizationReactContext {
 
   /** The timestamp signals and audiences was last updated */
   t: EpochTimeStamp;
+
+  /** Add new signals identified within the app to the personalization context */
+  setSignals: PersonalizationContext["setSignals"];
 }
 
 export const PersonalizationReactContext = createContext<

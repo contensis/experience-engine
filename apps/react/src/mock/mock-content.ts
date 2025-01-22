@@ -3,9 +3,9 @@ export const audienceContent = {
   subtitle: "Personalisation in Contensis",
   content: [
     {
-      audiences: ["loggedInUser"],
-      weirdAudienceKey1: "loggedInUser",
-      lead: "New!: Create a personalised experience for your website visitors today (loggedInUser)",
+      audiences: ["userHasLoggedIn"],
+      weirdAudienceKey1: "userHasLoggedIn",
+      lead: "New!: Create a personalised experience for your website visitors today (userHasLoggedIn)",
     },
     {
       audiences: ["artsInterestedStudents"],

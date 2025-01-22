@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { IManifest, PersonalizationContext } from "@contensis/personalization";
+import { PersonalizationContext } from "@contensis/personalization";
 import {
   IPersonalizationReactContext,
   PersonalizationReactContext,
@@ -7,17 +7,7 @@ import {
 
 type PersonalizationLogger = (message: string, ...values: unknown[]) => void;
 
-let eOnPageView:
-  | ((
-      context: PersonalizationContext,
-      current: string,
-      previous?: string | undefined
-    ) => void)
-  | undefined;
-
-let eOnManifestReady:
-  | ((context: PersonalizationContext, manifest: IManifest) => void)
-  | undefined;
+let eOnComputed: ((context: PersonalizationContext) => void) | undefined;
 
 /** React hook that returns personalization state for you to provide personalized experiences in your components */
 export const usePersonalizationContext = () => {
@@ -34,6 +24,7 @@ export const usePersonalizationContext = () => {
       total: 0,
     },
     percentile: 0,
+    setSignals: () => {},
     t: 0,
   });
 
@@ -42,12 +33,12 @@ export const usePersonalizationContext = () => {
       Array.isArray(id)
         ? id.some((item) => state.audiences.includes(item))
         : state.audiences.includes(id),
-    [state.audiences.join("~")]
+    [state.audiences.join("~"), state.t]
   );
 
   const updateState = () => {
     if (context) {
-      const { manifest, pageViews, percentile, state, t } = context;
+      const { manifest, pageViews, percentile, setSignals, state, t } = context;
       const { audiences, signals } = state;
       setState({
         audiences: audiences?.active || [],
@@ -61,6 +52,7 @@ export const usePersonalizationContext = () => {
           total: state.pageViews,
         },
         percentile,
+        setSignals,
         state,
         t,
       });
@@ -69,43 +61,28 @@ export const usePersonalizationContext = () => {
 
   useEffect(() => {
     if (context) {
-      if (!eOnPageView) eOnPageView = context.handlers.onPageView;
-      context.handlers.onPageView = (context, c, p) => {
-        (context.l as PersonalizationLogger)(
-          `handlers.onPageView`,
-          context?.pageViews.length
-        );
+      // Add "on" handlers that update react state so we can
+      // trigger rerenders when data has been updated
+      if (!eOnComputed) eOnComputed = context.handlers.onComputed;
+      context.handlers.onComputed = (context) => {
+        (context.l as PersonalizationLogger)(`handlers.onComputed`, context);
         updateState();
-        eOnPageView?.(context, c, p);
-      };
-      if (!eOnManifestReady)
-        eOnManifestReady = context.handlers.onManifestReady;
-      context.handlers.onManifestReady = (context, manifest) => {
-        (context.l as PersonalizationLogger)(
-          `handlers.onManifestReady`,
-          context?.pageViews.length
-        );
-        updateState();
-        eOnManifestReady?.(context, manifest);
+        eOnComputed?.(context);
       };
     }
     // Reassign existing/original "on" handlers when this component
     // is unmounted
     return () => {
-      if (eOnPageView && context) {
-        context.handlers.onPageView = eOnPageView;
-        eOnPageView = undefined;
-      }
-      if (eOnManifestReady && context) {
-        context.handlers.onManifestReady = eOnManifestReady;
-        eOnManifestReady = undefined;
+      if (eOnComputed && context) {
+        context.handlers.onComputed = eOnComputed;
+        eOnComputed = undefined;
       }
     };
   }, []);
 
   useEffect(() => {
     updateState();
-  }, [context?.pageViews.length, isAudience]);
+  }, [context?.pageViews.length, context?.t, isAudience]);
 
   if (!context) {
     throw new Error(

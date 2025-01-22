@@ -41,19 +41,15 @@ export const PersonalizationProvider = (
         typeof globalThis[GLOBAL] === "object" ? globalThis[GLOBAL] : {});
 
       // Unwrap props to PersonalizationContext constructor arguments
-      const client: IManifestClientArgs | undefined =
-        "alias" in props && props.alias
-          ? {
+      const client =
+        ("alias" in props && props.alias) ||
+        ("rootUrl" in props && props.rootUrl)
+          ? ({
               alias: props.alias,
-              projectId: props.projectId,
-              token: props.token || g.token,
-            }
-          : "rootUrl" in props && props.rootUrl
-          ? {
               rootUrl: props.rootUrl,
               projectId: props.projectId,
               token: props.token || g.token,
-            }
+            } as IManifestClientArgs)
           : undefined;
       const manifest =
         "manifest" in props && props.manifest ? props.manifest : undefined;
@@ -67,6 +63,7 @@ export const PersonalizationProvider = (
           manifest,
           session: props.session || undefined,
           handlers: {
+            onComputed: props.onComputed,
             onInit: props.onInit,
             onManifestReady: props.onManifestReady,
             onNavigate: props.onNavigate,
