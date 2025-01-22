@@ -23,8 +23,7 @@
   "scripts": {
     "start": "npm run build",
     "prebuild": "rimraf dist && npm run tsc",
-    "build": "tsup && tsup --minify && npm run build:browser",
-    "build:browser": "tsup --config tsup.browser.config.js && tsup --config tsup.browser.config.js --minify",
+    "build": "tsup && tsup --minify",
     "tsc": "tsc --noEmit",
     "test": "jest -c ../../jest.config.js"
   },

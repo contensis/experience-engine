@@ -26,6 +26,7 @@
     "@tsconfig/recommended": "^1.0.8",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.6",
+    "browserslist-to-esbuild": "^2.1.1",
     "cross-env": "^7.0.3",
     "cypress": "^13.16.0",
     "cypress-wait-until": "^3.0.2",
