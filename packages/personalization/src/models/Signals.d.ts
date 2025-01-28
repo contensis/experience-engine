@@ -8,3 +8,7 @@ export type SignalValue = string | number | boolean | null | undefined;
 export type AppSignals = {
   [key: string]: SignalValue | SignalValue[];
 };
+
+export type AppOverrideSignals = {
+  [key: string]: SignalValue | SignalValue[];
+};

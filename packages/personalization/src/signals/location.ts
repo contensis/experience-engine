@@ -18,7 +18,7 @@ export const extractLocationHeaders = (response?: Response) => {
   // TODO: Remove - returned test data
   const mockGeoIpResponse = {
     ip: "209.93.238.8",
-    country_code: "NG",
+    country_code: "GB",
     country_name: "United Kingdom",
     region_code: null,
     region_name: "Greater London",

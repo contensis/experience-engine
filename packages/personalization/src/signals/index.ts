@@ -27,6 +27,10 @@ export class CalculateSignals {
   snapshot: ISignalAttributes;
   t = now();
 
+  get attributes(): ISignalAttributes {
+    const overrides = this.#context.state.overrides || {};
+    return { ...this.snapshot, ...overrides };
+  }
   /** Return the state of the signals, merging newly matched signals with those previously matched */
   get state() {
     const { computed, matched: matchedThis, t } = this;
@@ -116,7 +120,7 @@ export class CalculateSignals {
       ...flattenObject(BrowserSignalsSnapshot(), "browser"),
       ...flattenObject(location, "location"),
     };
-    context.app = {};
+    context.app = undefined;
 
     if (isSSR()) return; // Don't compute signals in SSR
 
@@ -234,7 +238,7 @@ export class CalculateSignals {
 
   /** Find the value(s) for a given signal attribute */
   #getSignal = (attribute: WhereAttribute, key = "") => {
-    const { snapshot } = this;
+    const { attributes: snapshot } = this;
     if (attribute === "cookie.*") return snapshot[attribute]?.[key];
     if (
       attribute === "page.queryParams.*" ||

@@ -24,13 +24,22 @@ export const usePersonalizationContext = () => {
       total: 0,
     },
     percentile: 0,
-    setSignals: () => {},
+    setAttributes: () => {},
+    overrideAttributes: () => {},
     t: 0,
   });
 
   const updateState = () => {
     if (context) {
-      const { manifest, percentile, session, setSignals, state, t } = context;
+      const {
+        manifest,
+        overrideAttributes,
+        percentile,
+        session,
+        setAttributes,
+        state,
+        t,
+      } = context;
       const audiences = state.audiences?.active || [];
       const signals = state.signals?.active || [];
       setState({
@@ -43,12 +52,13 @@ export const usePersonalizationContext = () => {
             : audiences.includes(id),
         matched: context.signals?.matched || [],
         manifest,
+        overrideAttributes,
         pageViews: {
           session: session.state.pageViews,
           total: state.pageViews,
         },
         percentile,
-        setSignals,
+        setAttributes,
         state,
         t,
       });

@@ -1,6 +1,11 @@
 import { CalculateAudiences } from "./audiences";
 import { IManifestClientArgs, Manifest } from "./providers/manifest";
-import { AppSignals, IManifest, IPersonalizationStore } from "./models";
+import {
+  AppOverrideSignals,
+  AppSignals,
+  IManifest,
+  IPersonalizationStore,
+} from "./models";
 import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
 import {
@@ -41,7 +46,7 @@ export class PersonalizationContext {
   signals?: CalculateSignals;
   manifest?: Manifest;
   pageViews: PageView[] = [];
-  app: AppSignals = {};
+  app?: AppSignals;
   t = 0;
 
   /** User-supplied event handlers */
@@ -176,6 +181,7 @@ export class PersonalizationContext {
   #onManifestReady = (manifest: IManifest) => {
     const { handlers, l, pageViews, state } = this;
 
+    // Should we update location attributes from the manifest to the session?
     const stateLocation = state.manifest?.location;
     const manifestLocation = manifest?.location;
     const updateLocation = !objectMatches(stateLocation, manifestLocation);
@@ -382,14 +388,28 @@ export class PersonalizationContext {
     handlers.onPageView(this, currentPage, previousPage);
   };
 
-  /** Add new signals identified within the app to the personalization context */
-  setSignals = (appSignals: AppSignals) => {
+  /** Add new signal attributes identified within the app to the personalization context */
+  setAttributes = (appSignals: AppSignals) => {
     if (objectKeys(appSignals).length) {
-      const existing = this.app;
+      const existing = this.app || {};
       const prev = stringify(existing);
       // Update app signals in this context
       this.app = { ...existing, ...appSignals };
       const next = stringify(this.app);
+      // Crude deep comparison to save needlessly recomputing signals
+      if (next !== prev) this.#compute();
+    }
+  };
+
+  /** Set signal attributes within the app to override the personalization context */
+  overrideAttributes = (overrideSignals: AppOverrideSignals) => {
+    if (objectKeys(overrideSignals).length) {
+      const { state } = this;
+      const existing = state.overrides;
+      const prev = stringify(existing);
+      // Update override signals in this context
+      this.#save = { ...state, overrides: { ...existing, ...overrideSignals } };
+      const next = stringify(this.state.overrides);
       // Crude deep comparison to save needlessly recomputing signals
       if (next !== prev) this.#compute();
     }

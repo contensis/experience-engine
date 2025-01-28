@@ -21,10 +21,6 @@ export interface ISignalAttributes {
   "cookie.*": { [key: string]: string };
 }
 
-export interface IAppSignalAttributes {
-  "app": { [key: string]: SignalValue | SignalValue[] };
-}
-
 export interface IBrowserSignalAttributes {
   userAgent: string;
   language: string;

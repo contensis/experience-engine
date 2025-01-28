@@ -47,7 +47,10 @@ export interface IPersonalizationReactContext {
   t: EpochTimeStamp;
 
   /** Add new signals identified within the app to the personalization context */
-  setSignals: PersonalizationContext["setSignals"];
+  setAttributes: PersonalizationContext["setAttributes"];
+
+  /** Set signal attributes within the app to override the personalization context */
+  overrideAttributes: PersonalizationContext["overrideAttributes"];
 }
 
 export const PersonalizationReactContext = createContext<
