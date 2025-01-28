@@ -5,7 +5,7 @@ import { ISignal } from "./Signal";
 export interface IManifest {
   audiences: IAudience[];
   signals: ISignal[];
-  location: ILocationSignalAttributes;
+  location?: ILocationSignalAttributes;
   version: IManifestVersion;
 }
 

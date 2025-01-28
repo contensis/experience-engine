@@ -31,7 +31,7 @@ export class Manifest implements IManifest {
   client?: ReturnType<typeof ManifestClient>;
   audiences: IAudience[] = [];
   signals: ISignal[] = [];
-  location: ILocationSignalAttributes = {};
+  location?: ILocationSignalAttributes;
   version: IManifestVersion = {} as IManifestVersion;
   isReady = false;
 
