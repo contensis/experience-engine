@@ -1,7 +1,14 @@
 import { ManifestClient } from "./manifest-client";
-import { IAudience, IManifest, IManifestVersion, ISignal } from "../models";
+import {
+  IAudience,
+  ILocationSignalAttributes,
+  IManifest,
+  IManifestVersion,
+  ISignal,
+} from "../models";
 import { PersonalizationContext } from "../personalization";
 import { isManifestClient } from "../util";
+import { extractLocationHeaders } from "../signals/location";
 
 export type IManifestClientArgs = {
   alias: string;
@@ -24,6 +31,7 @@ export class Manifest implements IManifest {
   client?: ReturnType<typeof ManifestClient>;
   audiences: IAudience[] = [];
   signals: ISignal[] = [];
+  location: ILocationSignalAttributes = {};
   version: IManifestVersion = {} as IManifestVersion;
   isReady = false;
 
@@ -64,9 +72,11 @@ export class Manifest implements IManifest {
       );
     else {
       // Initialise with an IManifest object
-      this.audiences = client.audiences || this.audiences;
-      this.signals = client.signals || this.signals;
-      this.version = client.version || this.version;
+      this.audiences = client.audiences || [];
+      this.signals = client.signals || [];
+      // TODO: Remove - location test data (extractLocationHeaders)
+      this.location = client.location || extractLocationHeaders() || {};
+      this.version = client.version || ({} as IManifestVersion);
     }
 
     // Fallback to manifest from state if available before we initialise any client
@@ -74,6 +84,7 @@ export class Manifest implements IManifest {
       log("m");
       this.audiences = state.audiences || [];
       this.signals = state.signals || [];
+      this.location = state.location || {};
       this.version = state.version || ({} as IManifestVersion);
       this.isReady = (state as Manifest).isReady;
     }
@@ -88,6 +99,7 @@ export class Manifest implements IManifest {
         // Initialise with an API response
         this.audiences = manifest.audiences;
         this.signals = manifest.signals;
+        this.location = manifest.location;
         this.version = manifest.version;
 
         this.isReady = true;

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { PersonalizationContext } from "@contensis/personalization";
 import {
   IPersonalizationReactContext,
@@ -28,27 +28,23 @@ export const usePersonalizationContext = () => {
     t: 0,
   });
 
-  const isAudience = useCallback(
-    (id: string | string[]) =>
-      Array.isArray(id)
-        ? id.some((item) => state.audiences.includes(item))
-        : state.audiences.includes(id),
-    [state.audiences.join("~"), state.t]
-  );
-
   const updateState = () => {
     if (context) {
-      const { manifest, pageViews, percentile, setSignals, state, t } = context;
-      const { audiences, signals } = state;
+      const { manifest, percentile, session, setSignals, state, t } = context;
+      const audiences = state.audiences?.active || [];
+      const signals = state.signals?.active || [];
       setState({
-        audiences: audiences?.active || [],
-        signals: signals?.active || [],
+        audiences,
+        signals,
         context,
-        isAudience,
+        isAudience: (id: string | string[]) =>
+          Array.isArray(id)
+            ? id.some((item) => audiences.includes(item))
+            : audiences.includes(id),
         matched: context.signals?.matched || [],
         manifest,
         pageViews: {
-          session: pageViews.length,
+          session: session.state.pageViews,
           total: state.pageViews,
         },
         percentile,
@@ -82,7 +78,11 @@ export const usePersonalizationContext = () => {
 
   useEffect(() => {
     updateState();
-  }, [context?.pageViews.length, context?.t, isAudience]);
+  }, [
+    context?.pageViews.length,
+    context?.t,
+    context?.signals?.matched.map((s) => `${s.id}${s.times}`).join(""),
+  ]);
 
   if (!context) {
     throw new Error(

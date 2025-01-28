@@ -72,7 +72,6 @@ export type WhereOpKeys =
   | keyof WhereStartsWith;
 
 export type WhereAttribute =
-  | "app.*"
   | "cookie"
   | "cookie.*"
   | "page.url"

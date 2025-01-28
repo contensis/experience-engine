@@ -2,10 +2,15 @@ import { EvaluateSignal } from "./evaluate";
 import { RouteSignalsSnapshot } from "./route";
 import { PersonalizationContext } from "../personalization";
 import { findSignal } from "../providers/manifest";
-import { isSSR, now, objectFromEntries, objectKeys } from "../util";
+import {
+  flattenObject,
+  isSSR,
+  now,
+  objectFromEntries,
+  objectKeys,
+} from "../util";
 import {
   ComputedSignal,
-  IAppSignalAttributes,
   ISignalAttributes,
   ISignalsStore,
   Where,
@@ -13,17 +18,19 @@ import {
   WhereCriteria,
 } from "../models";
 import { AppSignalsSnapshot } from "./app";
+import { BrowserSignalsSnapshot } from "./browser";
 
 export class CalculateSignals {
+  #context: PersonalizationContext;
   computed: ComputedSignal[] = [];
   matched: ComputedSignal[] = [];
-  snapshot: ISignalAttributes & IAppSignalAttributes;
+  snapshot: ISignalAttributes;
   t = now();
 
   /** Return the state of the signals, merging newly matched signals with those previously matched */
   get state() {
-    const { computed, context, matched: matchedThis, t } = this;
-    const { debug, manifest, page: p, state } = context;
+    const { computed, matched: matchedThis, t } = this;
+    const { debug, manifest, page: p, state } = this.#context;
 
     // Merge signal matches from this instance into any previously matched
     const matchedPrev: ISignalsStore["matched"] = state.signals?.matched || {};
@@ -88,7 +95,8 @@ export class CalculateSignals {
     return nextState;
   }
 
-  constructor(private context: PersonalizationContext) {
+  constructor(context: PersonalizationContext) {
+    this.#context = context;
     const { app, currentPage, pageViews, previousPage } = context;
 
     // Find the signals from the last page view
@@ -97,47 +105,35 @@ export class CalculateSignals {
         ? pageViews[pageViews.length - 2]?.[2]?.snapshot
         : undefined;
 
-    // Hold the signals for this page view and a referrer
-    const routeSignals = RouteSignalsSnapshot(
-      currentPage,
-      previousSignals || previousPage
-    );
-    const appSignals = AppSignalsSnapshot(app);
-    context.app = {};
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { browser, location, ...sessionSignals } = context.session.state;
 
-    this.snapshot = { ...routeSignals, ...appSignals };
+    // Hold the signals for this page view and a referrer
+    this.snapshot = {
+      ...RouteSignalsSnapshot(currentPage, previousSignals || previousPage),
+      ...flattenObject(AppSignalsSnapshot(app)),
+      ...flattenObject(sessionSignals, "session"),
+      ...flattenObject(BrowserSignalsSnapshot(), "browser"),
+      ...flattenObject(location, "location"),
+    };
+    context.app = {};
 
     if (isSSR()) return; // Don't compute signals in SSR
 
     this.#calculate();
   }
 
-  /** Iterate manifest.signals and check each signal criteria for a match */
-  #calculate = () => {
-    const { manifest, state } = this.context;
-    const signals = manifest?.signals || [];
-    for (const signal of signals) {
-      const matched = this.#check(signal.where);
-      const matchedTimes = state.signals?.matched?.[signal.id]?.length || 0;
-      const computed = {
-        ...signal,
-        matched,
-        times: matchedTimes + (matched ? 1 : 0),
-      };
-      if (matched) this.matched.push(computed);
-      this.computed.push(computed);
-    }
-    this.#log();
-  };
-
   /** Iterate computed.signals that are unmatched and check signal criteria for a match */
   redo = () => {
-    const { computed, context, matched: matches } = this;
+    const { computed, matched: matches } = this;
 
     // update any "app" signals set before we recalculate
-    this.snapshot["app.*"] = context.app;
+    this.snapshot = {
+      ...this.snapshot,
+      ...flattenObject(AppSignalsSnapshot(this.#context.app)),
+    };
     // reset the app signals from context so we don't consider them in every page view
-    context.app = {};
+    this.#context.app = {};
 
     this.t = now();
 
@@ -155,20 +151,22 @@ export class CalculateSignals {
     return this;
   };
 
-  #log = () => {
-    const { context, matched } = this;
-    const { l, manifest } = context;
-    const t = now();
-    l("sc", manifest?.signals.length, t - this.t, manifest?.version.versionNo);
-
-    const matches = matched.length;
-    if (matches) {
-      l(
-        "sm",
-        matches,
-        matched.map((s) => `${s.id}(${s.times} / ${s.minMatches})`).join(", ")
-      );
+  /** Iterate manifest.signals and check each signal criteria for a match */
+  #calculate = () => {
+    const { manifest, state } = this.#context;
+    const signals = manifest?.signals || [];
+    for (const signal of signals) {
+      const matched = this.#check(signal.where);
+      const matchedTimes = state.signals?.matched?.[signal.id]?.length || 0;
+      const computed = {
+        ...signal,
+        matched,
+        times: matchedTimes + (matched ? 1 : 0),
+      };
+      if (matched) this.matched.push(computed);
+      this.computed.push(computed);
     }
+    this.#log();
   };
 
   /**
@@ -236,15 +234,14 @@ export class CalculateSignals {
 
   /** Find the value(s) for a given signal attribute */
   #getSignal = (attribute: WhereAttribute, key = "") => {
-    const { snapshot: signals } = this;
-    if (attribute === "app.*" || attribute === "cookie.*")
-      return signals[attribute]?.[key];
+    const { snapshot } = this;
+    if (attribute === "cookie.*") return snapshot[attribute]?.[key];
     if (
       attribute === "page.queryParams.*" ||
       attribute === "referrer.queryParams.*"
     )
-      return signals[attribute](key);
-    return signals[attribute];
+      return snapshot[attribute](key);
+    return snapshot[attribute];
   };
 
   /**
@@ -257,8 +254,7 @@ export class CalculateSignals {
   #keyedAttribute = (attribute: WhereAttribute): [WhereAttribute, string] => {
     let slices = 0;
     if (attribute.includes(".queryParams.")) slices = 2;
-    if (attribute.startsWith("cookie.") || attribute.startsWith("app."))
-      slices = 1;
+    if (attribute.startsWith("cookie.")) slices = 1;
     const att = slices
       ? (`${attribute
           .split(".")
@@ -268,5 +264,21 @@ export class CalculateSignals {
     const key = slices ? attribute.split(".").slice(slices).join(".") : "";
 
     return [att, key];
+  };
+
+  #log = () => {
+    const { matched } = this;
+    const { l, manifest } = this.#context;
+    const t = now();
+    l("sc", manifest?.signals.length, t - this.t, manifest?.version.versionNo);
+
+    const matches = matched.length;
+    if (matches) {
+      l(
+        "sm",
+        matches,
+        matched.map((s) => `${s.id}(${s.times} / ${s.minMatches})`).join(", ")
+      );
+    }
   };
 }

@@ -40,5 +40,8 @@
   "peerDependencies": {
     "@contensis/personalization": "*",
     "react": "*"
+  },
+  "devDependencies": {
+    "browserslist-to-esbuild": "^2.1.1"
   }
 }

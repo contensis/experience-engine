@@ -1,5 +1,6 @@
-import { IManifest } from "../models";
+import { ILocationSignalAttributes, IManifest } from "../models";
 import { GLOBAL } from "../personalization";
+import { extractLocationHeaders } from "../signals/location";
 import { isObject, tryParse } from "../util";
 
 export const ManifestClient = (
@@ -31,7 +32,9 @@ export const ManifestClient = (
 
       if (response.ok) {
         const body = await response.text();
-        return tryParse(body);
+        const location = extractLocationHeaders(response);
+        const parsed = tryParse(body);
+        return { ...(isObject(parsed) ? parsed : {}), location } as IManifest;
       }
     } catch (ex: unknown) {
       const statusCode =
@@ -41,5 +44,6 @@ export const ManifestClient = (
       );
     }
   };
+
   return { alias, get, projectId };
 };

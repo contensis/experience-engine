@@ -5,7 +5,7 @@ export const AppSignalsSnapshot = (
   signals: AppSignals
 ): IAppSignalAttributes => {
   const attributes: IAppSignalAttributes = {
-    "app.*": signals,
+    app: signals,
   };
 
   return attributes;

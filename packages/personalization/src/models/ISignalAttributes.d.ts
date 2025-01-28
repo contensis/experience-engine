@@ -22,5 +22,29 @@ export interface ISignalAttributes {
 }
 
 export interface IAppSignalAttributes {
-  "app.*": { [key: string]: SignalValue | SignalValue[] };
+  "app": { [key: string]: SignalValue | SignalValue[] };
+}
+
+export interface IBrowserSignalAttributes {
+  userAgent: string;
+  language: string;
+  platform: string;
+  vendor: string;
+  screenWidth: number;
+  screenHeight: number;
+  colorDepth: number;
+  touchSupport: boolean;
+  timezone: string;
+  cookiesEnabled: boolean;
+}
+
+export interface ILocationSignalAttributes {
+  ip?: string;
+  country?: string;
+  region?: string;
+  city?: string;
+  timezone?: string;
+  latitude?: number;
+  longitude?: number;
+  postalCode?: string;
 }

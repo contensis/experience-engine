@@ -3,8 +3,17 @@ import { IManifestClientArgs, Manifest } from "./providers/manifest";
 import { AppSignals, IManifest, IPersonalizationStore } from "./models";
 import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
-import { isArray, isSSR, isStore, now, objectKeys, stringify } from "./util";
+import {
+  isArray,
+  isSSR,
+  isStore,
+  now,
+  objectKeys,
+  objectMatches,
+  stringify,
+} from "./util";
 import { logger, messages } from "./logs";
+import { Session } from "./session";
 
 /** Global context object name */
 export const GLOBAL = "CONTENSIS_PERSONALIZATION";
@@ -28,6 +37,7 @@ export class PersonalizationContext {
   audiences?: CalculateAudiences;
   currentPage: string = "";
   previousPage?: string;
+  session!: Session;
   signals?: CalculateSignals;
   manifest?: Manifest;
   pageViews: PageView[] = [];
@@ -83,6 +93,59 @@ export class PersonalizationContext {
       }
   };
 
+  #compute = (pageView = this.#cpv) => {
+    // Ensure our session is up to date before calculating signals
+    this.session.update();
+
+    // Have we already computed signals for this pageView?
+    const existing = pageView?.[2];
+
+    // Compute signals
+    const signals = (this.signals = !existing
+      ? new CalculateSignals(this)
+      : existing.redo());
+
+    // Persist current signals state
+    this.#save = {
+      ...this.state,
+      signals: signals.state,
+    };
+
+    // Add signal state to pageViews array so we know it does not require recalculation
+    if (pageView) pageView[2] = signals;
+
+    // Determine audiences, evaluate conditions
+    const audiences = (this.audiences = new CalculateAudiences(this));
+
+    // Persist current audiences state
+    this.#save = {
+      ...this.state,
+      audiences: audiences.state,
+    };
+    this.session.update();
+    this.t = now();
+
+    const { handlers } = this;
+    handlers.onComputed(this);
+  };
+
+  #init = () => {
+    if (isSSR()) return;
+
+    this.#observe();
+
+    const { handlers } = this;
+    handlers.onInit(this);
+  };
+
+  #logs = async (debug?: boolean) =>
+    debug && !this.log
+      ? // Dynamically import logging if we have set debug flag
+        import("./logs").then(({ logger }) => {
+          this.log = logger;
+        })
+      : void 0;
+
   /** Monitor for DOM mutations and subsequent href changes */
   #observe = () => {
     let lastHref = "";
@@ -110,90 +173,56 @@ export class PersonalizationContext {
     });
   };
 
-  #compute = (pageView = this.#cpv) => {
-    // Have we already computed signals for this pageView?
-    const existing = pageView?.[2];
-
-    // Compute signals
-    const signals = (this.signals = !existing
-      ? new CalculateSignals(this)
-      : existing.redo());
-
-    // Persist current signals state
-    this.#save = {
-      ...this.state,
-      signals: signals.state,
-    };
-
-    // Add signal state to pageViews array so we know it does not require recalculation
-    if (pageView) pageView[2] = signals;
-
-    // Determine audiences, evaluate conditions
-    const audiences = (this.audiences = new CalculateAudiences(this));
-
-    // Persist current audiences state
-    this.#save = {
-      ...this.state,
-      audiences: audiences.state,
-    };
-    this.t = now();
-
-    const { handlers } = this;
-    handlers.onComputed(this);
-  };
-
-  #init = () => {
-    if (isSSR()) return;
-    const { handlers } = this;
-
-    this.#observe();
-
-    handlers.onInit(this);
-  };
-
-  #logs = async (debug?: boolean) =>
-    debug && !this.log
-      ? // Dynamically import logging if we have set debug flag
-        import("./logs").then(({ logger }) => {
-          this.log = logger;
-        })
-      : void 0;
-
   #onManifestReady = (manifest: IManifest) => {
-    const { audiences, handlers, l, pageViews, signals, state } = this;
+    const { handlers, l, pageViews, state } = this;
+
+    const stateLocation = state.manifest?.location;
+    const manifestLocation = manifest?.location;
+    const updateLocation = !objectMatches(stateLocation, manifestLocation);
+
+    if (updateLocation) {
+      this.session.update({ location: manifestLocation });
+      l("ml", manifestLocation, stateLocation);
+    }
 
     const stateVersion = state.manifest?.version.versionNo;
     const manifestVersion = manifest?.version.versionNo;
 
     if (
+      updateLocation ||
       (manifestVersion && manifestVersion !== stateVersion) ||
       manifestVersion === "draft" ||
       !manifestVersion
     ) {
-      l("mv", manifestVersion, stateVersion);
+      // Save the new manifest
       this.#save = { ...state, manifest };
+      l("mv", manifestVersion, stateVersion);
 
-      // Retrospectively calculate signals for any pageViews[][2] that are null
-      const toCheck = pageViews.filter((pv) => pv[2] === null);
-      for (const pageView of toCheck) {
-        const existingSignals = signals?.matched?.length || 0;
-        const existingAudiences = audiences?.active.length || 0;
+      // // Retrospectively calculate signals for any pageViews[][2] that are null
+      // const toCheck = pageViews.filter((pv) => pv[2] === null);
+      // for (const pageView of toCheck) {
+
+      // Recompute all pageViews when manifest is updated
+      for (const pageView of pageViews) {
+        const existingSignals = this.signals?.matched?.length || 0;
+        const existingAudiences = this.audiences?.active.length || 0;
 
         // Compute signals and audiences
         this.#compute(pageView);
 
-        const hasNewSignals = signals?.matched?.length !== existingSignals;
+        const hasNewSignals = this.signals?.matched?.length !== existingSignals;
         // If we have matched new signals...
         if (hasNewSignals) l("ms");
 
-        const hasNewAudiences = audiences?.active.length !== existingAudiences;
+        const hasNewAudiences =
+          this.audiences?.active.length !== existingAudiences;
         // If we have matched new audiences...
         if (hasNewAudiences) l("ma");
       }
     }
 
     // Call event handler
-    handlers.onManifestReady(this, manifest!);
+    handlers.onManifestReady(this, manifest);
   };
 
   /** Safely return the current location.href */
@@ -212,7 +241,9 @@ export class PersonalizationContext {
 
   /** Assign any state or [value, options] to persist the value */
   set #save(state: IPersonalizationStore | [unknown, IStoreOptions]) {
-    if (isStore(state)) this.#store.set(state);
+    if (isStore(state)) {
+      this.#store.set(state);
+    }
     if (isArray(state) && state.length === 2) {
       const [value, opts] = state;
       this.#store.set(value, opts);
@@ -271,6 +302,9 @@ export class PersonalizationContext {
 
     // Dynamically import logging if we have set debug flag
     l("init", id, pc, state.pageViews);
+
+    // Initialise a new session
+    this.session = new Session(this);
 
     // Ensure we have a manifest
     if (manifest) {

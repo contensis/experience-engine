@@ -4,6 +4,7 @@ export const messages = {
   im: `[init] Initialising with supplied manifest`,
   ic: `[init] Initialising manifest with client`,
   mv: `[onManifestReady] Updated to version "{0}" from version "{1}"`,
+  ml: `[onManifestReady] Location updated "{0}" from "{1}"`,
   ms: `[onManifestReady] Matched new signals from updated manifest`,
   ma: `[onManifestReady] Matched new audiences from updated manifest`,
   n1: `[observe] Initial page view: {0}`,

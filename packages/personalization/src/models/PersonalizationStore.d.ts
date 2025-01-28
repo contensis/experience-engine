@@ -1,3 +1,9 @@
+import {
+  IBrowserSignalAttributes,
+  ILocationSignalAttributes,
+  IManifest,
+} from "./";
+
 export interface IPersonalizationStore {
   cpid: string;
   pc: number;
@@ -7,6 +13,26 @@ export interface IPersonalizationStore {
   manifest?: IManifest;
   signals?: ISignalsStore;
   audiences?: IAudiencesStore;
+}
+
+export interface IPersonalizationSessionStore {
+  isFirstVisit: boolean;
+  startTime: string;
+  duration: number;
+  pageViews: number;
+  lastActivity: string;
+  entryPage: string;
+  browser: IBrowserSignalAttributes;
+  referrer?: {
+    url: string;
+    path: string;
+    querystring;
+    queryParams: { [param: string]: string };
+    domain: string;
+    subdomain: string;
+    baseUrl: string;
+  };
+  location?: ILocationSignalAttributes;
 }
 
 export interface ISignalsStore {
