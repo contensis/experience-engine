@@ -1,8 +1,12 @@
 import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useState } from "react";
+import ReactSwitch from "react-switch";
 
 const Summary = () => {
-  const { audiences, isAudience, matched, signals } =
+  const { audiences, context, isAudience, matched, signals } =
     usePersonalizationContext();
+
+  const [debug, setDebug] = useState(!!context?.debug);
 
   const className =
     "flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700";
@@ -59,6 +63,22 @@ const Summary = () => {
           <p>A special message just for our users</p>
         </div>
       )}
+      <h4>
+        <label>
+          <span>Console logging</span>
+          <ReactSwitch
+            onChange={() => {
+              if (context) {
+                setDebug(!context.debug);
+                context.debug = !context.debug;
+              }
+            }}
+            height={22}
+            className="react-switch"
+            checked={debug}
+          />
+        </label>
+      </h4>
       <div>
         {activeAudiencesJSX}
         {activeSignalsJSX}

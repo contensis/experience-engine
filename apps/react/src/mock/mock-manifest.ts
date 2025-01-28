@@ -165,12 +165,12 @@ export const MOCK_MANIFEST: IManifest = {
       where: {
         and: [
           {
-            attribute: "custom.country_code",
+            attribute: "location.country",
             in: ["GB", "NG"],
           },
           {
             not: {
-              attribute: "app.country_code",
+              attribute: "location.country",
               equalTo: "GB",
             },
           },
@@ -190,11 +190,11 @@ export const MOCK_MANIFEST: IManifest = {
       where: {
         and: [
           {
-            attribute: "app.country_code",
+            attribute: "location.country",
             exists: true,
           },
           {
-            attribute: "app.country_code",
+            attribute: "location.country",
             matchesRegex: "^[A-Z]{2,}$",
           },
         ],

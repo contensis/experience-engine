@@ -7,7 +7,7 @@ import {
   RowData,
   useReactTable,
 } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -67,20 +67,28 @@ const EditableCell = ({
 };
 
 const formatSignals = (snapshot?: ISignalAttributes) =>
-  Object.entries(snapshot || {}).sort((a, b) => {
-    if (a[0] < b[0]) return -1;
-    if (a[0] > b[0]) return 1;
-    return 0;
-  });
+  Object.entries(snapshot || {})
+    .filter(([key]) => !key.endsWith("*"))
+    .sort((a, b) => {
+      if (a[0] < b[0]) return -1;
+      if (a[0] > b[0]) return 1;
+      return 0;
+    });
 
 const Attributes = () => {
-  const { context, setSignals: setAttribute } = usePersonalizationContext();
+  const { context, overrideAttributes } = usePersonalizationContext();
 
-  const [signals, setSignals] = useState(
-    formatSignals(context?.signals?.snapshot)
-  );
+  const rerender = Object.values(context?.signals?.attributes || {}).join("+");
 
-  const rerender = Object.values(context?.signals?.snapshot || {}).join("+");
+  const attributes = useMemo(() => {
+    return context?.signals?.attributes;
+  }, [rerender]);
+
+  const snapshot = useMemo(() => {
+    return context?.signals?.snapshot;
+  }, [rerender]);
+
+  const [signals, setSignals] = useState(formatSignals(attributes));
 
   const table = useReactTable({
     columns: [
@@ -91,15 +99,37 @@ const Attributes = () => {
       {
         header: "value",
         accessorKey: "1",
-        cell: (props) => (
-          <code>
-            {["string", "number", "boolean"].includes(
-              typeof props.getValue()
-            ) ? (
-              <EditableCell {...props} />
-            ) : null}
-          </code>
-        ),
+        cell: (props) => {
+          const isRenderable = ["string", "number", "boolean"].includes(
+            typeof props.getValue()
+          );
+          const key = props.row.original[0];
+          const value = snapshot?.[key as keyof ISignalAttributes];
+          const originalValue =
+            isRenderable && value != props.getValue() ? `${value}` : null;
+          return (
+            <>
+              <code className={originalValue ? "override" : ""}>
+                {isRenderable ? <EditableCell {...props} /> : null}
+                {originalValue ? (
+                  <button
+                    className="override"
+                    onClick={() => {
+                      overrideAttributes({
+                        [key]: undefined,
+                      });
+                    }}
+                  >
+                    x
+                  </button>
+                ) : null}
+              </code>
+              {originalValue ? (
+                <code className="overridden">{originalValue}</code>
+              ) : null}
+            </>
+          );
+        },
       },
     ],
     data: signals,
@@ -107,18 +137,25 @@ const Attributes = () => {
     // Provide our updateData function to our table meta
     meta: {
       updateData: (rowIndex, columnId, value) => {
-        console.log(`rowIndex, columnId, value`, rowIndex, columnId, value);
-
-        setAttribute({
-          [signals[rowIndex][0]]: value as string,
-        });
+        if (signals[rowIndex][1] != value) {
+          console.log(
+            `rowIndex, columnId, value, from`,
+            rowIndex,
+            columnId,
+            value,
+            signals[rowIndex]
+          );
+          overrideAttributes({
+            [signals[rowIndex][0]]: value as string,
+          });
+        }
       },
     },
   });
 
   useEffect(() => {
-    setSignals(formatSignals(context?.signals?.snapshot));
-  }, [rerender, context?.signals?.snapshot]);
+    setSignals(formatSignals(attributes));
+  }, [rerender, attributes]);
 
   return (
     <table>

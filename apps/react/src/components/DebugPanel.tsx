@@ -5,7 +5,7 @@ import "react-tabs/style/react-tabs.css";
 import Collapsible from "./Collapsible";
 import Summary from "./Summary";
 import Manifest from "./Manifest";
-import Audiences from "./audiences";
+import Audiences from "./Audiences";
 import Signals from "./Signals";
 import Attributes from "./Attributes";
 
@@ -23,7 +23,7 @@ const DebugPanel = () => {
             </h3>
           </div>
         }
-        label="more"
+        label="console"
       >
         <Tabs>
           <TabList>

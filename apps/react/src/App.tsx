@@ -49,7 +49,7 @@ const MainLayout = () => {
     context,
     isAudience,
     percentile,
-    setSignals: setAttributes,
+    setAttributes,
   } = usePersonalizationContext();
 
   // This is to make the component re-render when the location has changed
