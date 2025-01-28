@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+
 import {
   PersonalizationProvider,
   usePersonalizationContext,
 } from "@contensis/personalization-react";
+
 import "./App.css";
 import ContentPage from "./ContentPage";
 
@@ -99,7 +101,6 @@ const MainLayout = () => {
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
       </div>
-
       <ContentPage />
 
       <div

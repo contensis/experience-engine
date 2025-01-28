@@ -43,3 +43,35 @@
 .read-the-docs {
   color: #888;
 }
+.signal-attributes {
+  text-align: start;
+  border-radius: 25px;
+  border: 1px solid;
+  padding: 0 1rem;
+  max-width: 1000px;
+}
+code {
+  padding: 0.3em 0.6em;
+  margin: 0;
+  white-space: break-spaces;
+  background-color: #656c7633;
+  border-radius: 6px;
+}
+table {
+  width: 100%;
+}
+table,
+th,
+.title-column {
+  background-color: rgb(96 139 168 / 0.2);
+}
+th,
+td {
+  margin: 0.1em 0.3em;
+}
+
+.title-column {
+  padding: 0.1em 0.3em;
+  font-size: 80%;
+  font-weight: bold;
+}
