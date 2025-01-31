@@ -45,27 +45,30 @@ const useGeoIP = () => {
 
 const MainLayout = () => {
   const geoLocation = useGeoIP();
-  const {
-    context,
-    isAudience,
-    percentile,
-    setAttributes,
-  } = usePersonalizationContext();
+  const { audiences, context, isAudience, percentile, setAttributes, signals } =
+    usePersonalizationContext();
 
-  // This is to make the component re-render when the location has changed
-  // (simulating client-side navigation to trigger MutationObserver callback)
-  const [currentPage, setCurrentPage] = useState<string>("");
-  const href = typeof location !== "undefined" ? location.href : "";
+  const [, rerender] = useState(context?.t || 0);
+
   useEffect(() => {
-    setCurrentPage(href);
-  }, [href]);
+    if (context?.t) rerender(context.t);
+  }, [context?.t, audiences.length, signals.length]);
+
+  console.log(context?.t);
+  // // This is to make the component re-render when the location has changed
+  // // (simulating client-side navigation to trigger MutationObserver callback)
+  // const [currentPage, setCurrentPage] = useState<string>("");
+  // const href = typeof location !== "undefined" ? location.href : "";
+  // useEffect(() => {
+  //   setCurrentPage(href);
+  // }, [href]);
 
   // Track state so we can toggle via the test buttons
   const [isLoggedIn, setLoggedIn] = useState(
     document.cookie.includes("RefreshToken=")
   );
 
-  // Add a cookie to this page so we can match the signals defined in the manifest
+  // Add a cookie to this page so we can match the signal defined in the manifest
   useEffect(() => {
     if (isLoggedIn) document.cookie = "RefreshToken=any; path=/;";
     else {
@@ -74,7 +77,7 @@ const MainLayout = () => {
     }
   }, [isLoggedIn]);
 
-  // Take our geo location attributes and set them as signals
+  // Take our own geo location attributes and set them as signal attributes
   useEffect(() => {
     if (geoLocation) {
       console.log(`GeoIP data:`, geoLocation);
@@ -82,7 +85,12 @@ const MainLayout = () => {
     }
   }, [geoLocation, setAttributes]);
 
-  const blockSignIn = isAudience("disallowWebsiteSignup");
+  const [blockSignIn, setBlockSignIn] = useState(
+    isAudience("disallowWebsiteSignup")
+  );
+  useEffect(() => {
+    setBlockSignIn(isAudience("disallowWebsiteSignup"));
+  }, [isAudience]);
 
   return (
     <>
@@ -116,10 +124,20 @@ const MainLayout = () => {
           type="button"
           onClick={() => {
             localStorage.removeItem("cp");
+            sessionStorage.removeItem("cp");
             location.reload();
           }}
         >
-          Reset localStorage
+          Reset storage
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            sessionStorage.removeItem("cp");
+            location.reload();
+          }}
+        >
+          Reset session
         </button>
         <button type="button">percentile is {percentile}</button>
         <br />
@@ -129,12 +147,12 @@ const MainLayout = () => {
             history.pushState(
               {},
               "",
-              currentPage.includes("/arts") ? "/" : "/arts/"
+              location.href.includes("/arts") ? "/" : "/arts/"
             );
-            setCurrentPage(location.href);
+            // setCurrentPage(location.href);
           }}
         >
-          Navigate {currentPage.includes("/arts") ? "Home" : `Arts`}
+          Navigate {location.href.includes("/arts") ? "Home" : `Arts`}
           {(() => {
             const signal = context?.signals?.computed.find(
               (s) => s.id === "artsVisitor"

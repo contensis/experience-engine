@@ -8,9 +8,14 @@ import Manifest from "./Manifest";
 import Audiences from "./Audiences";
 import Signals from "./Signals";
 import Attributes from "./Attributes";
+import { useState } from "react";
 
 const DebugPanel = () => {
   const { pageViews } = usePersonalizationContext();
+
+  const [tabIndex, setTabIndex] = useState(
+    Number(sessionStorage.getItem("cpdemo-tabIndex")) || 0
+  );
   return (
     <div className="signal-attributes">
       <Collapsible
@@ -25,13 +30,19 @@ const DebugPanel = () => {
         }
         label="console"
       >
-        <Tabs>
+        <Tabs
+          selectedIndex={tabIndex}
+          onSelect={(index) => {
+            setTabIndex(index);
+            sessionStorage.setItem("cpdemo-tabIndex", `${index}`);
+          }}
+        >
           <TabList>
             <Tab>Summary</Tab>
             <Tab>Audiences</Tab>
-            <Tab>Manifest</Tab>
             <Tab>Signals</Tab>
             <Tab>Signal attributes</Tab>
+            <Tab>Manifest</Tab>
           </TabList>
           <TabPanel>
             <Summary />
@@ -40,13 +51,13 @@ const DebugPanel = () => {
             <Audiences />
           </TabPanel>
           <TabPanel>
-            <Manifest />
-          </TabPanel>
-          <TabPanel>
             <Signals />
           </TabPanel>
           <TabPanel>
             <Attributes />
+          </TabPanel>
+          <TabPanel>
+            <Manifest />
           </TabPanel>
         </Tabs>
       </Collapsible>

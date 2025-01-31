@@ -3,15 +3,15 @@ import { useState } from "react";
 import ReactSwitch from "react-switch";
 
 const Summary = () => {
-  const { audiences, context, isAudience, matched, signals } =
+  const { audiences, context,  matched, signals } =
     usePersonalizationContext();
 
   const [debug, setDebug] = useState(!!context?.debug);
 
   const className =
-    "flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700";
+    "";
 
-  const activeAudiencesJSX = audiences.length ? (
+  const activeAudiencesJSX = (
     <div className={className}>
       <h4>Active audiences: {audiences.length}</h4>
       <ul>
@@ -22,9 +22,9 @@ const Summary = () => {
         ))}
       </ul>
     </div>
-  ) : null;
+  );
 
-  const activeSignalsJSX = signals.length ? (
+  const activeSignalsJSX = (
     <div className={className}>
       <h4>Active signals: {signals.length}</h4>
       <ul>
@@ -35,9 +35,9 @@ const Summary = () => {
         ))}
       </ul>
     </div>
-  ) : null;
+  );
 
-  const signalsJSX = matched?.length ? (
+  const signalsJSX = (
     <div className={className}>
       <h4>Matched signals: {matched.length}</h4>
       <ul>
@@ -53,36 +53,36 @@ const Summary = () => {
         ))}
       </ul>
     </div>
-  ) : null;
+  );
 
   return (
     <div className="">
-      {isAudience(["loggedInUser"]) && (
+      {signals.includes("isLoggedIn") && (
         <div>
           <h2>Welcome back! 😎</h2>
           <p>A special message just for our users</p>
         </div>
       )}
-      <h4>
-        <label>
-          <span>Console logging</span>
-          <ReactSwitch
-            onChange={() => {
-              if (context) {
-                setDebug(!context.debug);
-                context.debug = !context.debug;
-              }
-            }}
-            height={22}
-            className="react-switch"
-            checked={debug}
-          />
-        </label>
-      </h4>
       <div>
         {activeAudiencesJSX}
         {activeSignalsJSX}
         {signalsJSX}
+        <h4>
+          <label>
+            <span>Console logging</span>
+            <ReactSwitch
+              onChange={() => {
+                if (context) {
+                  setDebug(!context.debug);
+                  context.debug = !context.debug;
+                }
+              }}
+              height={22}
+              className="react-switch"
+              checked={debug}
+            />
+          </label>
+        </h4>
       </div>
     </div>
   );
