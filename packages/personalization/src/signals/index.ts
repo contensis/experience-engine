@@ -137,7 +137,7 @@ export class CalculateSignals {
       ...flattenObject(AppSignalsSnapshot(this.#context.app)),
     };
     // reset the app signals from context so we don't consider them in every page view
-    this.#context.app = {};
+    this.#context.app = undefined;
 
     this.t = now();
 
@@ -148,7 +148,8 @@ export class CalculateSignals {
         // mutate the array item here to update computed array
         signal.matched = true;
         ++signal.times;
-        matches.push(signal);
+        // preview apps may be interfering here so don't push new matches without checking first
+        if (!matches.find((m) => m.id === signal.id)) matches.push(signal);
       }
     }
     this.#log();

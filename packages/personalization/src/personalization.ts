@@ -98,7 +98,7 @@ export class PersonalizationContext {
       }
   };
 
-  #compute = (pageView = this.#cpv) => {
+  compute = (pageView = this.#cpv) => {
     // Ensure our session is up to date before calculating signals
     this.session.update();
 
@@ -214,7 +214,7 @@ export class PersonalizationContext {
         const existingAudiences = this.audiences?.active.length || 0;
 
         // Compute signals and audiences
-        this.#compute(pageView);
+        this.compute(pageView);
 
         const hasNewSignals = this.signals?.matched?.length !== existingSignals;
         // If we have matched new signals...
@@ -381,7 +381,7 @@ export class PersonalizationContext {
     // If the manifest is available, compute signals for this page
     if (this.manifest?.isReady) {
       // Compute signals and audiences
-      this.#compute();
+      this.compute();
     } else l("pm");
 
     // Call event handler
@@ -397,7 +397,7 @@ export class PersonalizationContext {
       this.app = { ...existing, ...appSignals };
       const next = stringify(this.app);
       // Crude deep comparison to save needlessly recomputing signals
-      if (next !== prev) this.#compute();
+      if (next !== prev) this.compute();
     }
   };
 
@@ -411,7 +411,7 @@ export class PersonalizationContext {
       this.#save = { ...state, overrides: { ...existing, ...overrideSignals } };
       const next = stringify(this.state.overrides);
       // Crude deep comparison to save needlessly recomputing signals
-      if (next !== prev) this.#compute();
+      if (next !== prev) this.compute();
     }
   };
 }

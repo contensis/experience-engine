@@ -19,57 +19,83 @@ export interface WhereNotCriteria {
 }
 
 export type WhereCriteria =
+  | WhereBetween
   | WhereContains
+  | WhereEndsWith
   | WhereEqualTo
   | WhereExists
   | WhereGreaterThan
+  | WhereGreaterThanOrEqualTo
   | WhereIn
+  | WhereInRange
   | WhereLessThan
+  | WhereLessThanOrEqualTo
   | WhereMatchesRegex
   | WhereStartsWith;
 
-export interface WhereStartsWith {
+export interface WhereBetween {
   attribute: string;
-  startsWith: string;
-}
-export interface WhereGreaterThan {
-  attribute: string;
-  greaterThan: number;
-}
-export interface WhereMatchesRegex {
-  attribute: string;
-  matchesRegex: string;
-}
-export interface WhereLessThan {
-  attribute: string;
-  lessThan: number;
-}
-export interface WhereIn {
-  attribute: string;
-  in: string[];
-}
-export interface WhereExists {
-  attribute: string;
-  exists: boolean;
-}
-export interface WhereEqualTo {
-  attribute: string;
-  equalTo: string;
+  between: [number, number] | [string, string];
 }
 export interface WhereContains {
   attribute: string;
   contains: string;
 }
+export interface WhereEndsWith {
+  attribute: string;
+  endsWith: string;
+}
+export interface WhereEqualTo {
+  attribute: string;
+  equalTo: string;
+}
+export interface WhereExists {
+  attribute: string;
+  exists: boolean;
+}
+export interface WhereGreaterThan {
+  attribute: string;
+  greaterThan: number;
+}
+export interface WhereGreaterThanOrEqualTo {
+  attribute: string;
+  greaterThanOrEqualTo: number;
+}
+export interface WhereIn {
+  attribute: string;
+  in: string[];
+}
+/** Excusively for location.ip is a subnet range */
+export interface WhereInRange {
+  attribute: string;
+  inRange: string;
+}
+export interface WhereLessThan {
+  attribute: string;
+  lessThan: number;
+}
+export interface WhereLessThanOrEqualTo {
+  attribute: string;
+  lessThanOrEqualTo: number;
+}
+export interface WhereMatchesRegex {
+  attribute: string;
+  matchesRegex: string;
+}
+export interface WhereStartsWith {
+  attribute: string;
+  startsWith: string;
+}
 
-export type WhereOpKeys =
-  | keyof WhereContains
-  | keyof WhereEqualTo
-  | keyof WhereExists
-  | keyof WhereGreaterThan
-  | keyof WhereIn
-  | keyof WhereLessThan
-  | keyof WhereMatchesRegex
-  | keyof WhereStartsWith;
+// export type WhereOpKeys =
+//   | keyof WhereContains
+//   | keyof WhereEqualTo
+//   | keyof WhereExists
+//   | keyof WhereGreaterThan
+//   | keyof WhereIn
+//   | keyof WhereLessThan
+//   | keyof WhereMatchesRegex
+//   | keyof WhereStartsWith;
 
 export type WhereAttribute =
   | "cookie"
