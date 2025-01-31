@@ -17,6 +17,7 @@ export const usePersonalizationContext = () => {
     audiences: [],
     signals: [],
     context,
+    computed: [],
     isAudience: () => false,
     matched: [],
     pageViews: {
@@ -45,6 +46,7 @@ export const usePersonalizationContext = () => {
       setState({
         audiences,
         signals,
+        computed: context.signals?.computed || [],
         context,
         isAudience: (id: string | string[]) =>
           Array.isArray(id)

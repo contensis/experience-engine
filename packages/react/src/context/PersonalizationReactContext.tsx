@@ -16,6 +16,9 @@ export interface IPersonalizationReactContext {
   /** Array of signal ids the visitor has activated */
   signals: string[];
 
+  /** Array of computed signals from the last time signals were computed */
+  computed: ComputedSignal[];
+
   /** Returns true if the visitor is a member of any provided audience id */
   isAudience: (id: string | string[]) => boolean;
 
