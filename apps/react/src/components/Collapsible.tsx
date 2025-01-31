@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Collapsible = ({
   children,
   header = null,
-  label,
+  label = "",
+  openState = false,
+  onToggle,
 }: {
-  header: React.JSX.Element | null;
+  header?: React.JSX.Element | null;
   children: React.JSX.Element | null;
-  label: string;
+  label?: string;
+  openState?: boolean;
+  onToggle?: (state: boolean) => void;
 }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(openState);
+  useEffect(() => {
+    if (onToggle) onToggle(open);
+  }, [open, onToggle]);
   return (
     <div>
       <button

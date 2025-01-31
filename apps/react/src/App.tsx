@@ -45,23 +45,33 @@ const useGeoIP = () => {
 
 const MainLayout = () => {
   const geoLocation = useGeoIP();
-  const { audiences, context, isAudience, percentile, setAttributes, signals } =
-    usePersonalizationContext();
+  const {
+    audiences,
+    computed,
+    context: { t } = { t: 0 },
+    isAudience,
+    percentile,
+    setAttributes,
+    signals,
+  } = usePersonalizationContext();
 
-  const [, rerender] = useState(context?.t || 0);
-
-  useEffect(() => {
-    if (context?.t) rerender(context.t);
-  }, [context?.t, audiences.length, signals.length]);
-
-  console.log(context?.t);
-  // // This is to make the component re-render when the location has changed
-  // // (simulating client-side navigation to trigger MutationObserver callback)
-  // const [currentPage, setCurrentPage] = useState<string>("");
-  // const href = typeof location !== "undefined" ? location.href : "";
+  // This is to make the component re-render when the location has changed
+  // (simulating client-side navigation to trigger MutationObserver callback)
+  const [currentPage, setCurrentPage] = useState<string>("");
+  const href = typeof location !== "undefined" ? location.href : "";
   // useEffect(() => {
   //   setCurrentPage(href);
   // }, [href]);
+
+  const [, rerender] = useState(t);
+
+  useEffect(() => {
+    if (t) {
+      rerender(t);
+      console.log(t);
+    }
+    if (href !== currentPage) setCurrentPage(href);
+  }, [href, currentPage, t, audiences, signals]);
 
   // Track state so we can toggle via the test buttons
   const [isLoggedIn, setLoggedIn] = useState(
@@ -149,14 +159,12 @@ const MainLayout = () => {
               "",
               location.href.includes("/arts") ? "/" : "/arts/"
             );
-            // setCurrentPage(location.href);
+            setCurrentPage(location.href);
           }}
         >
           Navigate {location.href.includes("/arts") ? "Home" : `Arts`}
           {(() => {
-            const signal = context?.signals?.computed.find(
-              (s) => s.id === "artsVisitor"
-            );
+            const signal = computed.find((s) => s.id === "artsVisitor");
             const remaining = (signal?.minMatches || 0) - (signal?.times || 0);
             return remaining ? ` +${remaining}` : "";
           })()}

@@ -1,18 +1,145 @@
+import { useEffect, useState } from "react";
+import ReactSwitch from "react-switch";
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
+import { googlecode as theme } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { usePersonalizationContext } from "@contensis/personalization-react";
 import {
-  flexRender,
+  ComputedSignal,
+  EvaluateSignal,
+  ISignalAttributes,
+  PersonalizationContext,
+  SignalValue,
+  WhereCriteria,
+} from "@contensis/personalization";
+import {
   getCoreRowModel,
+  getExpandedRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
-import activeCheck from "../assets/green_checkmark.svg";
-import ReactSwitch from "react-switch";
-import { Store } from "@contensis/personalization";
 
-const store = new Store({ persist: true });
+import AudiencesTable from "./Table";
+import Collapsible from "./Collapsible";
+import { mapConditions, recalculateSignals } from "../util";
+
+import activeCheck from "../assets/green_checkmark.svg";
+
+SyntaxHighlighter.registerLanguage("json", json);
+
+type ConditionData = WhereCriteria & {
+  logic: string;
+};
+
+const ConditionsTable = ({
+  context,
+  row,
+  data,
+}: {
+  context?: PersonalizationContext;
+  data: ConditionData[];
+  row: Row<ComputedSignal>;
+}) => {
+  const table = useReactTable({
+    columns: [
+      {
+        id: "isAudienceActive",
+        header: " ",
+        meta: {
+          className: "active-check",
+        },
+
+        cell: (props) => {
+          const row = props.row.original;
+
+          const checked = EvaluateSignal(
+            row,
+            context?.signals?.attributes[
+              row.attribute as keyof ISignalAttributes
+            ] as SignalValue
+          );
+
+          return (row.logic.endsWith(".not") ? !checked : checked) ? (
+            <div style={{ textAlign: "right" }}>
+              <img
+                src={activeCheck}
+                alt={`Attribute ${row.attribute} was matched`}
+                title={`Attribute ${row.attribute} was matched`}
+                style={{ width: "16px" }}
+              />
+            </div>
+          ) : null;
+        },
+      },
+      {
+        header: "Group",
+        accessorKey: "logic",
+      },
+      {
+        header: "Attribute",
+        accessorKey: "attribute",
+        cell: (props) => <code>{props.getValue()}</code>,
+      },
+      {
+        header: "Value",
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        accessorFn: ({ attribute, logic, ...rest }) => Object.values(rest),
+        cell: (props) => {
+          const row = props.row.original;
+          return (
+            <code>
+              {
+                context?.signals?.attributes[
+                  row.attribute as keyof ISignalAttributes
+                ] as SignalValue
+              }
+            </code>
+          );
+        },
+      },
+      {
+        header: "Operator",
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        accessorFn: ({ attribute, logic, ...rest }) => Object.keys(rest),
+      },
+      {
+        header: "Operand",
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        accessorFn: ({ attribute, logic, ...rest }) => Object.values(rest),
+      },
+    ],
+    data,
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand: () => true,
+  });
+  return (
+    <>
+      <AudiencesTable table={table} />
+      <Collapsible label={"raw JSON"}>
+        <div className="json-panel" style={{ padding: "2em" }}>
+          <SyntaxHighlighter language="json" style={theme}>
+            {JSON.stringify(row.original, null, 2)}
+          </SyntaxHighlighter>
+        </div>
+      </Collapsible>
+    </>
+  );
+};
 
 const Signals = () => {
   const { context, manifest, matched, signals, state } =
     usePersonalizationContext();
+
+  const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
+  useEffect(() => {
+    setConditions(
+      (manifest?.signals ?? []).map((signal) => [
+        signal.id,
+        mapConditions(signal?.where),
+      ])
+    );
+  }, [manifest?.signals]);
 
   const table = useReactTable({
     columns: [
@@ -54,16 +181,7 @@ const Signals = () => {
 
                     state.signals.matched[signalId] = matches;
                   }
-                  store.set(state);
-
-                  // // Trigger a new pageView in the context to force signal and audience recalculation
-                  // context.pageView();
-
-                  // Hack the context by setting the CalculatedSignals to null
-                  // in the pageViews array for this (last) route/pageView
-                  // and then manually call the compute method
-                  context.pageViews[context.pageViews.length - 1][2] = null;
-                  context.compute();
+                  recalculateSignals(context, state);
                 }
               }}
               height={22}
@@ -76,6 +194,7 @@ const Signals = () => {
       {
         header: "Id",
         accessorKey: "id",
+        cell: (props) => <code>{props.getValue()}</code>,
       },
       {
         header: "Name",
@@ -115,57 +234,45 @@ const Signals = () => {
             />
           ) : null,
       },
+      {
+        id: "expander",
+        header: () => null,
+        cell: ({ row }) => {
+          return row.getCanExpand() ? (
+            <button
+              {...{
+                onClick: row.getToggleExpandedHandler(),
+                style: { cursor: "pointer" },
+              }}
+            >
+              {row.getIsExpanded() ? "👇" : "🤔"}
+            </button>
+          ) : (
+            "🔵"
+          );
+        },
+      },
     ],
-    data: context?.signals?.computed ?? [],
+    data:
+      context?.signals?.computed.sort((a, b) => {
+        if (a.id < b.id) return -1;
+        if (a.id > b.id) return 1;
+        return 0;
+      }) ?? [],
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand: () => true,
   });
 
   return (
-    <table>
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        {table.getFooterGroups().map((footerGroup) => (
-          <tr key={footerGroup.id}>
-            {footerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.footer,
-                      header.getContext()
-                    )}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </tfoot>
-    </table>
+    <AudiencesTable
+      table={table}
+      renderSubComponent={(row) => {
+        const signal = row.original.id;
+        const data = conditions.find(([id]) => id === signal)?.[1] || [];
+        return <ConditionsTable row={row} data={data} context={context} />;
+      }}
+    />
   );
 };
 export default Signals;

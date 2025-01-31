@@ -43,7 +43,16 @@
 .read-the-docs {
   color: #888;
 }
-.signal-attributes {
+
+button.collapsible {
+  float: right;
+  position: relative;
+  top: -10px;
+  font-size: 80%;
+}
+
+.signal-attributes,
+.json-panel {
   text-align: start;
   border-radius: 25px;
   border: 1px solid;
@@ -53,12 +62,24 @@
 .react-tabs {
   padding: 0.6em 0 1.6em 0;
 }
-code {
+code:not(.language-json),
+pre {
+  box-sizing: border-box;
   padding: 0.3em 0.6em;
   margin: 0;
   white-space: break-spaces;
   background-color: #656c7633;
   border-radius: 6px;
+}
+.json-panel {
+  background-color: rgba(255, 255, 255, 0.87);
+  margin: 1em 1em;
+  padding: 0 0.6em;
+}
+.json-panel pre {
+  width: 100%;
+  background: none !important;
+  padding: 0em 2em !important;
 }
 code input {
   font-family: monospace;
@@ -85,20 +106,37 @@ button.override {
   margin-left: 0.6em;
 }
 table {
+  border-spacing: unset;
   width: 100%;
 }
 table,
 th,
+tr:hover,
+thead,
+tfoot,
 .title-column {
   background-color: rgb(96 139 168 / 0.2);
 }
 th,
 td {
   margin: 0.1em 0.3em;
-  padding: 0.1em 0.3em;
+  padding: 0.3em 0.6em;
+  font-size: 90%;
 }
 
+td button {
+  font-size: 80%;
+}
+tr .sub {
+  padding: 0.6em 2em;
+}
 .title-column {
   font-size: 80%;
   font-weight: bold;
+}
+.active-check {
+  width: 32px;
+}
+.sub thead {
+  text-align: left;
 }

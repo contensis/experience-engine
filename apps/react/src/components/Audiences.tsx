@@ -1,16 +1,113 @@
+import { useEffect, useState } from "react";
+import ReactSwitch from "react-switch";
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
+import { googlecode as theme } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { usePersonalizationContext } from "@contensis/personalization-react";
-import { Store } from "@contensis/personalization";
 import {
-  flexRender,
+  Condition,
+  IAudience,
+  PersonalizationContext,
+} from "@contensis/personalization";
+import {
   getCoreRowModel,
+  getExpandedRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
+import AudiencesTable from "./Table";
+import Collapsible from "./Collapsible";
+import { mapConditions, recalculateSignals } from "../util";
+
 import activeCheck from "../assets/green_checkmark.svg";
-import ReactSwitch from "react-switch";
 
-const store = new Store({ persist: true });
+SyntaxHighlighter.registerLanguage("json", json);
 
-const Audiences = () => {
+type ConditionData = Condition & {
+  logic: string;
+};
+
+const ConditionsTable = ({
+  context,
+  row,
+  data,
+}: {
+  context?: PersonalizationContext;
+  data: ConditionData[];
+  row: Row<IAudience>;
+}) => {
+  const table = useReactTable({
+    columns: [
+      {
+        id: "isAudienceActive",
+        header: " ",
+        meta: {
+          className: "active-check",
+        },
+
+        cell: (props) => {
+          const row = props.row.original;
+          if (!("type" in row)) return null;
+
+          const state = context?.state;
+          let checked = false;
+          if (row.type === "audience") {
+            checked = state?.audiences?.active.includes(row.id) || false;
+          }
+
+          if (row.type === "signal") {
+            checked = state?.signals?.active.includes(row.id) || false;
+          }
+
+          return (row.logic.endsWith(".not") ? !checked : checked) ? (
+            <div style={{ textAlign: "right" }}>
+              <img
+                src={activeCheck}
+                alt={`${
+                  row.logic.endsWith(".not") ? `Did not match` : `Matched`
+                } ${row.type} ${row.id}`}
+                title={`${
+                  row.logic.endsWith(".not") ? `Did not match` : `Matched`
+                } ${row.type} ${row.id}`}
+                style={{ width: "16px" }}
+              />
+            </div>
+          ) : null;
+        },
+      },
+      {
+        header: "Group",
+        accessorKey: "logic",
+      },
+      {
+        header: "Type",
+        accessorKey: "type",
+      },
+      {
+        header: "Id",
+        accessorKey: "id",
+      },
+    ],
+    data,
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand: () => true,
+  });
+
+  return (
+    <>
+      <AudiencesTable table={table} />
+      <Collapsible label={"raw JSON"}>
+        <div className="json-panel" style={{ padding: "2em" }}>
+          <SyntaxHighlighter language="json" style={theme}>
+            {JSON.stringify(row.original, null, 2)}
+          </SyntaxHighlighter>
+        </div>
+      </Collapsible>
+    </>
+  );
+};
+const Audiences = ({ ids }: { ids?: string[] }) => {
   const { context, isAudience, manifest, state } = usePersonalizationContext();
   const audiences = manifest?.audiences ?? [];
   const table = useReactTable({
@@ -20,7 +117,7 @@ const Audiences = () => {
         header: " ",
         accessorFn: ({ id }) => isAudience(id),
         cell: (props) => (
-          <label title="Activate or deactivate this signal">
+          <label title="Activate or deactivate this audience">
             <span></span>
             <ReactSwitch
               onChange={() => {
@@ -45,16 +142,7 @@ const Audiences = () => {
                       { p: "preview", t: 0 },
                     ];
                   }
-                  store.set(state);
-
-                  // // Trigger a new pageView in the context to force signal and audience recalculation
-                  // context.pageView();
-
-                  // Hack the context by setting the CalculatedSignals to null
-                  // in the pageViews array for this (last) route/pageView
-                  // and then manually call the compute method
-                  context.pageViews[context.pageViews.length - 1][2] = null;
-                  context.compute();
+                  recalculateSignals(context, state);
                 }
               }}
               height={22}
@@ -65,81 +153,69 @@ const Audiences = () => {
         ),
       },
       {
-        id: "isAudience",
-        header: "*",
-        accessorFn: ({ id }) => isAudience(id),
-        cell: (props) =>
-          isAudience(props.row.original.id) ? (
-            <img
-              src={activeCheck}
-              alt={`Audience ${props.row.original.id} is active`}
-              style={{ width: "16px" }}
-            />
-          ) : null,
-      },
-      {
-        header: "Id",
-        accessorKey: "id",
-      },
-      {
         header: "Name",
         accessorKey: "name",
+        cell: (props) => (
+          <>
+            {props.getValue()}
+            <br />
+            <code>{props.row.original.id}</code>
+          </>
+        ),
       },
       {
         header: "Description",
         accessorKey: "description",
       },
+      {
+        id: "expander",
+        header: () => null,
+        cell: ({ row }) => {
+          return row.getCanExpand() ? (
+            <button
+              {...{
+                onClick: row.getToggleExpandedHandler(),
+                style: { cursor: "pointer" },
+              }}
+            >
+              {row.getIsExpanded() ? "👇" : "🤔"}
+            </button>
+          ) : (
+            "🔵"
+          );
+        },
+      },
     ],
-    data: audiences,
+    data: (ids ? audiences.filter((a) => ids.includes(a.id)) : audiences).sort(
+      (a, b) => {
+        if (a.id < b.id) return -1;
+        if (a.id > b.id) return 1;
+        return 0;
+      }
+    ),
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand: () => true,
   });
+  const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
+  useEffect(() => {
+    setConditions(
+      (manifest?.audiences ?? []).map((audience) => [
+        audience.id,
+        mapConditions(audience?.conditions),
+      ])
+    );
+  }, [manifest?.audiences, isAudience]);
 
   return (
-    <table>
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        {table.getFooterGroups().map((footerGroup) => (
-          <tr key={footerGroup.id}>
-            {footerGroup.headers.map((header) => (
-              <th key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.footer,
-                      header.getContext()
-                    )}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </tfoot>
-    </table>
+    <AudiencesTable
+      table={table}
+      renderSubComponent={(row) => {
+        const audienceId = row.original.id;
+        const data = conditions.find(([id]) => id === audienceId)?.[1] || [];
+        return <ConditionsTable row={row} data={data} context={context} />;
+      }}
+    />
   );
 };
 export default Audiences;
