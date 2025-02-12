@@ -3,6 +3,7 @@ import { IManifestClientArgs, Manifest } from "./providers/manifest";
 import {
   AppOverrideSignals,
   AppSignals,
+  IHandlers,
   IManifest,
   IPersonalizationStore,
 } from "./models";
@@ -26,15 +27,43 @@ export const GLOBAL = "CONTENSIS_PERSONALIZATION";
 export type PersonalizationContextOptions = {
   client?: IManifestClientArgs | undefined;
   debug?: PersonalizationContext["debug"];
-  handlers?: Partial<PersonalizationContext["handlers"]>;
+  handlers?: Partial<IHandlers>;
   manifest?: IManifest;
   session?: true;
 };
 
+// /** User-supplied event handlers */
+// type IHandlers = {
+//   /** onInit event handler, called when the context is initialized */
+//   onInit: (context: PersonalizationContext) => void;
+//   /** onNavigate event handler, called when client-side navigation has been detected */
+//   onNavigate: (
+//     context: PersonalizationContext,
+//     current: string,
+//     previous?: string
+//   ) => void;
+//   /** onPageView event handler, called when a pageView has been registered and signals have been calculated */
+//   onPageView: (
+//     context: PersonalizationContext,
+//     current: string,
+//     previous?: string
+//   ) => void;
+//   /** onManifestReady event handler, called when a manifest has been loaded and signals have been calculated */
+//   onManifestReady: (
+//     context: PersonalizationContext,
+//     manifest: IManifest
+//   ) => void;
+//   /** onComputed event handler, called when signals and audiences have been calculated */
+//   onComputed: (context: PersonalizationContext) => void;
+// };
+
 type PageView = [string, Date, CalculateSignals | null];
 
 export class PersonalizationContext {
+  static Store = Store;
+
   #store: Store;
+  #events: [keyof IHandlers, IHandlers[keyof IHandlers]][] = [];
   /** Output console.log messaging, true or v=verbose */
   debug: boolean | "v";
   cpid: string;
@@ -49,37 +78,38 @@ export class PersonalizationContext {
   app?: AppSignals;
   t = 0;
 
-  /** User-supplied event handlers */
-  handlers: {
-    /** onInit event handler, called when the context is initialized */
-    onInit: (context: PersonalizationContext) => void;
-    /** onNavigate event handler, called when client-side navigation has been detected */
-    onNavigate: (
-      context: PersonalizationContext,
-      current: string,
-      previous?: string
-    ) => void;
-    /** onPageView event handler, called when a pageView has been registered and signals have been calculated */
-    onPageView: (
-      context: PersonalizationContext,
-      current: string,
-      previous?: string
-    ) => void;
-    /** onManifestReady event handler, called when a manifest has been loaded and signals have been calculated */
-    onManifestReady: (
-      context: PersonalizationContext,
-      manifest: IManifest
-    ) => void;
-    /** onComputed event handler, called when signals and audiences have been calculated */
-    onComputed: (context: PersonalizationContext) => void;
-  } = {
-    onInit: () => {},
-    onNavigate: () => {},
-    onPageView: () => {},
-    onManifestReady: () => {},
-    onComputed: () => {},
-  };
+  // handlers: IHandlers = {
+  //   onInit: () => {},
+  //   onNavigate: () => {},
+  //   onPageView: () => {},
+  //   onManifestReady: () => {},
+  //   onComputed: () => {},
+  // };
   log?: typeof logger;
+
+  addHandler = <T extends keyof IHandlers>(key: T, callback: IHandlers[T]) => {
+    this.#events.push([key, callback]);
+    return callback;
+  };
+
+  removeHandler = <T extends keyof IHandlers>(
+    key: T,
+    callback: IHandlers[T]
+  ) => {
+    this.#events = this.#events.filter(
+      (e) => e[0] !== key || e[1] !== callback
+    );
+  };
+
+  #handler = <T extends keyof IHandlers>(
+    key: T,
+    ...args: Parameters<IHandlers[T]>
+  ) => {
+    for (const [evt, cb] of this.#events.filter((e) => e[0] === key)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (cb as any)(...args);
+    }
+  };
 
   /** Log a debug message */
   l = (message: keyof typeof messages, ...values: unknown[]) => {
@@ -130,8 +160,9 @@ export class PersonalizationContext {
     this.session.update();
     this.t = now();
 
-    const { handlers } = this;
-    handlers.onComputed(this);
+    // const { handlers } = this;
+    // handlers.onComputed(this);
+    this.#handler("onComputed", this);
   };
 
   #init = () => {
@@ -139,8 +170,9 @@ export class PersonalizationContext {
 
     this.#observe();
 
-    const { handlers } = this;
-    handlers.onInit(this);
+    // const { handlers } = this;
+    // handlers.onInit(this);
+    this.#handler("onInit", this);
   };
 
   #logs = async (debug?: boolean) =>
@@ -155,7 +187,7 @@ export class PersonalizationContext {
   #observe = () => {
     let lastHref = "";
     const observer = new MutationObserver(() => {
-      const { currentPage, handlers, l, page } = this;
+      const { currentPage, l, page } = this;
       // If page has changed (or is initial page load)
       if (page !== lastHref) {
         // Log the page view (debug only)
@@ -166,7 +198,8 @@ export class PersonalizationContext {
         this.pageView();
 
         // Call navigate handler
-        handlers.onNavigate(this, page, lastHref);
+        // handlers.onNavigate(this, page, lastHref);
+        this.#handler("onNavigate", this, page, lastHref);
       }
     });
 
@@ -179,7 +212,7 @@ export class PersonalizationContext {
   };
 
   #onManifestReady = (manifest: IManifest) => {
-    const { handlers, l, pageViews, state } = this;
+    const { l, pageViews, state } = this;
 
     // Should we update location attributes from the manifest to the session?
     const stateLocation = state.manifest?.location;
@@ -228,7 +261,8 @@ export class PersonalizationContext {
     }
 
     // Call event handler
-    handlers.onManifestReady(this, manifest);
+    // handlers.onManifestReady(this, manifest);
+    this.#handler("onManifestReady", this, manifest);
   };
 
   /** Safely return the current location.href */
@@ -256,7 +290,7 @@ export class PersonalizationContext {
     }
   }
 
-  /** Check the store for an existing entry or initialise a new state */
+  /** Return an existing entry from the store or initialise a new state */
   get state() {
     return (
       this.#store.get<IPersonalizationStore>() /** generate a personalisation uuid and a percentile for random bucketing */ || {
@@ -283,9 +317,11 @@ export class PersonalizationContext {
     this.debug = debug || false;
 
     for (const h in handlers) {
-      const method = h as keyof PersonalizationContext["handlers"];
-      if (typeof handlers[method] === "function")
-        (this.handlers[method] as unknown) = handlers[method];
+      const method = h as keyof IHandlers;
+      if (typeof handlers[method] === "function") {
+        // (this.handlers[method] as unknown) = handlers[method];
+        this.addHandler(method, handlers[method]);
+      }
     }
 
     this.currentPage = this.page;
@@ -336,7 +372,7 @@ export class PersonalizationContext {
   }
 
   pageView = (url = this.page) => {
-    const { handlers, l, pageViews } = this;
+    const { l, pageViews } = this;
     pageViews.push([url, new Date(), null]);
 
     const state = this.state;
@@ -385,7 +421,8 @@ export class PersonalizationContext {
     } else l("pm");
 
     // Call event handler
-    handlers.onPageView(this, currentPage, previousPage);
+    // handlers.onPageView(this, currentPage, previousPage);
+    this.#handler("onPageView", this, currentPage, previousPage);
   };
 
   /** Add new signal attributes identified within the app to the personalization context */
@@ -412,6 +449,26 @@ export class PersonalizationContext {
       const next = stringify(this.state.overrides);
       // Crude deep comparison to save needlessly recomputing signals
       if (next !== prev) this.compute();
+    }
+  };
+
+  /** Toggle an audience on or off for use when previewing sites */
+  toggleAudience = (audienceId: string) => {
+    const { state } = this;
+    if (state.audiences?.matched) {
+      if (state.audiences.active.includes(audienceId)) {
+        // "Uncheck" audience by clearing all previous matches in the store
+        // We can get away with just mutating state here
+        delete state.audiences.matched[audienceId];
+      } else {
+        // Add audience id to the matched array
+        // so it is set active in the next compute;
+        state.audiences.matched[audienceId] = [{ p: "preview", t: 0 }];
+      }
+      // Persist the state to the store
+      this.#save = state;
+      // and then call the compute method
+      this.compute();
     }
   };
 }

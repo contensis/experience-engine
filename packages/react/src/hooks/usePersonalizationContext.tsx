@@ -7,8 +7,6 @@ import {
 
 type PersonalizationLogger = (message: string, ...values: unknown[]) => void;
 
-let eOnComputed: ((context: PersonalizationContext) => void) | undefined;
-
 /** React hook that returns personalization state for you to provide personalized experiences in your components */
 export const usePersonalizationContext = () => {
   const context = useContext(PersonalizationReactContext);
@@ -16,7 +14,7 @@ export const usePersonalizationContext = () => {
   const [state, setState] = useState<IPersonalizationReactContext>({
     audiences: [],
     signals: [],
-    context,
+    context: context as PersonalizationContext,
     computed: [],
     isAudience: () => false,
     matched: [],
@@ -27,6 +25,7 @@ export const usePersonalizationContext = () => {
     percentile: 0,
     setAttributes: () => {},
     overrideAttributes: () => {},
+    toggleAudience: () => {},
     t: 0,
   });
 
@@ -62,39 +61,45 @@ export const usePersonalizationContext = () => {
         percentile,
         setAttributes,
         state,
+        toggleAudience: context.toggleAudience,
         t,
       });
     }
   };
 
   useEffect(() => {
-    if (context) {
-      // Add "on" handlers that update react state so we can
-      // trigger rerenders when data has been updated
-      if (!eOnComputed) eOnComputed = context.handlers.onComputed;
-      context.handlers.onComputed = (context) => {
-        (context.l as PersonalizationLogger)(`handlers.onComputed`, context);
+    // Add "on" handlers that update react state so we can
+    // trigger rerenders when data has been updated
+    const computedHandler = context?.addHandler("onComputed", (context) => {
+      (context.l as PersonalizationLogger)(`handlers.onComputed`, context);
+      updateState();
+    });
+
+    const manifestHandler = context?.addHandler(
+      "onManifestReady",
+      (context, manifest) => {
+        (context.l as PersonalizationLogger)(
+          `handlers.onManifestReady`,
+          context
+        );
         updateState();
-        eOnComputed?.(context);
-      };
-    }
-    // Reassign existing/original "on" handlers when this component
+      }
+    );
+
+    // Remove any "on" handlers when this component
     // is unmounted
     return () => {
-      if (eOnComputed && context) {
-        context.handlers.onComputed = eOnComputed;
-        eOnComputed = undefined;
-      }
+      if (computedHandler)
+        context?.removeHandler("onComputed", computedHandler);
+      if (manifestHandler)
+        context?.removeHandler("onManifestReady", manifestHandler);
     };
   }, []);
 
   useEffect(() => {
     updateState();
-  }, [
-    context?.pageViews.length,
-    context?.t,
-    context?.signals?.matched.map((s) => `${s.id}${s.times}`).join(""),
-  ]);
+    console.log(`updateState:`, context?.t);
+  }, [context?.pageViews.length, context?.t]);
 
   if (!context) {
     throw new Error(

@@ -3,6 +3,7 @@ import {
   PersonalizationContext,
   IManifest,
   IManifestClientArgs,
+  IHandlers,
 } from "@contensis/personalization";
 import { PersonalizationReactContext } from "./PersonalizationReactContext";
 
@@ -10,7 +11,7 @@ export type PersonalizationProviderContextProps = {
   /** Output console.log messaging, true or v=verbose */
   debug?: PersonalizationContext["debug"];
   session?: boolean;
-} & Partial<PersonalizationContext["handlers"]>;
+} & Partial<IHandlers>;
 
 export type PersonalizationProviderInstantiationProps =
   PersonalizationProviderContextProps & Partial<IManifestClientArgs>;
@@ -32,7 +33,7 @@ export const PersonalizationProvider = (
   props: React.PropsWithChildren<PersonalizationProviderProps>
 ) => {
   const currentContext = useMemo(() => {
-    if ("context" in props) {
+    if ("context" in props && props.context) {
       // We have been provided a context already
       return props.context;
     } else {

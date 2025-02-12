@@ -1,14 +1,14 @@
 import { createContext } from "react";
 import {
   ComputedSignal,
-  IManifest,
   IPersonalizationStore,
+  Manifest,
   PersonalizationContext,
 } from "@contensis/personalization";
 
 export interface IPersonalizationReactContext {
-  /** The main PersonalizationContext object */
-  context?: PersonalizationContext;
+  /** Singleton context object that manages the personalization features */
+  context: PersonalizationContext;
 
   /** Array of audience ids the visitor is a member of */
   audiences: string[];
@@ -24,8 +24,9 @@ export interface IPersonalizationReactContext {
 
   /** Signals the vistor has matched in this page view */
   matched: ComputedSignal[];
+
   /** The manifest we are using to calculate signals and audiences */
-  manifest?: IManifest;
+  manifest?: Manifest;
 
   /** The pageViews object containing page view counts for this visitor */
   pageViews: {
@@ -54,6 +55,9 @@ export interface IPersonalizationReactContext {
 
   /** Set signal attributes within the app to override the personalization context */
   overrideAttributes: PersonalizationContext["overrideAttributes"];
+
+  /** Toggle an audience on or off for use when previewing sites */
+  toggleAudience: PersonalizationContext["toggleAudience"];
 }
 
 export const PersonalizationReactContext = createContext<

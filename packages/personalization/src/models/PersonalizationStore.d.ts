@@ -12,8 +12,8 @@ export interface IPersonalizationStore {
   currentPage?: string;
   previousPage?: string;
   manifest?: IManifest;
-  signals?: ISignalsStore;
-  audiences?: IAudiencesStore;
+  signals: ISignalsStore;
+  audiences: IAudiencesStore;
   overrides?: AppOverrideSignals
 }
 
