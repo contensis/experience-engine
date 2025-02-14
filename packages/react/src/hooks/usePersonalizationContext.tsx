@@ -5,8 +5,6 @@ import {
   PersonalizationReactContext,
 } from "../context/PersonalizationReactContext";
 
-type PersonalizationLogger = (message: string, ...values: unknown[]) => void;
-
 /** React hook that returns personalization state for you to provide personalized experiences in your components */
 export const usePersonalizationContext = () => {
   const context = useContext(PersonalizationReactContext);
@@ -70,21 +68,13 @@ export const usePersonalizationContext = () => {
   useEffect(() => {
     // Add "on" handlers that update react state so we can
     // trigger rerenders when data has been updated
-    const computedHandler = context?.addHandler("onComputed", (context) => {
-      (context.l as PersonalizationLogger)(`handlers.onComputed`, context);
+    const computedHandler = context?.addHandler("onComputed", () => {
       updateState();
     });
 
-    const manifestHandler = context?.addHandler(
-      "onManifestReady",
-      (context, manifest) => {
-        (context.l as PersonalizationLogger)(
-          `handlers.onManifestReady`,
-          context
-        );
-        updateState();
-      }
-    );
+    const manifestHandler = context?.addHandler("onManifestReady", () => {
+      updateState();
+    });
 
     // Remove any "on" handlers when this component
     // is unmounted
@@ -98,7 +88,7 @@ export const usePersonalizationContext = () => {
 
   useEffect(() => {
     updateState();
-    console.log(`updateState:`, context?.t);
+    // console.log(`updateState:`, context?.t);
   }, [context?.pageViews.length, context?.t]);
 
   if (!context) {

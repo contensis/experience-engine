@@ -65,9 +65,6 @@ export const Personalize = <
       null
   );
 
-  // Keep the content variants in component state
-  const [contentVariants] = useState(props.variants);
-
   // Maintain state to set personalized variant
   // Initial value is the default content (also rendered in SSR)
   const [personalizedVariant, setPersonalizedVariant] =
@@ -78,7 +75,7 @@ export const Personalize = <
   // has activated any of the audiences in each content variant
   useEffect(() => {
     let personalized = false;
-    for (const variant of contentVariants) {
+    for (const variant of props.variants) {
       if (isAudience(variant[audiences])) {
         setPersonalizedVariant(variant);
         personalized = true;
@@ -86,7 +83,7 @@ export const Personalize = <
       }
     }
     if (!personalized) setPersonalizedVariant(defaultContent);
-  }, [audiences, contentVariants, defaultContent, isAudience]);
+  }, [audiences, defaultContent, isAudience]);
 
   // Render the component with any variant
   if (Component && personalizedVariant) {
