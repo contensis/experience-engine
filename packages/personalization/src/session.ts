@@ -5,6 +5,9 @@ import { BrowserSignalsSnapshot } from "./signals/browser";
 import { UrlSignals } from "./signals/url";
 import { date, isoDate, isSSR, now, toSeconds } from "./util";
 
+/**
+ * Interact with session store and hold session signals
+ */
 export class Session {
   #context: PersonalizationContext;
   #store: Store;

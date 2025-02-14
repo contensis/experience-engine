@@ -25,84 +25,97 @@ import { Session } from "./session";
 export const GLOBAL = "CONTENSIS_PERSONALIZATION";
 
 export type PersonalizationContextOptions = {
+  /** Required configuration for the Manifest Client */
   client?: IManifestClientArgs | undefined;
+  /** Output additional debug information to console and localStorage */
   debug?: PersonalizationContext["debug"];
+  /** Add handler(s) to call after the specified event */
   handlers?: Partial<IHandlers>;
+  /** The Personalization Manifest containing the working rules for calculating signals and audiences */
   manifest?: IManifest;
   /** Are we running the preview Personalization Context */
   preview?: boolean;
+  /**
+   * Not implemented - Keep everything in sessionStorage rather than localStorage,
+   * past sessions cannot be considered for counting previously matched
+   * signals and active audiences, only those matched in the current session
+   * */
   session?: true;
 };
-
-// /** User-supplied event handlers */
-// type IHandlers = {
-//   /** onInit event handler, called when the context is initialized */
-//   onInit: (context: PersonalizationContext) => void;
-//   /** onNavigate event handler, called when client-side navigation has been detected */
-//   onNavigate: (
-//     context: PersonalizationContext,
-//     current: string,
-//     previous?: string
-//   ) => void;
-//   /** onPageView event handler, called when a pageView has been registered and signals have been calculated */
-//   onPageView: (
-//     context: PersonalizationContext,
-//     current: string,
-//     previous?: string
-//   ) => void;
-//   /** onManifestReady event handler, called when a manifest has been loaded and signals have been calculated */
-//   onManifestReady: (
-//     context: PersonalizationContext,
-//     manifest: IManifest
-//   ) => void;
-//   /** onComputed event handler, called when signals and audiences have been calculated */
-//   onComputed: (context: PersonalizationContext) => void;
-// };
 
 type PageView = [string, Date, CalculateSignals | null];
 
 export class PersonalizationContext {
   static Store = Store;
 
+  /** Private store object initiated to localStorage */
   #store: Store;
+  /** Array of user-supplied event handlers */
   #events: [keyof IHandlers, IHandlers[keyof IHandlers]][] = [];
+
   /** Output console.log messaging, true or v=verbose */
   debug: boolean | "v";
+  /** Contensis Personalization Id */
   cpid: string;
+  /** Random percentile for experiment bucketing */
   percentile: number;
-  audiences?: CalculateAudiences;
+
+  /** The current page href we are working with */
   currentPage: string = "";
+  /** The previous page href we are working with */
   previousPage?: string;
+
+  /** Holds details pertaining to the current session */
   session!: Session;
+
+  /** The audiences last calculated */
+  audiences?: CalculateAudiences;
+  /** The signals last calculated */
   signals?: CalculateSignals;
+
+  /** The Manifest containing the working rules for this context */
   manifest?: Manifest;
+
+  /**
+   * The pageViews we have counted and calculated since the Personalization Context was last instantiated
+   * Used for counting pageViews in a SPA and monitored by the MutationObserver created in the observe() method
+   */
   pageViews: PageView[] = [];
+
+  // TODO: review and replace
   app?: AppSignals;
+
+  /** Timestamp this context was last updated */
   t = 0;
 
-  // handlers: IHandlers = {
-  //   onInit: () => {},
-  //   onNavigate: () => {},
-  //   onPageView: () => {},
-  //   onManifestReady: () => {},
-  //   onComputed: () => {},
-  // };
+  /** Log method which is defined if we have set debug flag */
   log?: typeof logger;
 
-  addHandler = <T extends keyof IHandlers>(key: T, callback: IHandlers[T]) => {
-    this.#events.push([key, callback]);
-    return callback;
+  /**
+   * Add a handler with a callback function that will be invoked when the event occurs
+   * returns the callback function that can be used to supply the removeHandler argument
+   */
+  addHandler = <T extends keyof IHandlers>(
+    event: T,
+    callback: IHandlers[T]
+  ) => {
+    this.#events.push([event, callback]);
+    return callback; // return the callback so it can be passed to the removeHandler
   };
 
+  /** Clean up any handlers previously added */
   removeHandler = <T extends keyof IHandlers>(
     key: T,
     callback: IHandlers[T]
   ) => {
+    // Filter the events array to remove the event
+    // matching the supplied key and callback
     this.#events = this.#events.filter(
       (e) => e[0] !== key || e[1] !== callback
     );
   };
 
+  /** Invoke event handler(s) */
   #handler = <T extends keyof IHandlers>(
     key: T,
     ...args: Parameters<IHandlers[T]>
@@ -130,6 +143,10 @@ export class PersonalizationContext {
       }
   };
 
+  /**
+   * Compute (or recompute) the signals and audiences from this page
+   * @param pageView optional pageView object to compute signals for (defaults to current pageView)
+   */
   compute = (pageView = this.#cpv) => {
     // Ensure our session is up to date before calculating signals
     this.session.update();
@@ -162,25 +179,24 @@ export class PersonalizationContext {
     this.session.update();
     this.t = now();
 
-    // const { handlers } = this;
-    // handlers.onComputed(this);
+    // Invoke user-supplied event handler(s)
     this.#handler("onComputed", this);
   };
 
+  /** Initialise the context, or bow out here if we are running in SSR */
   #init = () => {
     if (isSSR()) return;
 
     this.#observe();
 
-    // const { handlers } = this;
-    // handlers.onInit(this);
+    // Invoke user-supplied event handler(s)
     this.#handler("onInit", this);
   };
 
+  /** Dynamically import logging if we have set debug flag */
   #logs = async (debug?: boolean) =>
     debug && !this.log
-      ? // Dynamically import logging if we have set debug flag
-        import("./logs").then(({ logger }) => {
+      ? import("./logs").then(({ logger }) => {
           this.log = logger;
         })
       : void 0;
@@ -199,8 +215,7 @@ export class PersonalizationContext {
         // Record the page view
         this.pageView();
 
-        // Call navigate handler
-        // handlers.onNavigate(this, page, lastHref);
+        // Invoke user-supplied event handler(s)
         this.#handler("onNavigate", this, page, lastHref);
       }
     });
@@ -213,6 +228,7 @@ export class PersonalizationContext {
     });
   };
 
+  /** Actions to call when the manifest has been loaded */
   #onManifestReady = (manifest: IManifest) => {
     const { l, pageViews, state } = this;
 
@@ -262,8 +278,7 @@ export class PersonalizationContext {
       }
     }
 
-    // Call event handler
-    // handlers.onManifestReady(this, manifest);
+    // Invoke user-supplied event handler(s)
     this.#handler("onManifestReady", this, manifest);
   };
 
@@ -278,7 +293,6 @@ export class PersonalizationContext {
     const { pageViews } = this;
     const len = pageViews.length;
     return len ? pageViews[pageViews.length - 1] : null;
-    // return pageViews[pageViews.length - 1];
   }
 
   /** Assign any state or [value, options] to persist the value */
@@ -319,6 +333,7 @@ export class PersonalizationContext {
 
     this.debug = debug || false;
 
+    // Add any user-supplied handlers to the events array to be invoked at the right times
     for (const h in handlers) {
       const method = h as keyof IHandlers;
       if (typeof handlers[method] === "function") {
@@ -348,7 +363,7 @@ export class PersonalizationContext {
     // Dynamically import logging if we have set debug flag
     l("init", id, pc, state.pageViews);
 
-    // Initialise a new session
+    // Initialise a new session, create a session store and hold session signals
     this.session = new Session(this);
 
     // Ensure we have a manifest
@@ -376,6 +391,7 @@ export class PersonalizationContext {
     this.#init();
   }
 
+  /** Register a new page view to compute signals and audiences with */
   pageView = (url = this.page) => {
     const { l, pageViews } = this;
     pageViews.push([url, new Date(), null]);
@@ -425,8 +441,7 @@ export class PersonalizationContext {
       this.compute();
     } else l("pm");
 
-    // Call event handler
-    // handlers.onPageView(this, currentPage, previousPage);
+    // Invoke user-supplied event handler(s)
     this.#handler("onPageView", this, currentPage, previousPage);
   };
 
