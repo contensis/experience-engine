@@ -10,7 +10,10 @@ import { PersonalizationReactContext } from "./PersonalizationReactContext";
 export type PersonalizationProviderContextProps = {
   /** Output console.log messaging, true or v=verbose */
   debug?: PersonalizationContext["debug"];
+  /** Not implemented - Avoid localStorage and maintain signals and audiences in sessionStorage */
   session?: boolean;
+  /** Request the latest Manifest version, running the Personalization Context in preview */
+  preview?: boolean;
 } & Partial<IHandlers>;
 
 export type PersonalizationProviderInstantiationProps =
@@ -19,6 +22,7 @@ export type PersonalizationProviderInstantiationProps =
 export type PersonalizationProviderProps =
   | PersonalizationProviderInstantiationProps
   | (PersonalizationProviderInstantiationProps & {
+      /** A previously instantiated Personalization Context */
       context: PersonalizationContext;
     })
   | (PersonalizationProviderInstantiationProps & {
@@ -62,7 +66,6 @@ export const PersonalizationProvider = (
           client,
           debug: props.debug,
           manifest,
-          session: props.session || undefined,
           handlers: {
             onComputed: props.onComputed,
             onInit: props.onInit,
@@ -70,6 +73,8 @@ export const PersonalizationProvider = (
             onNavigate: props.onNavigate,
             onPageView: props.onPageView,
           },
+          session: props.session || undefined,
+          preview: props.preview,
         }));
 
       return context;

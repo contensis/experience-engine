@@ -29,6 +29,8 @@ export type PersonalizationContextOptions = {
   debug?: PersonalizationContext["debug"];
   handlers?: Partial<IHandlers>;
   manifest?: IManifest;
+  /** Are we running the preview Personalization Context */
+  preview?: boolean;
   session?: true;
 };
 
@@ -311,6 +313,7 @@ export class PersonalizationContext {
     handlers,
     manifest,
     session,
+    preview,
   }: PersonalizationContextOptions = {}) {
     const { l } = this;
 
@@ -355,7 +358,8 @@ export class PersonalizationContext {
         manifest,
         this.#onManifestReady,
         l,
-        state.manifest
+        state.manifest,
+        preview
       );
     } else if (client) {
       l("ic");
@@ -363,7 +367,8 @@ export class PersonalizationContext {
         client,
         this.#onManifestReady,
         l,
-        state.manifest
+        state.manifest,
+        preview
       );
     } else {
       console.warn(`cp: client or manifest required`);

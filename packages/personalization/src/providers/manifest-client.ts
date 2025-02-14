@@ -1,4 +1,4 @@
-import { ILocationSignalAttributes, IManifest } from "../models";
+import { IManifest } from "../models";
 import { GLOBAL } from "../personalization";
 import { extractLocationHeaders } from "../signals/location";
 import { isObject, tryParse } from "../util";
@@ -7,26 +7,28 @@ export const ManifestClient = (
   alias: string,
   rootUrl?: string,
   projectId = "website",
-  token?: string
+  token?: string,
+  preview?: boolean
 ) => {
   const hostname = rootUrl || `https://cms-${alias}.cloud.contensis.com`;
 
   const get = async (): Promise<IManifest | undefined> => {
     try {
-      const uri = `${hostname}/api/delivery/projects/${projectId}/personalization/manifest/current`;
+      const bearerToken = token || globalThis[GLOBAL]?.token;
 
-      const tempToken = token || globalThis[GLOBAL]?.token;
+      const uri = `${hostname}/api/${
+        bearerToken ? "management" : "delivery"
+      }/projects/${projectId}/personalization/manifest/${
+        preview && !bearerToken ? "preview" : "current"
+      }`;
 
-      const tempUri = tempToken
-        ? `${hostname}/api/management/projects/${projectId}/personalization/manifest/preview`
-        : uri;
       const headers = {
         ["x-alias"]: alias,
       } as Record<string, string>;
 
-      if (tempToken) headers.Authorization = `Bearer ${tempToken}`;
+      if (bearerToken) headers.Authorization = `Bearer ${bearerToken}`;
 
-      const response = await fetch(tempUri, {
+      const response = await fetch(uri, {
         headers,
       });
 

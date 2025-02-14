@@ -27,6 +27,7 @@ export interface IManifestClient {
 export const findSignal = (id: string, signals?: ISignal[]) =>
   signals?.find((signal) => signal.id === id);
 
+/** The Manifest contains the working rules for this context */
 export class Manifest implements IManifest {
   client?: ReturnType<typeof ManifestClient>;
   audiences: IAudience[] = [];
@@ -39,26 +40,30 @@ export class Manifest implements IManifest {
     client: IManifestClientArgs,
     onReady: IManifestOnReady,
     log: PersonalizationContext["l"],
-    state?: IManifest
+    state?: IManifest,
+    preview?: boolean
   );
   constructor(
     client: IManifestClient,
     onReady: IManifestOnReady,
     log: PersonalizationContext["l"],
-    state?: IManifest
+    state?: IManifest,
+    preview?: boolean
   );
   constructor(
     manifest: IManifest,
     onReady: IManifestOnReady,
     log: PersonalizationContext["l"],
-    state?: IManifest
+    state?: IManifest,
+    preview?: boolean
   );
 
   constructor(
     client: IManifestClientArgs | IManifest,
     onReady: IManifestOnReady,
     log: PersonalizationContext["l"],
-    state?: IManifest
+    state?: IManifest,
+    preview?: boolean
   ) {
     // Initialise with an instance of ManifestClient
     if (isManifestClient(client)) this.client = client;
@@ -68,7 +73,8 @@ export class Manifest implements IManifest {
         client.alias,
         client.rootUrl,
         client.projectId,
-        client.token
+        client.token,
+        preview
       );
     else {
       // Initialise with an IManifest object
