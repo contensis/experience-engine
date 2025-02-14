@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import ReactSwitch from "react-switch";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
@@ -131,15 +130,19 @@ const Signals = () => {
   const { context, manifest, matched, signals, state } =
     usePersonalizationContext();
 
-  const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
-  useEffect(() => {
-    setConditions(
-      (manifest?.signals ?? []).map((signal) => [
-        signal.id,
-        mapConditions(signal?.where),
-      ])
-    );
-  }, [manifest?.signals]);
+  // const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
+  // useEffect(() => {
+  //   setConditions(
+  //     (manifest?.signals ?? []).map((signal) => [
+  //       signal.id,
+  //       mapConditions(signal?.where),
+  //     ])
+  //   );
+  // }, [manifest?.signals, matched.length, signals.length]);
+
+  const conditions = (manifest?.signals ?? []).map<[string, ConditionData[]]>(
+    (signal) => [signal.id, mapConditions(signal?.where)]
+  );
 
   const table = useReactTable({
     columns: [
@@ -162,6 +165,7 @@ const Signals = () => {
                     // "Uncheck" matches by clearing all the previous matches from the store
                     // We can get away with just mutating state here
                     state.signals.matched[signalId] = [];
+                    delete state.signals.matched[signalId];
                   } else {
                     // Add synthetic matches to state up to minMatches
                     // minus previous matches

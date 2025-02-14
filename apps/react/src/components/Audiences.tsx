@@ -107,9 +107,22 @@ const ConditionsTable = ({
     </>
   );
 };
+
 const Audiences = ({ ids }: { ids?: string[] }) => {
-  const { context, isAudience, manifest, state } = usePersonalizationContext();
-  const audiences = manifest?.audiences ?? [];
+  const { audiences, context, isAudience, manifest, state } =
+    usePersonalizationContext();
+  const manifestAudiences = manifest?.audiences ?? [];
+  const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
+
+  useEffect(() => {
+    setConditions(
+      (manifest?.audiences ?? []).map((audience) => [
+        audience.id,
+        mapConditions(audience?.conditions),
+      ])
+    );
+  }, [manifest?.audiences, audiences.length]);
+
   const table = useReactTable({
     columns: [
       {
@@ -186,26 +199,18 @@ const Audiences = ({ ids }: { ids?: string[] }) => {
         },
       },
     ],
-    data: (ids ? audiences.filter((a) => ids.includes(a.id)) : audiences).sort(
-      (a, b) => {
-        if (a.id < b.id) return -1;
-        if (a.id > b.id) return 1;
-        return 0;
-      }
-    ),
+    data: (ids
+      ? manifestAudiences.filter((a) => ids.includes(a.id))
+      : manifestAudiences
+    ).sort((a, b) => {
+      if (a.id < b.id) return -1;
+      if (a.id > b.id) return 1;
+      return 0;
+    }),
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
   });
-  const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
-  useEffect(() => {
-    setConditions(
-      (manifest?.audiences ?? []).map((audience) => [
-        audience.id,
-        mapConditions(audience?.conditions),
-      ])
-    );
-  }, [manifest?.audiences, isAudience]);
 
   return (
     <AudiencesTable

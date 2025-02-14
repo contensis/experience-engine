@@ -1,9 +1,25 @@
 import { useState } from "react";
-import { Experiment, Personalize } from "@contensis/personalization-react";
+import {
+  Experiment,
+  Personalize,
+  usePersonalizationContext,
+} from "@contensis/personalization-react";
 import LeadText from "./components/LeadText";
 
 import { abTestContent, audienceContent } from "./mock/mock-content";
 import DebugPanel from "./components/DebugPanel";
+
+const Heading = ({ title }: { title: string }) => {
+  const { matched } = usePersonalizationContext();
+  return matched.map((s) => s.id).includes("isLoggedIn") ? (
+    <div>
+      <h2>Welcome back! 😎</h2>
+      <p>A special message just for our users</p>
+    </div>
+  ) : (
+    <h2>{title}</h2>
+  );
+};
 
 const ContentPage = () => {
   const [experiment] = useState(abTestContent);
@@ -13,7 +29,7 @@ const ContentPage = () => {
     <>
       <h1>{audienceContent.title}</h1>
       <DebugPanel />
-      <h2>{audienceContent.subtitle}</h2>
+      <Heading title={audienceContent.subtitle} />
       <Experiment experiments={experiment.content}>
         {(props) => (
           <>

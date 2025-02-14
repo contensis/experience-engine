@@ -3,7 +3,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
 import Collapsible from "./Collapsible";
-import Summary from "./Summary";
+import Overview from "./Overview";
 import Manifest from "./Manifest";
 import Audiences from "./Audiences";
 import Signals from "./Signals";
@@ -12,12 +12,15 @@ import { useState } from "react";
 import { recalculateSignals } from "../util";
 
 const DebugPanel = () => {
-  const { context, pageViews } = usePersonalizationContext();
+  const {
+    context,
+    pageViews,
+  } = usePersonalizationContext();
 
   const [tabIndex, setTabIndex] = useState(
     Number(sessionStorage.getItem("cpdemo-tabIndex")) || 0
   );
-  
+
   return (
     <div className="signal-attributes">
       <Collapsible
@@ -47,13 +50,13 @@ const DebugPanel = () => {
           }}
         >
           <TabList>
-            <Tab>Summary</Tab>
+            <Tab>Overview</Tab>
             <Tab>Audiences and Signals</Tab>
             <Tab>Signal attributes</Tab>
             <Tab>Manifest</Tab>
           </TabList>
           <TabPanel>
-            <Summary />
+            <Overview />
           </TabPanel>
           <TabPanel>
             <div>
@@ -99,11 +102,9 @@ const DebugPanel = () => {
                 Reset signals
               </button>
               <h4>Signals</h4>
+              <Signals />
             </div>
-            <Signals />
           </TabPanel>
-          {/* <TabPanel>
-          </TabPanel> */}
           <TabPanel>
             <button
               style={{ top: "-4px" }}

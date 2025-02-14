@@ -45,33 +45,23 @@ const useGeoIP = () => {
 
 const MainLayout = () => {
   const geoLocation = useGeoIP();
-  const {
-    audiences,
-    computed,
-    context: { t } = { t: 0 },
-    isAudience,
-    percentile,
-    setAttributes,
-    signals,
-  } = usePersonalizationContext();
+  const { audiences, computed, context, isAudience, setAttributes, signals } =
+    usePersonalizationContext();
 
   // This is to make the component re-render when the location has changed
   // (simulating client-side navigation to trigger MutationObserver callback)
   const [currentPage, setCurrentPage] = useState<string>("");
   const href = typeof location !== "undefined" ? location.href : "";
-  // useEffect(() => {
-  //   setCurrentPage(href);
-  // }, [href]);
 
-  const [, rerender] = useState(t);
+  const [, rerender] = useState(context?.t);
 
   useEffect(() => {
-    if (t) {
-      rerender(t);
-      console.log(t);
+    if (context?.t) {
+      rerender(context?.t);
+      // console.log(context?.t);
     }
     if (href !== currentPage) setCurrentPage(href);
-  }, [href, currentPage, t, audiences, signals]);
+  }, [href, currentPage, context?.t, audiences, signals]);
 
   // Track state so we can toggle via the test buttons
   const [isLoggedIn, setLoggedIn] = useState(
@@ -120,7 +110,6 @@ const MainLayout = () => {
         </a>
       </div>
       <ContentPage />
-
       <div
         className="card"
         style={{
@@ -130,27 +119,6 @@ const MainLayout = () => {
           textAlign: "left",
         }}
       >
-        <button
-          type="button"
-          onClick={() => {
-            localStorage.removeItem("cp");
-            sessionStorage.removeItem("cp");
-            location.reload();
-          }}
-        >
-          Reset storage
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            sessionStorage.removeItem("cp");
-            location.reload();
-          }}
-        >
-          Reset session
-        </button>
-        <button type="button">percentile is {percentile}</button>
-        <br />
         <button
           type="button"
           onClick={() => {
@@ -185,10 +153,15 @@ const MainLayout = () => {
           onClick={() => {
             if (!blockSignIn) {
               setLoggedIn(!isLoggedIn);
+              location.reload();
             }
           }}
         >
-          {isLoggedIn ? "Logout" : blockSignIn ? "Contact us :)" : "Login"}
+          {isLoggedIn
+            ? "Logout"
+            : blockSignIn
+            ? "Contact us :)"
+            : "Login with cookie"}
         </button>
       </div>
     </>
