@@ -17,7 +17,11 @@ const cookie = (
   return document.cookie;
 };
 
-export type StoreConstructorArgs = { persist?: boolean; type?: Store["type"] };
+export type StoreConstructorArgs = {
+  key?: string;
+  persist?: boolean;
+  type?: Store["type"];
+};
 
 export interface IStoreOptions {
   type?: Store["type"];
@@ -30,9 +34,19 @@ export class Store {
   type: "localStorage" | "sessionStorage" | "c" = "localStorage";
   #persist = true;
 
-  /** Use sessionStorage or localStorage if persist is false or true (default: true) */
-  constructor({ persist = true, type = "localStorage" }: StoreConstructorArgs) {
+  /**
+   * Store is an interface for persisting values or (stringifiable) objects for Personalization
+   * Provide a key to maintain a particular store or omit the key to write to the default "cp" store
+   * The store type can be set and used for sessionStorage or a cookie, localStorage is default
+   * Use sessionStorage or localStorage if persist is false or true (default: true)
+   */
+  constructor({
+    key,
+    persist = true,
+    type = "localStorage",
+  }: StoreConstructorArgs) {
     this.#persist = persist;
+    if (key) this.key = key;
     this.type = type === "localStorage" && !persist ? "sessionStorage" : type;
   }
 
