@@ -1,14 +1,14 @@
-import { AppSignals, SignalValue } from "../models";
+import { ICustomAttributes } from "../models";
 
 export interface IAppSignalAttributes {
-  app?: { [key: string]: SignalValue | SignalValue[] };
+  custom?: ICustomAttributes;
 }
 /** A call to AppSignalsSnapshot will return a snapshot of the signals for a given url */
 export const AppSignalsSnapshot = (
-  signals?: AppSignals
+  signals?: ICustomAttributes
 ): IAppSignalAttributes => {
   const attributes: IAppSignalAttributes = {
-    app: signals,
+    custom: signals,
   };
 
   return signals ? attributes : {};

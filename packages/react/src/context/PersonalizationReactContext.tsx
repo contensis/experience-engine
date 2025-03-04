@@ -50,7 +50,7 @@ export interface IPersonalizationReactContext {
   /** The timestamp signals and audiences was last updated */
   t: EpochTimeStamp;
 
-  /** Add new signals identified within the app to the personalization context */
+  /** Supply custom attributes identified within the app to the personalization context */
   setAttributes: PersonalizationContext["setAttributes"];
 
   /** Set signal attributes within the app to override the personalization context */

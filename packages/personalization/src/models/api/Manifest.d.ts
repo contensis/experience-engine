@@ -7,6 +7,11 @@ export interface IManifest {
   signals: ISignal[];
   location?: ILocationSignalAttributes;
   version: IManifestVersion;
+  client?: {
+    alias: string;
+    preview?: boolean;
+    projectId: string;
+  };
 }
 
 export interface IManifestVersion {

@@ -44,3 +44,11 @@ export interface ILocationSignalAttributes {
   longitude?: number;
   postalCode?: string;
 }
+
+export interface ICustomAttributes {
+  [key: string]: SignalValue | SignalValue[];
+}
+
+export interface IOverrideAttributes {
+  [key: string]: SignalValue | SignalValue[];
+}

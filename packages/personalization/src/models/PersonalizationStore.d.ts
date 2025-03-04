@@ -1,5 +1,5 @@
 import {
-  AppOverrideSignals,
+  IOverrideAttributes,
   IBrowserSignalAttributes,
   ILocationSignalAttributes,
   IManifest,
@@ -14,7 +14,7 @@ export interface IPersonalizationStore {
   manifest?: IManifest;
   signals: ISignalsStore;
   audiences: IAudiencesStore;
-  overrides?: AppOverrideSignals
+  overrides?: IOverrideAttributes;
 }
 
 export interface IPersonalizationSessionStore {

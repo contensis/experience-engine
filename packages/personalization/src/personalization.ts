@@ -1,8 +1,8 @@
 import { CalculateAudiences } from "./audiences";
 import { IManifestClientArgs, Manifest } from "./providers/manifest";
 import {
-  AppOverrideSignals,
-  AppSignals,
+  IOverrideAttributes,
+  ICustomAttributes,
   IHandlers,
   IManifest,
   IPersonalizationStore,
@@ -11,12 +11,12 @@ import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
 import {
   isArray,
+  isObjectContentEqual,
   isSSR,
   isStore,
   now,
   objectKeys,
   objectMatches,
-  stringify,
 } from "./util";
 import { logger, messages } from "./logs";
 import { Session } from "./session";
@@ -84,8 +84,8 @@ export class PersonalizationContext {
    */
   pageViews: PageView[] = [];
 
-  // TODO: review and replace
-  app?: AppSignals;
+  /** Holds custom attributes for consumption in the next attribute snapshot for signal calculations */
+  custom?: ICustomAttributes;
 
   /** Timestamp this context was last updated */
   t = 0;
@@ -334,7 +334,6 @@ export class PersonalizationContext {
   }: PersonalizationContextOptions = {}) {
     const { l } = this;
 
-    this.preview = preview || false;
     this.debug = debug || false;
 
     // Add any user-supplied handlers to the events array to be invoked at the right times
@@ -350,6 +349,13 @@ export class PersonalizationContext {
     this.#store = new Store({ persist: !session });
     // Get the current state from the store
     const state = this.state;
+
+    // Set the preview flag from the constructor args
+    // or if it has been previously set in state
+    this.preview =
+      typeof preview !== "undefined"
+        ? preview
+        : !!state.manifest?.client?.preview;
 
     // Check for a cpid cookie we will use that if one is found
     const cookieId = this.#store.get<string>({ type: "c", key: "cpid" });
@@ -378,7 +384,7 @@ export class PersonalizationContext {
         this.#onManifestReady,
         l,
         state.manifest,
-        preview
+        this.preview
       );
     } else if (client) {
       l("ic");
@@ -387,7 +393,7 @@ export class PersonalizationContext {
         this.#onManifestReady,
         l,
         state.manifest,
-        preview
+        this.preview
       );
     } else {
       console.warn(`cp: client or manifest required`);
@@ -449,30 +455,37 @@ export class PersonalizationContext {
     this.#handler("onPageView", this, currentPage, previousPage);
   };
 
-  /** Add new signal attributes identified within the app to the personalization context */
-  setAttributes = (appSignals: AppSignals) => {
-    if (objectKeys(appSignals).length) {
-      const existing = this.app || {};
-      const prev = stringify(existing);
-      // Update app signals in this context
-      this.app = { ...existing, ...appSignals };
-      const next = stringify(this.app);
-      // Crude deep comparison to save needlessly recomputing signals
-      if (next !== prev) this.compute();
+  /**
+   * Supply custom attributes identified within the app to the
+   * personalization context
+   */
+  setAttributes = (customAttributes: ICustomAttributes) => {
+    if (objectKeys(customAttributes).length) {
+      const existing = this.custom || {};
+      const next = { ...existing, ...customAttributes };
+
+      if (!isObjectContentEqual(existing, next)) {
+        this.custom = next;
+        this.compute();
+      }
     }
   };
 
-  /** Set signal attributes within the app to override the personalization context */
-  overrideAttributes = (overrideSignals: AppOverrideSignals) => {
+  /**
+   * Set signal attributes within the app to override the
+   * personalization context
+   */
+  overrideAttributes = (overrideSignals: IOverrideAttributes) => {
     if (objectKeys(overrideSignals).length) {
       const { state } = this;
       const existing = state.overrides;
-      const prev = stringify(existing);
-      // Update override signals in this context
-      this.#save = { ...state, overrides: { ...existing, ...overrideSignals } };
-      const next = stringify(this.state.overrides);
-      // Crude deep comparison to save needlessly recomputing signals
-      if (next !== prev) this.compute();
+      const next = { ...existing, ...overrideSignals };
+
+      if (!isObjectContentEqual(existing, next)) {
+        // Update override signals in this context
+        this.#save = { ...state, overrides: next };
+        this.compute();
+      }
     }
   };
 
@@ -501,26 +514,65 @@ export class PersonalizationContext {
    * Supply options to control which elements are reset or leave
    * empty to reset everything
    */
-  reset = (options?: {
-    manifest?: boolean;
-    session?: boolean;
-    store?: boolean;
-  }) => {
+  reset = (
+    {
+      audiences,
+      signals,
+      attributes,
+      manifest,
+      session,
+      store,
+    }: {
+      /** Reset previously activated audencies */
+      audiences?: boolean;
+      /** Reset previously triggered signals */
+      signals?: boolean;
+      /** Remove any custom or overridden attributes */
+      attributes?: boolean;
+      /** Request a new manifest */
+      manifest?: boolean;
+      /** Reset the current session */
+      session?: boolean;
+      /** Reset the personalization store */
+      store?: boolean;
+    } = {
+      manifest: true,
+      session: true,
+      store: true,
+    }
+  ) => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const me = this;
-    if (!options || options.store) {
+
+    if (attributes || signals || audiences) {
+      const state = me.state;
+      if (attributes) {
+        delete state.overrides;
+      }
+      if (signals) {
+        state.signals = { active: [] };
+      }
+      if (audiences) state.audiences = { active: [] };
+
+      if (me.#cpv) me.#cpv[2] = null;
+      me.#save = state;
+      me.compute();
+    }
+
+    if (store) {
       me.#store.clear();
       // me.percentile = me.state.pc / 100;
     }
 
-    if (!options || options.session) {
+    if (session) {
       me.pageViews = [];
       me.session.clear();
       me.session = new Session(me);
       me.pageView();
     }
 
-    if (!options || options.manifest) {
+    if (manifest) {
+      if (me.#cpv) me.#cpv[2] = null;
       const { manifest } = me;
       if (manifest?.client) {
         manifest.client.preview = me.preview;

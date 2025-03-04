@@ -101,7 +101,7 @@ export class CalculateSignals {
 
   constructor(context: PersonalizationContext) {
     this.#context = context;
-    const { app, currentPage, pageViews, previousPage } = context;
+    const { custom, currentPage, pageViews, previousPage } = context;
 
     // Find the signals from the last page view
     const previousSignals =
@@ -115,12 +115,12 @@ export class CalculateSignals {
     // Hold the signals for this page view and a referrer
     this.snapshot = {
       ...RouteSignalsSnapshot(currentPage, previousSignals || previousPage),
-      ...flattenObject(AppSignalsSnapshot(app)),
+      ...flattenObject(AppSignalsSnapshot(custom)),
       ...flattenObject(sessionSignals, "session"),
       ...flattenObject(BrowserSignalsSnapshot(), "browser"),
       ...flattenObject(location, "location"),
     };
-    context.app = undefined;
+    delete context.custom; // Clear custom attributes so they are not consumed in the next snapshot
 
     if (isSSR()) return; // Don't compute signals in SSR
 
@@ -134,10 +134,10 @@ export class CalculateSignals {
     // update any "app" signals set before we recalculate
     this.snapshot = {
       ...this.snapshot,
-      ...flattenObject(AppSignalsSnapshot(this.#context.app)),
+      ...flattenObject(AppSignalsSnapshot(this.#context.custom)),
     };
-    // reset the app signals from context so we don't consider them in every page view
-    this.#context.app = undefined;
+    // Clear custom attributes from context so we don't consider them in every page view
+    delete this.#context.custom;
 
     this.t = now();
 

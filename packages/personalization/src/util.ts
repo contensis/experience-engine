@@ -104,3 +104,8 @@ export const isManifestClient = (
 export const objectKeys = Object.keys;
 export const objectFromEntries = Object.fromEntries;
 export const stringify = JSON.stringify;
+
+export const isObjectContentEqual = (
+  a?: Record<string, unknown>,
+  b?: Record<string, unknown>
+) => a && b && stringify(a) === stringify(b);
