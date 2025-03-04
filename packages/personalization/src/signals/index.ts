@@ -54,8 +54,8 @@ export class CalculateSignals {
       if (currentMatch && !matchedPrev[signalId]?.find((ps) => ps.t === t)) {
         matched[signalId] = [
           { p, t },
-          // Add prev match(es)s
-          ...(matchedPrev[signalId] || []),
+          // Add prev match(es) (hard-limited to last 99)
+          ...(matchedPrev[signalId] || []).slice(0, 98),
         ];
       } else {
         // No changes just assign prev, if the signalId is included in the manifest
