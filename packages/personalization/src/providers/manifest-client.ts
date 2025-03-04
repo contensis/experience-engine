@@ -12,14 +12,22 @@ export const ManifestClient = (
 ) => {
   const hostname = rootUrl || `https://cms-${alias}.cloud.contensis.com`;
 
-  const get = async (): Promise<IManifest | undefined> => {
+  // Hoist return object above get function so it can access altered args/members
+  const returnArgs = { alias, preview, projectId } as {
+    alias: string;
+    get: () => Promise<IManifest | undefined>;
+    preview: boolean | undefined;
+    projectId: string;
+  };
+
+  returnArgs.get = async (): Promise<IManifest | undefined> => {
     try {
       const bearerToken = token || globalThis[GLOBAL]?.token;
 
       const uri = `${hostname}/api/${
         bearerToken ? "management" : "delivery"
       }/projects/${projectId}/personalization/manifest/${
-        preview && !bearerToken ? "preview" : "current"
+        returnArgs.preview && !bearerToken ? "preview" : "current"
       }`;
 
       const headers = {
@@ -47,5 +55,5 @@ export const ManifestClient = (
     }
   };
 
-  return { alias, get, projectId };
+  return returnArgs;
 };

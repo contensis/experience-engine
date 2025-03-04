@@ -55,6 +55,8 @@ export class PersonalizationContext {
 
   /** Output console.log messaging, true or v=verbose */
   debug: boolean | "v";
+  /** True if the context is running in preview mode */
+  preview: boolean;
   /** Contensis Personalization Id */
   cpid: string;
   /** Random percentile for experiment bucketing */
@@ -308,12 +310,13 @@ export class PersonalizationContext {
 
   /** Return an existing entry from the store or initialise a new state */
   get state() {
+    const existingpc = this.percentile;
     return (
       this.#store.get<IPersonalizationStore>() /** generate a personalisation uuid and a percentile for random bucketing */ || {
         /** New visitor uuid */
-        cpid: crypto.randomUUID(),
+        cpid: this.cpid || crypto.randomUUID(),
         /** New percentile random bucketing to 2 dp */
-        pc: Math.floor(Math.random() * 10000),
+        pc: existingpc ? existingpc * 100 : Math.floor(Math.random() * 10000),
         pageViews: 0,
         signals: { active: [] },
         audiences: { active: [] },
@@ -331,6 +334,7 @@ export class PersonalizationContext {
   }: PersonalizationContextOptions = {}) {
     const { l } = this;
 
+    this.preview = preview || false;
     this.debug = debug || false;
 
     // Add any user-supplied handlers to the events array to be invoked at the right times
@@ -489,6 +493,39 @@ export class PersonalizationContext {
       this.#save = state;
       // and then call the compute method
       this.compute();
+    }
+  };
+
+  /**
+   * Clear all storage and reset the context to its initial state
+   * Supply options to control which elements are reset or leave
+   * empty to reset everything
+   */
+  reset = (options?: {
+    manifest?: boolean;
+    session?: boolean;
+    store?: boolean;
+  }) => {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const me = this;
+    if (!options || options.store) {
+      me.#store.clear();
+      // me.percentile = me.state.pc / 100;
+    }
+
+    if (!options || options.session) {
+      me.pageViews = [];
+      me.session.clear();
+      me.session = new Session(me);
+      me.pageView();
+    }
+
+    if (!options || options.manifest) {
+      const { manifest } = me;
+      if (manifest?.client) {
+        manifest.client.preview = me.preview;
+        manifest.init(me.#onManifestReady);
+      }
     }
   };
 }

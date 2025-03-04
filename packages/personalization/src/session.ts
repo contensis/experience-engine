@@ -80,4 +80,6 @@ export class Session {
   update = (patch: Partial<IPersonalizationSessionStore> = {}) => {
     this.#save = { ...this.state, ...patch };
   };
+
+  clear = () => this.#store.clear();
 }

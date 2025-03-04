@@ -8,7 +8,6 @@ import {
 } from "../models";
 import { PersonalizationContext } from "../personalization";
 import { isManifestClient } from "../util";
-import { extractLocationHeaders } from "../signals/location";
 
 export type IManifestClientArgs = {
   alias: string;
@@ -80,8 +79,7 @@ export class Manifest implements IManifest {
       // Initialise with an IManifest object
       this.audiences = client.audiences || [];
       this.signals = client.signals || [];
-      // TODO: Remove - location test data (extractLocationHeaders)
-      this.location = client.location || extractLocationHeaders() || {};
+      this.location = client.location || {};
       this.version = client.version || ({} as IManifestVersion);
     }
 
