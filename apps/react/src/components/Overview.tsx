@@ -75,26 +75,22 @@ const Overview = () => {
         {activeAudiencesJSX}
         {activeSignalsJSX}
         {signalsJSX}
-        <button
-          type="button"
-          onClick={() => {
-            localStorage.removeItem("cp");
-            sessionStorage.removeItem("cp");
-            location.reload();
-          }}
-        >
-          Reset storage
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            sessionStorage.removeItem("cp");
-            location.reload();
-          }}
-        >
-          Reset session
-        </button>
-        <button type="button">percentile is {percentile}</button>
+        <h4>
+          <label>
+            <span>Preview manifest</span>
+            <ReactSwitch
+              onChange={() => {
+                if (context) {
+                  context.preview = !context.preview;
+                  context.reset({ manifest: true });
+                }
+              }}
+              height={22}
+              className="react-switch"
+              checked={context.preview}
+            />
+          </label>
+        </h4>
         <h4>
           <label>
             <span>Update percentile </span>
@@ -122,6 +118,24 @@ const Overview = () => {
             </div>
           </label>
         </h4>
+        <button
+          type="button"
+          onClick={() => {
+            context?.reset();
+          }}
+        >
+          Reset storage
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            context?.reset({ session: true });
+            // sessionStorage.removeItem("cp");
+            // location.reload();
+          }}
+        >
+          Reset session
+        </button>
         <h4>
           <label>
             <span>Console logging</span>

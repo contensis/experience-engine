@@ -17,7 +17,7 @@ import {
 } from "@tanstack/react-table";
 import AudiencesTable from "./Table";
 import Collapsible from "./Collapsible";
-import { mapConditions, recalculateSignals } from "../util";
+import { mapConditions } from "../util";
 
 import activeCheck from "../assets/green_checkmark.svg";
 
@@ -135,27 +135,8 @@ const Audiences = ({ ids }: { ids?: string[] }) => {
             <ReactSwitch
               onChange={() => {
                 const audienceId = props.row.original.id;
-                const checked = isAudience(audienceId);
-                // const state = context?.state;
                 if (context && state?.audiences) {
-                  if (!state.audiences.active) state.audiences.active = [];
-                  if (!state.audiences.matched) state.audiences.matched = {};
-                  if (checked) {
-                    // "Uncheck" audience by removing the id from the active array
-                    // and clear all previous matches in the store
-                    // We can get away with just mutating state here
-                    state.audiences.active = state.audiences.active.filter(
-                      (a) => a !== audienceId
-                    );
-                    delete state.audiences.matched[audienceId];
-                  } else {
-                    // Add audience id to the active array
-                    // state.audiences.active.push(audienceId);
-                    state.audiences.matched[audienceId] = [
-                      { p: "preview", t: 0 },
-                    ];
-                  }
-                  recalculateSignals(context, state);
+                  context.toggleAudience(audienceId);
                 }
               }}
               height={22}

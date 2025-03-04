@@ -81,7 +81,11 @@ const MainLayout = () => {
   useEffect(() => {
     if (geoLocation) {
       console.log(`GeoIP data:`, geoLocation);
-      setAttributes({ ...geoLocation });
+      setAttributes({
+        ...geoLocation,
+        localTemperature: 20,
+        avgTemperature: 12,
+      });
     }
   }, [geoLocation, setAttributes]);
 

@@ -112,6 +112,7 @@ button.override {
 table {
   border-spacing: unset;
   width: 100%;
+  word-break: break-all;
 }
 table,
 th,
@@ -137,7 +138,22 @@ tr .sub {
 .title-column {
   font-size: 80%;
   font-weight: bold;
+
+  input {
+    width: 98%;
+  }
 }
+.title-column {
+  word-break: keep-all;
+}
+/* table .footer-buttons button {
+  border: none;
+  background-color: transparent;
+}
+table .add-button {
+  color: #4bbd7f;
+} */
+
 .active-check {
   width: 32px;
 }

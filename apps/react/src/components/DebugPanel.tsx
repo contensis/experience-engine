@@ -9,13 +9,10 @@ import Audiences from "./Audiences";
 import Signals from "./Signals";
 import Attributes from "./Attributes";
 import { useState } from "react";
-import { recalculateSignals } from "../util";
+import { getRelativeTime } from "../util";
 
 const DebugPanel = () => {
-  const {
-    context,
-    pageViews,
-  } = usePersonalizationContext();
+  const { context, pageViews } = usePersonalizationContext();
 
   const [tabIndex, setTabIndex] = useState(
     Number(sessionStorage.getItem("cpdemo-tabIndex")) || 0
@@ -26,11 +23,19 @@ const DebugPanel = () => {
       <Collapsible
         header={
           <div>
-            <h3>
-              Session page views: {pageViews.session}
-              <br />
-              Total page views: {pageViews.total}
-            </h3>
+            <div style={{ position: "relative", zIndex: "-1" }}>
+              <h3>Session page views: {pageViews.session}</h3>
+              <div
+                className="small"
+                style={{ position: "absolute", top: "1.7em", color: "#aaa" }}
+              >
+                Started{" "}
+                {getRelativeTime(
+                  +new Date() - context.session.state.duration * 1000
+                )}
+              </div>
+            </div>
+            <h3>Total page views: {pageViews.total}</h3>
           </div>
         }
         label="console"
@@ -52,7 +57,7 @@ const DebugPanel = () => {
           <TabList>
             <Tab>Overview</Tab>
             <Tab>Audiences and Signals</Tab>
-            <Tab>Signal attributes</Tab>
+            <Tab>Attributes snapshot</Tab>
             <Tab>Manifest</Tab>
           </TabList>
           <TabPanel>
@@ -64,10 +69,8 @@ const DebugPanel = () => {
                 className="collapsible"
                 onClick={() => {
                   if (context) {
-                    const state = context.state;
-                    state.audiences = { active: [] };
-                    state.signals = { active: [] };
-                    recalculateSignals(context, state);
+                    context.reset({ audiences: true, signals: true });
+                    context.compute();
                   }
                 }}
               >
@@ -77,9 +80,7 @@ const DebugPanel = () => {
                 className="collapsible"
                 onClick={() => {
                   if (context) {
-                    const state = context.state;
-                    state.audiences = { active: [] };
-                    recalculateSignals(context, state);
+                    context.reset({ audiences: true });
                   }
                 }}
               >
@@ -93,9 +94,7 @@ const DebugPanel = () => {
                 className="collapsible"
                 onClick={() => {
                   if (context) {
-                    const state = context.state;
-                    state.signals = { active: [] };
-                    recalculateSignals(context, state);
+                    context.reset({ signals: true });
                   }
                 }}
               >
@@ -111,9 +110,7 @@ const DebugPanel = () => {
               className="collapsible"
               onClick={() => {
                 if (context) {
-                  const state = context.state;
-                  delete state.overrides;
-                  recalculateSignals(context, state);
+                  context.reset({ attributes: true });
                 }
               }}
             >
