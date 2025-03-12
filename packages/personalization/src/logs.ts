@@ -3,6 +3,7 @@ export const messages = {
   init: `[init] visitorId: {0}, percentile: {1}%, pageViews: {2}`,
   im: `[init] Initialising with supplied manifest`,
   ic: `[init] Initialising manifest with client`,
+  mp: `[onManifestReady] Updated to preview version "{0}" from version "{1}"`,
   mv: `[onManifestReady] Updated to version "{0}" from version "{1}"`,
   ml: `[onManifestReady] Location updated "{0}" from "{1}"`,
   ms: `[onManifestReady] Matched new signals from updated manifest`,
@@ -18,6 +19,7 @@ export const messages = {
   am: `[Audiences] {0} matched: {1}`,
   sc: `[Signals] {0} checked in {1}ms, manifest version "{2}"`,
   sm: `[Signals] {0} matched: {1}`,
+  serr: `[Signals] an error occurred when calculating`,
 } as const;
 
 /**
@@ -28,7 +30,7 @@ export const messages = {
 export const logger = (key: keyof typeof messages, ...values: unknown[]) => {
   const count = values.length;
   let matched = 0;
-  console.log(
+  console[key.includes("err") ? "error" : "log"](
     messages.pre,
     messages[key]?.replace(/{([0-9]+)}/g, (match: string, index: number) => {
       matched++;

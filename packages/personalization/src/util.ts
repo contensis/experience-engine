@@ -105,6 +105,19 @@ export const objectKeys = Object.keys;
 export const objectFromEntries = Object.fromEntries;
 export const stringify = JSON.stringify;
 
+export const stringifyReplacer = (key: string, value: unknown) => {
+  if (value instanceof Error) {
+    return {
+      name: value.name,
+      message: value.message,
+      stack: value.stack,
+      cause: value.cause,
+      t: now(),
+    };
+  }
+  return value;
+};
+
 export const isObjectContentEqual = (
   a?: Record<string, unknown>,
   b?: Record<string, unknown>

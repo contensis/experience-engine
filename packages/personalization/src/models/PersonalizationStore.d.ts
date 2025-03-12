@@ -35,6 +35,7 @@ export interface IPersonalizationSessionStore {
     baseUrl: string;
   };
   location?: ILocationSignalAttributes;
+  error?: unknown;
 }
 
 export interface ISignalsStore {

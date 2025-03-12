@@ -129,49 +129,57 @@ export class CalculateSignals {
 
   /** Iterate computed.signals that are unmatched and check signal criteria for a match */
   redo = () => {
-    const { computed, matched: matches } = this;
+    try {
+      const { computed, matched: matches } = this;
 
-    // update any "app" signals set before we recalculate
-    this.snapshot = {
-      ...this.snapshot,
-      ...flattenObject(AppSignalsSnapshot(this.#context.custom)),
-    };
-    // Clear custom attributes from context so we don't consider them in every page view
-    delete this.#context.custom;
+      // update any "app" signals set before we recalculate
+      this.snapshot = {
+        ...this.snapshot,
+        ...flattenObject(AppSignalsSnapshot(this.#context.custom)),
+      };
+      // Clear custom attributes from context so we don't consider them in every page view
+      delete this.#context.custom;
 
-    this.t = now();
+      this.t = now();
 
-    // if we have already matched signals, don't match them again
-    for (const signal of computed.filter((s) => !s.matched)) {
-      const matched = this.#check(signal.where);
-      if (matched) {
-        // mutate the array item here to update computed array
-        signal.matched = true;
-        ++signal.times;
-        // preview apps may be interfering here so don't push new matches without checking first
-        if (!matches.find((m) => m.id === signal.id)) matches.push(signal);
+      // if we have already matched signals, don't match them again
+      for (const signal of computed.filter((s) => !s.matched)) {
+        const matched = this.#check(signal.where);
+        if (matched) {
+          // mutate the array item here to update computed array
+          signal.matched = true;
+          ++signal.times;
+          // preview apps may be interfering here so don't push new matches without checking first
+          if (!matches.find((m) => m.id === signal.id)) matches.push(signal);
+        }
       }
+      this.#log();
+    } catch (ex: unknown) {
+      this.#log(ex);
     }
-    this.#log();
     return this;
   };
 
   /** Iterate manifest.signals and check each signal criteria for a match */
   #calculate = () => {
-    const { manifest, state } = this.#context;
-    const signals = manifest?.signals || [];
-    for (const signal of signals) {
-      const matched = this.#check(signal.where);
-      const matchedTimes = state.signals?.matched?.[signal.id]?.length || 0;
-      const computed = {
-        ...signal,
-        matched,
-        times: matchedTimes + (matched ? 1 : 0),
-      };
-      if (matched) this.matched.push(computed);
-      this.computed.push(computed);
+    try {
+      const { manifest, state } = this.#context;
+      const signals = manifest?.signals || [];
+      for (const signal of signals) {
+        const matched = this.#check(signal.where);
+        const matchedTimes = state.signals?.matched?.[signal.id]?.length || 0;
+        const computed = {
+          ...signal,
+          matched,
+          times: matchedTimes + (matched ? 1 : 0),
+        };
+        if (matched) this.matched.push(computed);
+        this.computed.push(computed);
+      }
+      this.#log();
+    } catch (ex: unknown) {
+      this.#log(ex);
     }
-    this.#log();
   };
 
   /**
@@ -229,6 +237,9 @@ export class CalculateSignals {
 
   /** Evaluate one where criteria and return a boolean match */
   #evaluate = (criteria: WhereCriteria) => {
+    // Guard to prevent crashout caused by invalid criteria
+    if (!criteria || !("attribute" in criteria)) return false;
+
     const [attribute, key] = this.#keyedAttribute(
       criteria.attribute as WhereAttribute
     );
@@ -271,10 +282,17 @@ export class CalculateSignals {
     return [att, key];
   };
 
-  #log = () => {
+  #log = (err?: unknown) => {
     const { matched } = this;
     const { l, manifest } = this.#context;
     const t = now();
+
+    if (err) {
+      // console.error(err); // Log error always
+      this.#context.session.update({ error: err }); // Log error to session store
+      l("serr", err); // Log error when debug logging is enabled
+    }
+
     l("sc", manifest?.signals.length, t - this.t, manifest?.version.versionNo);
 
     const matches = matched.length;

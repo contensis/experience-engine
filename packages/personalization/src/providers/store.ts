@@ -5,6 +5,7 @@ import {
   now,
   objectFromEntries,
   stringify,
+  stringifyReplacer,
   tryParse,
   utcDate,
 } from "../util";
@@ -93,7 +94,9 @@ export class Store {
   ) => {
     if (isSSR()) return undefined;
 
-    const stringified = isObject(value) ? stringify(value) : value;
+    const stringified = isObject(value)
+      ? stringify(value, stringifyReplacer)
+      : value;
 
     if (type === "c") {
       const expires = now() + 30 * 24 * 60 * 60 * 1000;
