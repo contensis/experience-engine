@@ -232,7 +232,7 @@ export class PersonalizationContext {
 
   /** Actions to call when the manifest has been loaded */
   #onManifestReady = (manifest: IManifest) => {
-    const { l, pageViews, state } = this;
+    const { l, pageViews, preview, state } = this;
 
     // Should we update location attributes from the manifest to the session?
     const stateLocation = state.manifest?.location;
@@ -244,8 +244,8 @@ export class PersonalizationContext {
       l("ml", manifestLocation, stateLocation);
     }
 
-    const stateVersion = state.manifest?.version.versionNo;
-    const manifestVersion = manifest?.version.versionNo;
+    const stateVersion = state.manifest?.version?.versionNo;
+    const manifestVersion = manifest?.version?.versionNo;
 
     if (
       updateLocation ||
@@ -255,7 +255,7 @@ export class PersonalizationContext {
     ) {
       // Save the new manifest
       this.#save = { ...state, manifest };
-      l("mv", manifestVersion, stateVersion);
+      l(preview ? "mp" : "mv", manifestVersion, stateVersion);
 
       // // Retrospectively calculate signals for any pageViews[][2] that are null
       // const toCheck = pageViews.filter((pv) => pv[2] === null);
@@ -576,6 +576,7 @@ export class PersonalizationContext {
       const { manifest } = me;
       if (manifest?.client) {
         manifest.client.preview = me.preview;
+        manifest.isReady = false;
         manifest.init(me.#onManifestReady);
       }
     }
