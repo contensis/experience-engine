@@ -1,7 +1,11 @@
-import { ILocationSignalAttributes } from "../models";
+import { ILocationSignalAttributes, IManifest } from "../models";
+import { isObject } from "../util";
 
-export const extractLocationHeaders = (response?: Response) => {
-  const location: ILocationSignalAttributes = {};
+export const extractLocationHeaders = (
+  response?: Response,
+  body?: IManifest
+) => {
+  let location: ILocationSignalAttributes = {};
 
   for (const [header, value] of response?.headers || []) {
     // Look for specific header name
@@ -13,6 +17,12 @@ export const extractLocationHeaders = (response?: Response) => {
     // if (header === "LOC_LAT") location.latitude = Number(value);
     // if (header === "LOC_LON") location.longitude = Number(value);
     // if (header === "LOC_ZIP") location.postalCode = value;
+  }
+
+  // Add in any location keys hardcoded in manifest body
+  if (body && "location" in body) {
+    const bl = body.location;
+    if (isObject(bl)) location = { ...location, ...bl };
   }
 
   // // TODO: Remove - returned test data

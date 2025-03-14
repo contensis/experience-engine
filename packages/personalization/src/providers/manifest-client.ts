@@ -42,8 +42,8 @@ export const ManifestClient = (
 
       if (response.ok) {
         const body = await response.text();
-        const location = extractLocationHeaders(response);
-        const parsed = tryParse(body);
+        const parsed = tryParse<IManifest>(body);
+        const location = extractLocationHeaders(response, parsed);
         return { ...(isObject(parsed) ? parsed : {}), location } as IManifest;
       }
     } catch (ex: unknown) {
