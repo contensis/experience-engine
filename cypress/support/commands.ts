@@ -37,6 +37,7 @@
 // }
 
 import {
+  IPersonalizationSessionStore,
   IPersonalizationStore,
   PersonalizationContext,
 } from "@contensis/personalization";
@@ -51,7 +52,13 @@ Cypress.Commands.add("interceptManifest", (fixture: string) =>
     .intercept(
       "GET",
       "https://cms-cypress-test.cloud.contensis.com/api/delivery/projects/website/personalization/manifest/current",
-      { fixture }
+      {
+        fixture,
+        headers: {
+          "x-geoip-country-code": "GB",
+          "x-geoip-ip": "192.168.0.100",
+        },
+      }
     )
     .as(fixture)
 );
@@ -141,6 +148,18 @@ Cypress.Commands.add("getLocalStorage", (key = "cp") => {
     const ls = window.localStorage.getItem(key);
     if (key !== "cp") return ls;
     const state = JSON.parse(ls || "") as IPersonalizationStore;
+    return state;
+  });
+});
+/**
+ * Custom getSessionStorage command to get the personalisation store
+ * from sessionStorage, and parse it to a JSON object
+ */
+Cypress.Commands.add("getSessionStorage", (key = "cp") => {
+  cy.window().then((window) => {
+    const ls = window.sessionStorage.getItem(key);
+    if (key !== "cp") return ls;
+    const state = JSON.parse(ls || "") as IPersonalizationSessionStore;
     return state;
   });
 });

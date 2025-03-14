@@ -9,6 +9,11 @@ declare namespace Cypress {
     ): typeof key extends undefined
       ? Chainable<IPersonalizationStore>
       : Chainable<any>;
+    getSessionStorage<T extends string = undefined>(
+      key?: T
+    ): typeof key extends undefined
+      ? Chainable<IPersonalizationSessionStore>
+      : Chainable<any>;
     injectLink(innerHTML: string, href?: string): Chainable<Subject>;
     interceptManifest(fixture: string): Chainable<Subject>;
     pageView(url?: string): Chainable<PersonalizationContext>;

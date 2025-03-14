@@ -1,0 +1,216 @@
+{
+  "location": {
+    "country": "NG"
+  },
+  "audiences": [
+    {
+      "id": "artsInterestedStudents",
+      "name": "Interested Arts Students",
+      "description": "Students who have browsed arts section",
+      "conditions": {
+        "and": [
+          {
+            "type": "signal",
+            "id": "artsVisitor"
+          }
+        ]
+      }
+    },
+    {
+      "id": "artsEngagedStudents",
+      "name": "Highly Engaged Arts Students",
+      "description": "Students with a deep interest in arts",
+      "conditions": {
+        "and": [
+          {
+            "type": "audience",
+            "id": "artsInterestedStudents"
+          },
+          {
+            "or": [
+              {
+                "type": "signal",
+                "id": "frequentArtsVisitor"
+              },
+              {
+                "type": "signal",
+                "id": "searchedForArts"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "sportsEnthusiasts",
+      "name": "Active Sports Enthusiasts",
+      "description": "Users actively engaged with sports-related content",
+      "conditions": {
+        "and": [
+          {
+            "type": "signal",
+            "id": "frequentSportsVisitor"
+          },
+          {
+            "or": [
+              {
+                "type": "signal",
+                "id": "purchasedSportsGear"
+              },
+              {
+                "type": "signal",
+                "id": "searchedForSportsEvents"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "techSavvyUsers",
+      "name": "Tech Savvy Users",
+      "description": "Users frequently engaging with technology and gadget content",
+      "conditions": {
+        "or": [
+          {
+            "type": "signal",
+            "id": "frequentTechBlogReader"
+          },
+          {
+            "and": [
+              {
+                "type": "signal",
+                "id": "frequentGadgetReviewer"
+              },
+              {
+                "type": "signal",
+                "id": "recentlyPurchasedTech"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "signals": [
+    {
+      "id": "disallowCountry",
+      "name": "Disallow Country Code",
+      "description": "Country code is blacklisted",
+      "minMatches": 1,
+      "where": {
+        "and": [
+          {
+            "attribute": "location.country",
+            "in": ["GB", "NG"]
+          },
+          {
+            "not": {
+              "attribute": "location.country",
+              "equalTo": "GB"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "partnerOrganisationIp",
+      "name": "Partner Organisation IP",
+      "description": "Visitor's IP address is from a partner organisation",
+      "minMatches": 1,
+      "where": {
+        "and": [
+          {
+            "attribute": "location.ip",
+            "inRange": "192.168.0.0/16"
+          }
+        ]
+      }
+    },
+    {
+      "id": "artsVisitor",
+      "name": "Arts Section Visitor",
+      "minMatches": 3,
+      "where": {
+        "or": [
+          {
+            "attribute": "page.path",
+            "startsWith": "/arts/"
+          },
+          {
+            "and": [
+              {
+                "attribute": "referrer.path",
+                "startsWith": "/apps/html/arts/"
+              }
+            ]
+          },
+          {
+            "attribute": "page.path",
+            "startsWith": "/courses/arts/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "frequentArtsVisitor",
+      "name": "Frequent Arts Section Visitor",
+      "minMatches": 5,
+      "where": {
+        "or": [
+          {
+            "attribute": "page.path",
+            "startsWith": "/arts/"
+          },
+          {
+            "attribute": "referrer.path",
+            "startsWith": "/apps/html/arts/"
+          },
+          {
+            "attribute": "page.path",
+            "startsWith": "/courses/arts/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "purchasedSportsGear",
+      "name": "Purchased Sports Gear",
+      "minMatches": 1,
+      "where": {
+        "and": [
+          {
+            "attribute": "purchaseCategory",
+            "equalTo": "sports"
+          },
+          {
+            "attribute": "purchaseAmount",
+            "greaterThan": 50
+          }
+        ]
+      }
+    },
+    {
+      "id": "frequentTechBlogReader",
+      "name": "Frequent Technology Blog Reader",
+      "minMatches": 10,
+      "where": {
+        "or": [
+          {
+            "attribute": "page.path",
+            "contains": "techblog"
+          },
+          {
+            "attribute": "searchQuery",
+            "contains": "latest gadgets"
+          }
+        ]
+      }
+    }
+  ],
+  "version": {
+    "published": "2024-11-19T12:00:00.000Z",
+    "publishedBy": "j.doe",
+    "versionNo": "location"
+  }
+}
