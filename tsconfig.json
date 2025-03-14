@@ -2,7 +2,7 @@
   "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
     // "incremental": true,
-    "target": "es2019",
+    "target": "ES2022",
     "module": "ESNext",
     "jsx": "react",
     "declaration": true,
