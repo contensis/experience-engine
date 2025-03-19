@@ -11,6 +11,11 @@ const routes: RouteConfig = [
     path: "/arts/home",
     file: "./pages/page1.tsx",
   },
+  {
+    id: "sportsHome",
+    path: "/sports/home",
+    file: "./pages/page1.tsx",
+  },
 ];
 
 export default routes;

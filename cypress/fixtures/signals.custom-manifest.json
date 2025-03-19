@@ -1,0 +1,111 @@
+{
+  "audiences": [
+    {
+      "id": "sportsEnthusiasts",
+      "name": "Active Sports Enthusiasts",
+      "description": "Users actively engaged with sports-related content",
+      "conditions": {
+        "and": [
+          {
+            "type": "signal",
+            "id": "frequentSportsVisitor"
+          },
+          {
+            "or": [
+              {
+                "type": "signal",
+                "id": "purchasedSportsGear"
+              },
+              {
+                "type": "signal",
+                "id": "searchedForSportsEvents"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "signals": [
+    {
+      "id": "purchasedSportsGear",
+      "name": "Purchased Sports Gear",
+      "minMatches": 1,
+      "where": {
+        "and": [
+          {
+            "attribute": "custom.purchaseCategory",
+            "equalTo": "sports"
+          },
+          {
+            "attribute": "custom.purchaseAmount",
+            "greaterThan": 50
+          }
+        ]
+      }
+    },
+    {
+      "id": "frequentSportsVisitor",
+      "name": "Frequent Sports Section Visitor",
+      "minMatches": 3,
+      "where": {
+        "or": [
+          {
+            "attribute": "page.path",
+            "startsWith": "/sports/"
+          },
+          {
+            "attribute": "page.path",
+            "startsWith": "/courses/sports/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "searchedForSportsEvents",
+      "name": "Searched for Sports Events",
+      "minMatches": 3,
+      "where": {
+        "or": [
+          {
+            "attribute": "custom.searchQuery",
+            "contains": "sport event"
+          },
+          {
+            "attribute": "custom.searchQuery",
+            "contains": "sports events"
+          },
+          {
+            "and": [
+              {
+                "attribute": "custom.searchCategory",
+                "equalTo": "event"
+              },
+              {
+                "attribute": "custom.searchQuery",
+                "contains": "sport"
+              }
+            ]
+          },
+          {
+            "and": [
+              {
+                "attribute": "custom.searchCategory",
+                "equalTo": "sport"
+              },
+              {
+                "attribute": "custom.searchQuery",
+                "contains": "event"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "version": {
+    "published": "2024-11-19T12:00:00.000Z",
+    "publishedBy": "j.doe",
+    "versionNo": "custom"
+  }
+}

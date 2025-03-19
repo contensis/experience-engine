@@ -139,11 +139,63 @@ export const MOCK_MANIFEST: IManifest = {
           },
         ],
       },
-      version: {
-        created: "2024-06-01T00:00:00Z",
-        createdBy: "s.horan",
-        modified: "2024-06-04T00:00:00Z",
-        modifiedBy: "j.doe",
+    },
+    {
+      id: "frequentSportsVisitor",
+      name: "Frequent Sports Section Visitor",
+      minMatches: 3,
+      where: {
+        or: [
+          {
+            attribute: "page.path",
+            startsWith: "/sports/",
+          },
+          {
+            attribute: "page.path",
+            startsWith: "/courses/sports/",
+          },
+        ],
+      },
+    },
+    {
+      id: "searchedForSportsEvents",
+      name: "Searched for Sports Events",
+      minMatches: 3,
+      where: {
+        or: [
+          {
+            attribute: "custom.searchQuery",
+            contains: "sport event",
+          },
+          {
+            attribute: "custom.searchQuery",
+            contains: "sports events",
+          },
+          {
+            and: [
+              {
+                attribute: "custom.searchCategory",
+                equalTo: "event",
+              },
+              {
+                attribute: "custom.searchQuery",
+                contains: "sport",
+              },
+            ],
+          },
+          {
+            and: [
+              {
+                attribute: "custom.searchCategory",
+                equalTo: "sport",
+              },
+              {
+                attribute: "custom.searchQuery",
+                contains: "events",
+              },
+            ],
+          },
+        ],
       },
     },
     {
@@ -170,11 +222,11 @@ export const MOCK_MANIFEST: IManifest = {
       where: {
         and: [
           {
-            attribute: "purchaseCategory",
+            attribute: "custom.purchaseCategory",
             equalTo: "sports",
           },
           {
-            attribute: "purchaseAmount",
+            attribute: "custom.purchaseAmount",
             greaterThan: 50,
           },
         ],
@@ -183,7 +235,7 @@ export const MOCK_MANIFEST: IManifest = {
     {
       id: "frequentTechBlogReader",
       name: "Frequent Technology Blog Reader",
-      minMatches: 10,
+      minMatches: 3,
       where: {
         or: [
           {
@@ -191,7 +243,7 @@ export const MOCK_MANIFEST: IManifest = {
             contains: "techblog",
           },
           {
-            attribute: "searchQuery",
+            attribute: "custom.searchQuery",
             contains: "latest gadgets",
           },
         ],

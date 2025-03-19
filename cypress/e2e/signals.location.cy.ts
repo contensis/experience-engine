@@ -1,6 +1,5 @@
-const manifestFixture = `signals.location-manifest.json`;
-
 describe(`Match Signals via location attributes`, () => {
+  const manifestFixture = `signals.location-manifest.json`;
   context("Given I access the home page", () => {
     beforeEach(() => {
       cy.interceptManifest(manifestFixture);
