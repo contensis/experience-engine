@@ -3,7 +3,7 @@ export interface ISignal {
   name: string;
   minMatches: number;
   where: Where;
-  version: IAudienceVersion;
+  version?: IAudienceVersion;
 }
 
 export type Where = WhereAnd | WhereOr;

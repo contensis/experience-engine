@@ -14,12 +14,6 @@ export const MOCK_MANIFEST: IManifest = {
           },
         ],
       },
-      version: {
-        created: new Date("2024-11-22T00:00:00Z"),
-        createdBy: "n.flatley",
-        modified: new Date("2024-11-22T00:00:00Z"),
-        modifiedBy: "n.flatley",
-      },
     },
     {
       id: "artsEngagedStudents",
@@ -45,12 +39,6 @@ export const MOCK_MANIFEST: IManifest = {
           },
         ],
       },
-      version: {
-        created: "2024-06-01T00:00:00Z",
-        createdBy: "s.horan",
-        modified: "2024-06-04T00:00:00Z",
-        modifiedBy: "s.horan",
-      },
     },
     {
       id: "loggedInUser",
@@ -63,12 +51,6 @@ export const MOCK_MANIFEST: IManifest = {
             id: "isLoggedIn",
           },
         ],
-      },
-      version: {
-        created: new Date("2025-01-10T00:00:00Z"),
-        createdBy: "n.flatley",
-        modified: new Date("2025-01-10T00:00:00Z"),
-        modifiedBy: "n.flatley",
       },
     },
     {
@@ -94,12 +76,6 @@ export const MOCK_MANIFEST: IManifest = {
             ],
           },
         ],
-      },
-      version: {
-        created: "2024-05-15T12:00:00Z",
-        createdBy: "j.doe",
-        modified: "2024-06-01T08:30:00Z",
-        modifiedBy: "a.smith",
       },
     },
     {
@@ -127,12 +103,6 @@ export const MOCK_MANIFEST: IManifest = {
           },
         ],
       },
-      version: {
-        created: "2024-04-20T14:00:00Z",
-        createdBy: "k.jones",
-        modified: "2024-05-25T17:00:00Z",
-        modifiedBy: "k.jones",
-      },
     },
   ],
   signals: [
@@ -151,12 +121,6 @@ export const MOCK_MANIFEST: IManifest = {
             startsWith: "/courses/arts/",
           },
         ],
-      },
-      version: {
-        created: "2024-06-01T00:00:00Z",
-        createdBy: "s.horan",
-        modified: "2024-06-04T00:00:00Z",
-        modifiedBy: "j.doe",
       },
     },
     {
@@ -198,12 +162,6 @@ export const MOCK_MANIFEST: IManifest = {
           },
         ],
       },
-      version: {
-        created: "2025-01-10T00:00:00Z",
-        createdBy: "n.flatley",
-        modified: "2025-01-10T00:00:00Z",
-        modifiedBy: "n.flatley",
-      },
     },
     {
       id: "purchasedSportsGear",
@@ -221,12 +179,6 @@ export const MOCK_MANIFEST: IManifest = {
           },
         ],
       },
-      version: {
-        created: "2024-05-15T12:00:00Z",
-        createdBy: "j.doe",
-        modified: "2024-06-01T08:30:00Z",
-        modifiedBy: "a.smith",
-      },
     },
     {
       id: "frequentTechBlogReader",
@@ -243,12 +195,6 @@ export const MOCK_MANIFEST: IManifest = {
             contains: "latest gadgets",
           },
         ],
-      },
-      version: {
-        created: "2024-04-20T14:00:00Z",
-        createdBy: "k.jones",
-        modified: "2024-05-25T17:00:00Z",
-        modifiedBy: "k.jones",
       },
     },
   ],

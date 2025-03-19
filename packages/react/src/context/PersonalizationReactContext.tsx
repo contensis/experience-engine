@@ -53,6 +53,9 @@ export interface IPersonalizationReactContext {
   /** Supply custom attributes identified within the app to the personalization context */
   setAttributes: PersonalizationContext["setAttributes"];
 
+  /** Return any custom attributes provided by the app to the personalization context */
+  getAttributes: PersonalizationContext["getAttributes"];
+
   /** Set signal attributes within the app to override the personalization context */
   overrideAttributes: PersonalizationContext["overrideAttributes"];
 

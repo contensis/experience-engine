@@ -3,7 +3,7 @@ export interface IAudience {
   name: string;
   description: string;
   conditions: Conditions;
-  version: IAudienceVersion;
+  version?: IAudienceVersion;
 }
 
 export type Conditions =

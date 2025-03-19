@@ -22,6 +22,7 @@ export const usePersonalizationContext = () => {
     },
     percentile: 0,
     setAttributes: () => {},
+    getAttributes: () => null,
     overrideAttributes: () => {},
     toggleAudience: () => {},
     t: 0,
@@ -30,6 +31,7 @@ export const usePersonalizationContext = () => {
   const updateState = () => {
     if (context) {
       const {
+        getAttributes,
         manifest,
         overrideAttributes,
         percentile,
@@ -45,6 +47,7 @@ export const usePersonalizationContext = () => {
         signals,
         computed: context.signals?.computed || [],
         context,
+        getAttributes,
         isAudience: (id: string | string[]) =>
           Array.isArray(id)
             ? id.some((item) => audiences.includes(item))

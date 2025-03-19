@@ -456,6 +456,26 @@ export class PersonalizationContext {
   };
 
   /**
+   * Return any custom attributes provided by the app to the
+   * personalization context
+   */
+  getAttributes = (key?: string | string[]) => {
+    const allAttributes = (this.signals?.attributes ||
+      {}) as unknown as ICustomAttributes;
+    if (Array.isArray(key)) {
+      const selectedAttributes = {} as ICustomAttributes;
+      for (const k of key) {
+        if (allAttributes && k in allAttributes)
+          selectedAttributes[k] = allAttributes[k];
+      }
+      return selectedAttributes;
+    } else if (key) {
+      return allAttributes[key];
+    }
+    return allAttributes;
+  };
+
+  /**
    * Supply custom attributes identified within the app to the
    * personalization context
    */
