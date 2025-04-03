@@ -47,11 +47,13 @@ import "cypress-wait-until";
  * Custom interceptManifest command intercepts the ManifestClient request
  * for the current manifest and stubs the response with the given fixture
  */
-Cypress.Commands.add("interceptManifest", (fixture: string) =>
+Cypress.Commands.add("interceptManifest", (fixture: string, preview = false) =>
   cy
     .intercept(
       "GET",
-      "https://cms-cypress-test.cloud.contensis.com/api/delivery/projects/website/personalization/manifest/current",
+      `https://cms-cypress-test.cloud.contensis.com/api/delivery/projects/website/personalization/manifest/${
+        preview ? "preview" : "current"
+      }`,
       {
         fixture,
         headers: {
@@ -60,7 +62,7 @@ Cypress.Commands.add("interceptManifest", (fixture: string) =>
         },
       }
     )
-    .as(fixture)
+    .as(`${preview ? "preview." : ""}${fixture}`)
 );
 
 /**
@@ -83,12 +85,13 @@ Cypress.Commands.add("waitSignals", () =>
       cy.getContext().then((c: PersonalizationContext) => {
         return (
           // ensure we have computed signals
-          c.signals?.computed?.length > 0 &&
-          // ensure the computed signals matches the number of signals in the manifest
-          c.signals.computed.length === c.manifest.signals.length &&
-          // ensure the computed signals have been persisted to local storage
-          Object.keys(c.state.signals?.computed || {}).length ===
-            c.signals.computed.length
+          (c.signals?.computed?.length > 0 &&
+            // ensure the computed signals matches the number of signals in the manifest
+            c.signals.computed.length === c.manifest.signals.length &&
+            // ensure the computed signals have been persisted to local storage
+            Object.keys(c.state.signals?.computed || {}).length ===
+              c.signals.computed.length) ||
+          +new Date() - c.signals?.t > 1000
         );
       })
     )

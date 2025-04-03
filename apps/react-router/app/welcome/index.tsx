@@ -9,6 +9,15 @@ export function Welcome() {
   const { context, getAttributes, overrideAttributes, setAttributes } =
     usePersonalizationContext();
 
+  const [isPreviewChecked, setIsPreviewChecked] = useState(context.preview);
+
+  useEffect(() => {
+    // Set preview flag
+    context.preview = isPreviewChecked;
+    // Reset manifest
+    context.reset({ manifest: true });
+  }, [isPreviewChecked]);
+
   /** Manage a basket qty and a search term to test custom attributes */
   const [basketQty, setBasketQty] = useState(0);
   useEffect(() => {
@@ -60,6 +69,7 @@ export function Welcome() {
           <div className="flex justify-center gap-4">
             <div className="flex flex-col items-center justify-center gap-4">
               <button
+                id="resetStorage"
                 onClick={() => {
                   context.reset();
                 }}
@@ -69,6 +79,7 @@ export function Welcome() {
             </div>
             <div className="flex flex-col items-center justify-center gap-4">
               <button
+                id="resetSession"
                 onClick={() => {
                   context.reset({ session: true });
                 }}
@@ -78,6 +89,17 @@ export function Welcome() {
             </div>
             <div className="flex flex-col items-center justify-center gap-4">
               <button
+                id="reloadManifest"
+                onClick={() => {
+                  context.reset({ manifest: true });
+                }}
+              >
+                Reload manifest
+              </button>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-4">
+              <button
+                id="reloadPage"
                 onClick={() => {
                   location.reload();
                 }}
@@ -85,6 +107,53 @@ export function Welcome() {
                 Reload page
               </button>
             </div>
+          </div>
+          <div className="flex justify-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <button
+                id="resetAudiences"
+                onClick={() => {
+                  context.reset({ audiences: true, signals: true });
+                }}
+              >
+                Reset audiences
+              </button>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-4">
+              <button
+                id="resetSignals"
+                onClick={() => {
+                  context.reset({ signals: true });
+                }}
+              >
+                Reset signals
+              </button>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-4">
+              <button
+                id="resetAttributes"
+                onClick={() => {
+                  context.reset({ attributes: true });
+                }}
+              >
+                Reset attributes
+              </button>
+            </div>
+          </div>
+          <div>
+            <label>
+              <input
+                id="isPreviewChecked"
+                type="checkbox"
+                checked={isPreviewChecked}
+                onChange={(event) => {
+                  context.preview = event.target.checked;
+                  context.reset({ manifest: true });
+                  setIsPreviewChecked(event.target.checked);
+                }}
+              />
+              {isPreviewChecked ? "Latest Manifest" : "Published Manifest"}
+            </label>
           </div>
           <div>
             Basket qty:{" "}

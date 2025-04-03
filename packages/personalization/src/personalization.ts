@@ -318,6 +318,7 @@ export class PersonalizationContext {
         /** New percentile random bucketing to 2 dp */
         pc: existingpc ? existingpc * 100 : Math.floor(Math.random() * 10000),
         pageViews: 0,
+        manifest: this.manifest,
         signals: { active: [] },
         audiences: { active: [] },
       }
@@ -588,8 +589,9 @@ export class PersonalizationContext {
       me.pageViews = [];
       me.session.clear();
       me.session = new Session(me);
-      me.pageView();
     }
+
+    if (store || session) me.pageView();
 
     if (manifest) {
       if (me.#cpv) me.#cpv[2] = null;
