@@ -23,6 +23,7 @@ export default tseslint.config(
       "mocha/no-mocha-arrows": "off",
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/member-ordering": "error",
     },
   }
 );
