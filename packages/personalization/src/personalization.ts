@@ -494,6 +494,26 @@ export class PersonalizationContext {
     }
   };
 
+  /**
+   * Compute signals for a provided PageView 
+   * and debug log any updated signals or audiences
+   */
+  #computePage = (pageView: PageView) => {
+    const existingSignals = this.signals?.matched?.length || 0;
+    const existingAudiences = this.audiences?.active.length || 0;
+
+    // Compute signals and audiences
+    this.compute(pageView);
+
+    const hasNewSignals = this.signals?.matched?.length !== existingSignals;
+    // If we have matched new signals...
+    if (hasNewSignals) this.l("ms");
+
+    const hasNewAudiences = this.audiences?.active.length !== existingAudiences;
+    // If we have matched new audiences...
+    if (hasNewAudiences) this.l("ma");
+  };
+
   /** Invoke event handler(s) */
   #handler = <T extends keyof IHandlers>(
     key: T,
@@ -577,27 +597,12 @@ export class PersonalizationContext {
       this.#save = { ...state, manifest };
       l(preview ? "mp" : "mv", manifestVersion, stateVersion);
 
-      // // Retrospectively calculate signals for any pageViews[][2] that are null
-      // const toCheck = pageViews.filter((pv) => pv[2] === null);
-      // for (const pageView of toCheck) {
-
       // Recompute all pageViews when manifest is updated
-      for (const pageView of pageViews) {
-        const existingSignals = this.signals?.matched?.length || 0;
-        const existingAudiences = this.audiences?.active.length || 0;
-
-        // Compute signals and audiences
-        this.compute(pageView);
-
-        const hasNewSignals = this.signals?.matched?.length !== existingSignals;
-        // If we have matched new signals...
-        if (hasNewSignals) l("ms");
-
-        const hasNewAudiences =
-          this.audiences?.active.length !== existingAudiences;
-        // If we have matched new audiences...
-        if (hasNewAudiences) l("ma");
-      }
+      for (const pageView of pageViews) this.#computePage(pageView);
+    } else {
+      // Retrospectively calculate signals for any pageViews[][2] that are null
+      const toCheck = pageViews.filter((pv) => pv[2] === null);
+      for (const pageView of toCheck) this.#computePage(pageView);
     }
 
     // Invoke user-supplied event handler(s)
