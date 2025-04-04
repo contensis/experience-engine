@@ -17,6 +17,36 @@ describe(`Match Signals via session attributes`, () => {
           .its("signals.attributes['session.duration']")
           .should("equal", 0);
       });
+      it("And the browser signal attributes are recognised", () => {
+        cy.getContext()
+          .its("signals.attributes['browser.cookiesEnabled']")
+          .should("be.a", "boolean")
+          .and("equal", true);
+        cy.getContext()
+          .its("signals.attributes['browser.platform']")
+          .should("be.a", "string");
+        cy.getContext()
+          .its("signals.attributes['browser.language']")
+          .should("be.a", "string");
+        cy.getContext()
+          .its("signals.attributes['browser.screenHeight']")
+          .should("be.a", "number");
+        cy.getContext()
+          .its("signals.attributes['browser.screenWidth']")
+          .should("be.a", "number");
+        cy.getContext()
+          .its("signals.attributes['browser.timezone']")
+          .should("be.a", "string");
+        cy.getContext()
+          .its("signals.attributes['browser.touchSupport']")
+          .should("be.a", "boolean");
+        cy.getContext()
+          .its("signals.attributes['browser.userAgent']")
+          .should("contain", "Mozilla");
+        cy.getContext()
+          .its("signals.attributes['browser.vendor']")
+          .should("be.a", "string");
+      });
       it("And the attributes are saved in session storage", () => {
         cy.getSessionStorage().its("isFirstVisit").should("equal", true);
         cy.getSessionStorage().its("duration").should("equal", 0);
