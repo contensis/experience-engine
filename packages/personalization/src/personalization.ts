@@ -495,7 +495,7 @@ export class PersonalizationContext {
   };
 
   /**
-   * Compute signals for a provided PageView 
+   * Compute signals for a provided PageView
    * and debug log any updated signals or audiences
    */
   #computePage = (pageView: PageView) => {

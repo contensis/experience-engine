@@ -9,14 +9,7 @@ export function Welcome() {
   const { context, getAttributes, overrideAttributes, setAttributes } =
     usePersonalizationContext();
 
-  const [isPreviewChecked, setIsPreviewChecked] = useState(context.preview);
-
-  useEffect(() => {
-    // Set preview flag
-    context.preview = isPreviewChecked;
-    // Reset manifest
-    context.reset({ manifest: true });
-  }, [isPreviewChecked]);
+  const [isPreviewChecked, setIsPreviewChecked] = useState(false);
 
   /** Manage a basket qty and a search term to test custom attributes */
   const [basketQty, setBasketQty] = useState(0);

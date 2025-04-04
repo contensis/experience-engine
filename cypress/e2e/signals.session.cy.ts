@@ -27,8 +27,13 @@ describe(`Match Signals via session attributes`, () => {
     beforeEach(() => {
       cy.interceptManifest(manifestFixture);
       cy.pageViewVisit("/").waitManifest(manifestFixture, `session`);
+
       // Do navigations to activate a signal and audience
       cy.contains("Navigate to Arts Home Page").pageViewClick();
+
+      // Wait for a second to allow session.duration to increase by at least 1s
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(1000);
       cy.contains("Navigate to Home Page").pageViewClick();
     });
 
@@ -43,7 +48,7 @@ describe(`Match Signals via session attributes`, () => {
           .its("signals.attributes['session.duration']")
           .should("be.greaterThan", 0);
       });
-      it("And pageViews attribute is greater than 1", () => {
+      it("And total pageViews attribute is greater than 1", () => {
         cy.getLocalStorage().its("pageViews").should("be.greaterThan", 1);
       });
       it("And the returning visitor audience is not activated", () => {
@@ -87,7 +92,7 @@ describe(`Match Signals via session attributes`, () => {
       it("And session.pageViews attribute is 1", () => {
         cy.getSessionStorage().its("pageViews").should("equal", 1);
       });
-      it("And pageViews attribute is greater than 1", () => {
+      it("And total pageViews attribute is greater than 1", () => {
         cy.getLocalStorage().its("pageViews").should("be.greaterThan", 1);
       });
       it("And the returning visitor audience is activated", () => {
