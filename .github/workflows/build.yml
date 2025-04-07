@@ -40,7 +40,6 @@ jobs:
       fail-fast: false # don't fail the entire matrix on failure
       matrix:
         browser: ["chrome", "edge", "firefox"]
-        containers: [1, 2] # Uses 2 parallel instances
 
     steps:
       - name: Checkout
@@ -65,7 +64,6 @@ jobs:
           # Records to Cypress Cloud
           # https://docs.cypress.io/guides/cloud/projects#Set-up-a-project-to-record
           record: true
-          parallel: true # Runs test in parallel using settings above
 
       # after the test run completes store videos and any screenshots
       - name: Upload screenshots for any failed tests
