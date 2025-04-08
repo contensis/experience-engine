@@ -167,11 +167,11 @@
       "where": {
         "and": [
           {
-            "attribute": "purchaseCategory",
+            "attribute": "custom.purchaseCategory",
             "equalTo": "sports"
           },
           {
-            "attribute": "purchaseAmount",
+            "attribute": "custom.purchaseAmount",
             "greaterThan": 50
           }
         ]
@@ -194,7 +194,7 @@
             "contains": "techblog"
           },
           {
-            "attribute": "searchQuery",
+            "attribute": "custom.searchQuery",
             "contains": "latest gadgets"
           }
         ]

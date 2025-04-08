@@ -11,12 +11,6 @@
             "id": "artsVisitor"
           }
         ]
-      },
-      "version": {
-        "created": "2024-11-22T00:00:00.000Z",
-        "createdBy": "n.flatley",
-        "modified": "2024-11-22T00:00:00.000Z",
-        "modifiedBy": "n.flatley"
       }
     },
     {
@@ -42,12 +36,6 @@
             ]
           }
         ]
-      },
-      "version": {
-        "created": "2024-06-01T00:00:00Z",
-        "createdBy": "s.horan",
-        "modified": "2024-06-04T00:00:00Z",
-        "modifiedBy": "s.horan"
       }
     },
     {
@@ -73,12 +61,6 @@
             ]
           }
         ]
-      },
-      "version": {
-        "created": "2024-05-15T12:00:00Z",
-        "createdBy": "j.doe",
-        "modified": "2024-06-01T08:30:00Z",
-        "modifiedBy": "a.smith"
       }
     },
     {
@@ -104,12 +86,6 @@
             ]
           }
         ]
-      },
-      "version": {
-        "created": "2024-04-20T14:00:00Z",
-        "createdBy": "k.jones",
-        "modified": "2024-05-25T17:00:00Z",
-        "modifiedBy": "k.jones"
       }
     }
   ],
@@ -137,12 +113,6 @@
             "startsWith": "/courses/arts/"
           }
         ]
-      },
-      "version": {
-        "created": "2024-06-01T00:00:00Z",
-        "createdBy": "s.horan",
-        "modified": "2024-06-04T00:00:00Z",
-        "modifiedBy": "j.doe"
       }
     },
     {
@@ -164,12 +134,6 @@
             "startsWith": "/courses/arts/"
           }
         ]
-      },
-      "version": {
-        "created": "2024-06-01T00:00:00Z",
-        "createdBy": "s.horan",
-        "modified": "2024-06-04T00:00:00Z",
-        "modifiedBy": "j.doe"
       }
     },
     {
@@ -179,20 +143,14 @@
       "where": {
         "and": [
           {
-            "attribute": "purchaseCategory",
+            "attribute": "custom.purchaseCategory",
             "equalTo": "sports"
           },
           {
-            "attribute": "purchaseAmount",
+            "attribute": "custom.purchaseAmount",
             "greaterThan": 50
           }
         ]
-      },
-      "version": {
-        "created": "2024-05-15T12:00:00Z",
-        "createdBy": "j.doe",
-        "modified": "2024-06-01T08:30:00Z",
-        "modifiedBy": "a.smith"
       }
     },
     {
@@ -206,16 +164,10 @@
             "contains": "techblog"
           },
           {
-            "attribute": "searchQuery",
+            "attribute": "custom.searchQuery",
             "contains": "latest gadgets"
           }
         ]
-      },
-      "version": {
-        "created": "2024-04-20T14:00:00Z",
-        "createdBy": "k.jones",
-        "modified": "2024-05-25T17:00:00Z",
-        "modifiedBy": "k.jones"
       }
     }
   ],

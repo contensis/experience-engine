@@ -128,7 +128,7 @@
             "contains": "techblog"
           },
           {
-            "attribute": "searchQuery",
+            "attribute": "custom.searchQuery",
             "contains": "latest gadgets"
           }
         ]
