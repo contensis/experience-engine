@@ -4,16 +4,9 @@ import { usePersonalizationContext } from "../hooks/usePersonalizationContext";
 const DEFAULT_AUDIENCE_KEY = "audiences";
 
 type AudienceKey = typeof DEFAULT_AUDIENCE_KEY;
-type Optional<T, K extends keyof T> = Omit<T, K> & {
-  [P in K]?: T[P];
-};
-
-type PersonalizeBase<K extends string = AudienceKey> = {
-  [audienceKey in K]: string | string[];
-};
 
 export type PersonalizeProps<
-  T extends PersonalizeBase<K>,
+  T extends Record<string, unknown> & Record<K, string | string[]>,
   K extends string = AudienceKey
 > = {
   /**
@@ -23,20 +16,22 @@ export type PersonalizeProps<
    */
   variants: T[];
   /** Set the content to render if we haven't matched a personalized variant  */
-  defaultContent?: Optional<T, K>;
+  defaultContent?: Omit<T[][0], K> & Record<string, unknown>;
   /** The content field id to look for that contains audience ids in every variant, defaults to: `audiences`  */
-  audienceKey?: K;
+  audienceKey?: K | keyof T;
   children?: React.ComponentType<T>;
   /** The component to render with the variant/default content */
   render?: React.ComponentType<T>;
 };
 
 export const Personalize = <
-  TVariant extends PersonalizeBase<KAudienceKey>,
+  TVariant extends Record<string, unknown> &
+    Record<KAudienceKey, string | string[]>,
   KAudienceKey extends string = AudienceKey
->(
-  props: PersonalizeProps<TVariant, KAudienceKey>
-) => {
+>({
+  audienceKey = DEFAULT_AUDIENCE_KEY as KAudienceKey,
+  ...props
+}: PersonalizeProps<TVariant, KAudienceKey>) => {
   // Component can be passed in a render prop or as children
   const Component =
     "children" in props
@@ -49,9 +44,7 @@ export const Personalize = <
   const { isAudience } = usePersonalizationContext();
 
   // Determine the key in each variant that holds the audiences
-  const [audiences] = useState(
-    props.audienceKey || (DEFAULT_AUDIENCE_KEY as KAudienceKey)
-  );
+  const [audiences] = useState(audienceKey);
 
   // Set the defaultContent to be either defaultContent prop
   // or a variant that has no audiences set
@@ -76,7 +69,7 @@ export const Personalize = <
   useEffect(() => {
     let personalized = false;
     for (const variant of props.variants) {
-      if (isAudience(variant[audiences])) {
+      if (isAudience(variant[audiences] as string)) {
         setPersonalizedVariant(variant);
         personalized = true;
         break;
