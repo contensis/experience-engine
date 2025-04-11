@@ -6,6 +6,7 @@ import {
   IHandlers,
   IManifest,
   IPersonalizationStore,
+  SignalValue,
 } from "./models";
 import { CalculateSignals } from "./signals";
 import { IStoreOptions, Store } from "./providers/store";
@@ -14,6 +15,7 @@ import {
   isObjectContentEqual,
   isSSR,
   isStore,
+  isStringArray,
   now,
   objectKeys,
   objectMatches,
@@ -350,20 +352,25 @@ export class PersonalizationContext {
    * Return any custom attributes provided by the app to the
    * personalization context
    */
-  getAttributes = (key?: string | string[]) => {
+  getAttributes = <
+    T extends string | string[] | undefined = undefined,
+    R = T extends string ? SignalValue : ICustomAttributes
+  >(
+    key?: T
+  ) => {
     const allAttributes = (this.signals?.attributes ||
       {}) as unknown as ICustomAttributes;
-    if (Array.isArray(key)) {
+    if (isStringArray(key)) {
       const selectedAttributes = {} as ICustomAttributes;
       for (const k of key) {
         if (allAttributes && k in allAttributes)
           selectedAttributes[k] = allAttributes[k];
       }
-      return selectedAttributes;
-    } else if (key) {
-      return allAttributes[key];
+      return selectedAttributes as R;
+    } else if (typeof key === "string") {
+      return allAttributes[key] as R;
     }
-    return allAttributes;
+    return allAttributes as R;
   };
 
   /**

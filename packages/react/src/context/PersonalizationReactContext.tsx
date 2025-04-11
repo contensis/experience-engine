@@ -30,9 +30,9 @@ export interface IPersonalizationReactContext {
 
   /** The pageViews object containing page view counts for this visitor */
   pageViews: {
-    /** Number of page views accumulated since the current PersonalizationContext was created */
+    /** Number of page views accumulated in the current browser session */
     session: number;
-    /** Total number of page views(recorded in localStorage) */
+    /** Total number of page views (recorded in localStorage) */
     total: number;
   };
 

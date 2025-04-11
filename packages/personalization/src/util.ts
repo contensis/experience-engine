@@ -93,6 +93,8 @@ export const isStore = (store: unknown): store is IPersonalizationStore =>
   isObject(store) && "cpid" in store;
 export const isString = (val: unknown): val is string =>
   typeof val === "string";
+export const isStringArray = (array: unknown): array is string[] =>
+  isArray(array) && array.every((element) => typeof element === "string");
 export const isUndefined = (val: unknown): val is undefined =>
   typeof val === "undefined";
 
