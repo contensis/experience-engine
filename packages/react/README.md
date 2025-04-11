@@ -5,6 +5,12 @@
 
 Provides a context wrapper, hooks and components to easily leverage personalization with Contensis in your React projects
 
+### Prerequisites
+
+Before we can see Personalization in action it is recommended we first [ensure content is Personalized with variants for different audiences](https://github.com/contensis/personalization/blob/main/docs/PERSONALIZE_CONTENT.md)
+
+Familiarise yourself with the terminology by looking at [how we determine audiences](https://github.com/contensis/personalization/blob/main/README.md#how-it-works) in order to personalize content
+
 ## Installation
 
 ```bash
@@ -17,7 +23,7 @@ yarn add --save @contensis/personalization-react
 
 ## Configuration
 
-### PersonalizationProvider component
+### [\<PersonalizationProvider \/\> component](https://github.com/contensis/personalization/blob/main/packages/react/docs/PERSONALIZATION_PROVIDER.md)
 
 Wrap your "`App`" root component with a `PersonalizationProvider`
 
@@ -39,215 +45,53 @@ const App = () => {
   );
 };
 
+
 // Render the App
 createRoot(document.getElementById("root") as HTMLElement).render(
-  <StrictMode>
+    <StrictMode>
     <App />
   </StrictMode>
 );
 ```
 
-#### Props
-
-| Prop            | Type          | Description                                                                                                                 |
-| --------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| alias           | string        | Contensis Cloud alias for the project containing our Audiences                                                              |
-| projectId       | string        | API ID of the project containing our Audiences                                                                              |
-| preview         | boolean       | Set `true` to request the latest (unpublished) Manifest                                                                     |
-| rootUrl         | string        | Used instead of `alias` to fetch the Manifest from a specific hostname                                                      |
-| manifest        | Manifest      | The complete Manifest to use in this personalization context. Used instead of `alias` and `projectId`                       |
-| debug           | boolean / `v` | Set `true` to enable console logging, `v`erbose outputs raw logs that show the correct sequence each log message was output |
-| onComputed      | Function      | Custom handler called each time signals and audiences are computed                                                          |
-| onInit          | Function      | Custom handler called one time when the Personalization Context is initialized                                              |
-| onManifestReady | Function      | Custom handler called each time a manifest has been loaded                                                                  |
-| onNavigate      | Function      | Custom handler called each time the Personalization Context detects navigation within a SPA                                 |
-| onPageView      | Function      | Custom handler called each time the Personalization Context has registered a Page View                                      |
-
-### Event Handlers
-
-A custom event handler can be added via the Personalization Provider props and will be available to the Personalization Context from the time it is created.
-
-| Prop            | Type     | Description                                                                                 |
-| --------------- | -------- | ------------------------------------------------------------------------------------------- |
-| onComputed      | Function | Custom handler called each time signals and audiences are computed                          |
-| onInit          | Function | Custom handler called one time when the Personalization Context is initialized              |
-| onManifestReady | Function | Custom handler called each time a manifest has been loaded                                  |
-| onNavigate      | Function | Custom handler called each time the Personalization Context detects navigation within a SPA |
-| onPageView      | Function | Custom handler called each time the Personalization Context has registered a Page View      |
-
-### Manifest
-
-The "Manifest" is an object that is fetched from the Contensis Delivery API that contain the Audience and Signal definitions and the conditions that have been set up to trigger them
-
-When using the Audience and Signals editor in Contensis, the `Publish` activity will cause this "Manifest" to be updated and a new version will be delivered to website visitors in projects configured to use Personalization.
-
-#### Provide your own manifest
-
-The `PersonalizationProvider` component accepts a `manifest` prop where we can simply provide a JSON object that serves as the Manifest document.
-
-This can be useful for developers who are testing new Personalization conditions and how to apply them
-
-- [Manifest TypeScript definition](../../packages/personalization/src/models/api/Manifest.d.ts)
-- [Example Manifest document](../../cypress/fixtures/audiences.signals-manifest.json)
-- [Example Manifest usage](../../apps/react/src/App.tsx)
-
-When a manifest has been provided, the Personalization Context will not request a manifest from Contensis and will not require the `alias`, `projectId` or `rootUrl` props.
-
 ## Personalize content variations
 
-### Ensure Content is Personalized
+### [\<Personalize \/\> component](https://github.com/contensis/personalization/blob/main/packages/react/docs/PERSONALIZATION_PROVIDER.md)
 
-When working with Contensis, it is normal to render the content fields of an Entry of a specific content type that has fields containing the content for the current "page".
+A typical React component that renders a content Entry might look like this.
 
-For this example, our Entry uses a Component field set up in the Content Type called `personalizedHero`. The Component field is configured to be repeatable. We will add multiples of this Component field for every audience we wish to tailor the content for.
+The `ExampleHomePage` component renders a logo and the title from the Entry, then a `HeroBanner` component fed is props from the contents of the `hero` field
 
-The Component is defined with an Audience Picker field in addition to the content field(s) encapsulated within this component.
-
-We will also use the original `hero` field in the Content Type that serves as the default version (the variation we will render when the visitor matches no audiences in the `personalizedHero`). We could drop the `hero` field from this Content Type and use only the `personalizedHero` field, but we would have to include a variant of the component that serves as the default version to render in each Entry.
-
-```json
-{
-  "id": "exampleHomePage",
-  "projectId": "website",
-  "dataFormat": "entry",
-  "name": {
-    "en-GB": "Example: Home Page"
-  },
-  "entryTitleField": "title",
-  "fields": [
-    {
-      "id": "title",
-      "name": {
-        "en-GB": "Title"
-      },
-      "dataType": "string",
-      "dataFormat": "heading",
-      "groupId": "main"
-    },
-    {
-      "id": "hero",
-      "name": {
-        "en-GB": "Hero"
-      },
-      "dataType": "object",
-      "dataFormat": "component.personalizedhero",
-      "groupId": "main"
-    },
-    {
-      "id": "personalizedHero",
-      "name": {
-        "en-GB": "Personalized Hero"
-      },
-      "dataType": "objectArray",
-      "dataFormat": "component.personalizedhero",
-      "editor": {
-        "properties": {
-          "componentButtonLabel": "Add personalized variant"
-        }
-      },
-      "groupId": "main"
-    }
-  ]
-}
-```
-
-_Example Content Type JSON_
-
-```json
-{
-  "id": "personalizedHero",
-  "projectId": "website",
-  "dataFormat": "component",
-  "name": {
-    "en-GB": "Personalized Hero"
-  },
-  "description": {
-    "en-GB": "Create personalized variations for any audience"
-  },
-  "fields": [
-    {
-      "id": "audiences",
-      "name": {
-        "en-GB": "Audiences"
-      },
-      "dataType": "objectArray",
-      "dataFormat": "audience",
-      "validations": {
-        "allowedIds": {
-          "ids": ["returningVisitors", "potentialStudents", "campaignSignUp"]
-        }
-      },
-      "editor": {
-        "instructions": {
-          "en-GB": "Choose one or more audiences that will have this variant rendered"
-        },
-        "properties": {
-          "componentButtonLabel": "Add another audience"
-        }
-      }
-    },
-    {
-      "id": "heading",
-      "name": {
-        "en-GB": "Heading"
-      },
-      "dataType": "string"
-    },
-    {
-      "id": "leadIn",
-      "name": {
-        "en-GB": "Lead-In"
-      },
-      "dataType": "string",
-      "editor": {
-        "id": "text"
-      }
-    },
-    {
-      "id": "backgroundImage",
-      "name": {
-        "en-GB": "Background image"
-      },
-      "dataType": "object",
-      "dataFormat": "image",
-      "editor": {
-        "properties": {
-          "uploadPath": "/image-library",
-          "filterPaths": ["/image-library"]
-        }
-      }
-    }
-  ]
-}
-```
-
-_Example Personalized Hero Component JSON_
-
-### With Personalize component
-
-Render an Entry containing content
-
-```jsx
+```tsx
 import React from "react";
 
-import HeroBanner, { HeroBannerProps } from "~/components/hero/HeroBanner";
+import HeroBanner from "~/components/hero/HeroBanner";
 import Link from "~/components/link/link.component";
 
-export type ExampleHomePageProps = {
-  title: string,
-  hero: HeroBannerProps,
+type HeroBannerProps = {
+  audiences: string[];
+  heading: string;
+  leadIn: string;
+  backgroundImageUrl?: string;
 };
 
-const ExampleHomePage = (entry: ExampleHomePageProps) => {
+type ExampleHomePageEntry = {
+  title: string;
+  hero: HeroBannerProps;
+  personalizedHero: HeroBannerProps[];
+};
+
+const ExampleHomePage = (entry: ExampleHomePageEntry) => {
   return (
     <div className="wrapper">
       <div className="logo">
         <Link path="/">
           <h1 className="sr-only">Example web app</h1>
-          <svg />
+          <Logo />
         </Link>
         <h1>{entry.title}</h1>
       </div>
+      {/* Render HeroBanner props from the `hero` field */}
       <HeroBanner {...entry.hero} />
     </div>
   );
@@ -256,36 +100,35 @@ const ExampleHomePage = (entry: ExampleHomePageProps) => {
 export default ExampleHomePage;
 ```
 
-```jsx
+After updating the `ExampleHomePage` component to include the additional `personalizedHero` prop from the content Entry.
+
+```tsx
 import React from "react";
 import { Personalize } from "@contensis/personalization-react";
 
+import HeroBanner from "~/components/hero/HeroBanner";
 import Link from "~/components/link/link.component";
-import HeroBanner, { HeroBannerProps } from "~/components/hero/HeroBanner";
 
-export type ExampleHomePageProps = {
-  title: string,
-  hero: HeroBannerProps,
-  personalizedHero: HeroBannerProps[],
-};
-
-const ExampleHomePage = (entry: ExampleHomePageProps) => {
+const ExampleHomePage = (entry: ExampleHomePageEntry) => {
   return (
     <div className="wrapper">
       <div className="logo">
         <Link path="/">
           <h1 className="sr-only">Example web app</h1>
-          <svg />
+          <Logo />
         </Link>
         <h1>{entry.title}</h1>
       </div>
+      {/* Replace `HeroBanner` with `Personalize` component.
+          `variants` prop is supplied with the `personalizedHero`
+          repeatable component and the `render` prop (or JSX
+          children) is the React component that is used to
+          render the correct variant */}
       <Personalize
-        audienceKey="audienceId"
-        variants={entry.personalizedHero}
         defaultContent={entry.hero}
-      >
-        {(heroProps) => <HeroBanner {...heroProps} />}
-      </Personalize>
+        render={HeroBanner}
+        variants={entry.personalizedHero}
+      />
     </div>
   );
 };
@@ -293,21 +136,330 @@ const ExampleHomePage = (entry: ExampleHomePageProps) => {
 export default ExampleHomePage;
 ```
 
+We have replaced the `<HeroBanner>` JSX with the `<Personalize>` component. The component takes the `variants` from the Entry as a prop.
+
+One content variant will be chosen based on the current visitor's active audiences.
+
+The chosen variant will be provided to the `render` component (or children) with the render props supplied for a single variant of the component - the same as if the component was being rendered with regular, non-personalized content (as in the original/previous example).
+
 ## Personalize anything
 
-### IsAudience
+[`usePersonalizationContext` hook](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md) can be called in any component and will return properties and functions we can use when personalizing parts of your application
 
-### Via signal matches
+### [IsAudience](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#isaudience)
+
+```tsx
+import React from "react";
+import { usePersonalizationContext } from "@contensis/personalization-react";
+
+const VisitorSpecificBanner = () => {
+  const { isAudience } = usePersonalizationContext();
+
+  // isAudience returns true if any of the supplied audience Ids have been made active
+  return isAudience(["returningVisitor"]) ? (
+    <div className="wrapper">
+      Additional information for returning visitors!
+    </div>
+  ) : null;
+};
+
+export default VisitorSpecificBanner;
+```
+
+### Active audiences
+
+```tsx
+import React from "react";
+import { usePersonalizationContext } from "@contensis/personalization-react";
+
+const VisitorSpecificBanner = () => {
+  const { audiences } = usePersonalizationContext();
+
+  // Look for a specific audience the visitor has activated
+  const isReturningVisitor = audiences.includes("returningVisitor");
+
+  return isReturningVisitor ? (
+    <div className="wrapper">
+      Additional information for returning visitors!
+    </div>
+  ) : null;
+};
+
+export default VisitorSpecificBanner;
+```
+
+### Active signals
+
+```tsx
+import React from "react";
+import { usePersonalizationContext } from "@contensis/personalization-react";
+
+const VisitorSpecificBanner = () => {
+  const { signals } = usePersonalizationContext();
+
+  // Look for a specific signal the visitor has activated
+  const isReturningVisitor = signals.includes("returningVisitor");
+
+  return isReturningVisitor ? (
+    <div className="wrapper">
+      Additional information for returning visitors!
+    </div>
+  ) : null;
+};
+
+export default VisitorSpecificBanner;
+```
+
+## Custom Attributes
+
+Custom attributes can be configured in Contensis and can be part of the conditions to activate a signal
+
+They allow developers to supply values produced within the app or provided by visitor actions for consideration when calculating signal and audience conditions
+
+### [setAttributes](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#setattributes)
+
+Supply one or more custom attributes and then perform signal and audience calculations
+
+```tsx
+const { setAttributes } = usePersonalizationContext();
+
+/** Manage search input state */
+const [searchInput, setSearchInput] = useState("");
+
+/** Sets the attribute `custom.searchQuery` */
+const handleSearchSubmit = (value = searchInput) => {
+  /** We can call `setAttributes` any time we have
+   * captured the value(s) to use for the custom attribute(s) */
+  setAttributes({
+    searchQuery: value,
+  });
+};
+
+return (
+  <div>
+    <input
+      id="searchInput"
+      type="text"
+      placeholder={"Search"}
+      value={searchInput}
+      onChange={(e) => {
+        setSearchInput(e.target.value);
+      }}
+      onKeyDown={(e) => {
+        // Submit on Enter key
+        if (e.key === "Enter") handleSearchSubmit(e.currentTarget.value);
+      }}
+    ></input>
+    <button id="searchSubmit" onClick={() => handleSearchSubmit()}>
+      Search
+    </button>
+  </div>
+);
+```
+
+Attributes we have set will be calculated one time only.
+
+If our Manifest contains a signal that requires the above `custom.searchQuery` to match before it is activated, we can match and activate any signals containing this condition at the time the search is performed. The attribute value will not be stored and cannot be considered as a "previous" searchQuery in subsequent navigations or actions.
+
+### [overrideAttributes](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#overrideattributes)
+
+Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the personalization attributes are reset.
+
+`overrideAttributes` can permanently set/override any of the signal attributes including built-in attributes. It may be useful to override a specific attribute with a specific value when debugging certain scenarios.
+
+Following on from the previous example, if we wanted to hold and maintain the last input searchQuery, and consider this value in every signal and audience calculation going forward. We can use `overrideAttributes` instead.
+
+`overrideAttributes` requires the fully qualified attribute key, exactly as would appear in the Manifest. For example `custom.searchQuery` or `page.domain`
+
+```tsx
+const { getAttributes, overrideAttributes, setAttributes } = usePersonalizationContext();
+
+/** Set custom attributes `searchQuery`, `lastSearchQuery` and `totalSearches` */
+const handleSearchSubmit = (value = searchInput) => {
+  setAttributes({
+    searchQuery: value,
+  });
+
+  /** We can call `overrideAttributes` any time we wish
+   * to hold and maintain an attribute over time */
+  overrideAttributes({
+    "custom.lastSearchQuery": value,
+    /** We could maintain a counter of previous interactions
+     * Recall a previously set attribute with `getAttributes` and increment */
+    "custom.totalSearches": 1 + (getAttributes('custom.totalSearches') || 0);
+  });
+};
+```
 
 ## Experiments
+
+When running experiments (or A/B testing), similar to the `<Personalize />` component, the `<Experiment />` component will render one of a number of supplied content variants (experiments) except instead of rendering personalized content based on active audiences, each variant (experiment) contains a number field between 0 and 100 that constitutes where the experiment variants are "split" between each "bucket".
+
+Prerequisite: [Curating experimental content](https://github.com/contensis/personalization/blob/main/docs/EXPERIMENT_CONTENT.md)
+
+```tsx
+import React from "react";
+import { Experiment } from "@contensis/personalization-react";
+
+import LeadText from "~/components/lead/LeadText";
+
+type ExampleHomePageEntry = {
+  title: string;
+  experiments: { lead: string; split: number }[];
+};
+
+const ExampleComponent = (entry: ExampleHomePageEntry) => {
+  return (
+    <div className="wrapper">
+      {/* Replace `LeadText` with `Experiment` component.
+          `experiments` prop is supplied with the repeating 
+          component Entry data and the `render` prop (or JSX
+          children) is the React component that is used to render
+          the correct variant for the current visitor's "bucket" */}
+      <Experiment
+        experiments={entry.experiments}
+        render={(props) => <LeadText {...props} />}
+      />
+    </div>
+  );
+};
+```
 
 ## Debugging
 
 ### Debug flag
 
+Output trace information in console logs showing actions performed by the Personalization Context
+
+Set the `debug` property in the `PersonalizationContext` to `true` to output trace logs. Use `"v"` for verbose logging.
+
 ### Use the Latest Manifest (unpublished / preview)
 
+To test changes made to audiences and signals in Contensis prior to them being published, we can request the latest manifest version (instead of the default published version)
+
+1. Set the `preview` property in the `PersonalizationContext` to `true`
+2. If the `preview` property is updated after the `PersonalizationContext` has instantiated, also `reset` the manifest in the Personalization Context
+
+### Browser Window object reference
+
+The personalization context can be examined or watched in the Console of the browser developer tools at any time from the browser's global scope
+
+Type `window.CONTENSIS_PERSONALIZATION.context` into the browser developer tools Console window
+
 ### Reset personalization
+
+Manually reset personalization by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
+
+We can also manually reset personalization by running the `reset()` function in the browser console:
+
+```javascript
+window.CONTENSIS_PERSONALIZATION.context.reset();
+```
+
+Or we can reset some or all personalization elements programatically in our components
+
+```tsx
+import React from "react";
+import { usePersonalizationContext } from "@contensis/personalization-react";
+
+const ExampleComponent = () => {
+  // First get a handle on the `context` object
+  const { context } = usePersonalizationContext();
+
+  // examples are below
+  return <div>...</div>;
+};
+```
+
+#### Reset all personalizations
+
+```tsx
+return (
+  <div>
+    <button
+      id="reset"
+      onClick={() => {
+        context.reset();
+      }}
+    >
+      Reset personalizations
+    </button>
+  </div>
+);
+```
+
+#### Reset the Manifest
+
+```tsx
+// Manage checkbox state
+const [isPreviewChecked, setIsPreviewChecked] = useState(context.preview);
+
+return (
+  <div>
+    <label>
+      <input
+        id="isPreviewChecked"
+        type="checkbox"
+        checked={isPreviewChecked}
+        onChange={(event) => {
+          // Update the preview flag in the context
+          context.preview = event.target.checked;
+
+          // Reset the personalization manifest
+          context.reset({ manifest: true });
+
+          // Handle component state
+          setIsPreviewChecked(context.preview);
+        }}
+      />
+      Preview manifest
+    </label>
+  </div>
+);
+```
+
+#### Reset all Audiences / Signals
+
+```tsx
+return (
+  <div>
+    <button
+      id="resetAudiences"
+      onClick={() => {
+        context.reset({
+          audiences: true,
+          // It makes sense to also reset signals
+          // at the same time so we can avoid
+          // immediately reactivating any audiences
+          // via previously matched signals
+          signals: true,
+        });
+      }}
+    >
+      Reset audiences
+    </button>
+  </div>
+);
+```
+
+#### Reset all Attributes
+
+```tsx
+return (
+  <div>
+    <button
+      id="resetAttributes"
+      onClick={() => {
+        context.reset({
+          attributes: true,
+        });
+      }}
+    >
+      Reset attributes
+    </button>
+  </div>
+);
+```
 
 ## License
 
