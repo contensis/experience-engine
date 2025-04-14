@@ -22,7 +22,7 @@ export const usePersonalizationContext = () => {
     },
     percentile: 0,
     setAttributes: () => {},
-    getAttributes: () => null,
+    getAttributes: (() => null) as PersonalizationContext["getAttributes"],
     overrideAttributes: () => {},
     toggleAudience: () => {},
     t: 0,
