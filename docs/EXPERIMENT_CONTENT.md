@@ -25,3 +25,4 @@
   // ...other Entry fields
 }
 ```
+_Example Entry JSON highlighting a `lead` text field and then experimental versions of the same field in a repeatable field called `experiments`_

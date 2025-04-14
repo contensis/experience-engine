@@ -56,7 +56,7 @@ createRoot(document.getElementById("root") as HTMLElement).render(
 
 ## Personalize content variations
 
-### [\<Personalize \/\> component](https://github.com/contensis/personalization/blob/main/packages/react/docs/PERSONALIZATION_PROVIDER.md)
+### [\<Personalize \/\> component](https://github.com/contensis/personalization/blob/main/packages/react/docs/PERSONALIZE.md)
 
 A typical React component that renders a content Entry might look like this.
 
@@ -293,9 +293,12 @@ const handleSearchSubmit = (value = searchInput) => {
 
 ## Experiments
 
-When running experiments (or A/B testing), similar to the `<Personalize />` component, the `<Experiment />` component will render one of a number of supplied content variants (experiments) except instead of rendering personalized content based on active audiences, each variant (experiment) contains a number field between 0 and 100 that constitutes where the experiment variants are "split" between each "bucket".
+When running experiments (or A/B testing), similar to the `<Personalize />` component, the `<Experiment />` component will render one of a number of supplied content variants (experiments) except we are not rendering personalized content based on active audiences, instead each variant (experiment) contains a number field between 0 and 100 that constitutes where the experiment variants are "split" between each randomly assigned "bucket".
 
-Prerequisite: [Curating experimental content](https://github.com/contensis/personalization/blob/main/docs/EXPERIMENT_CONTENT.md)
+### Prerequisites
+* [Curating experimental content](https://github.com/contensis/personalization/blob/main/docs/EXPERIMENT_CONTENT.md)
+
+### Example
 
 ```tsx
 import React from "react";
@@ -311,14 +314,12 @@ type ExampleHomePageEntry = {
 const ExampleComponent = (entry: ExampleHomePageEntry) => {
   return (
     <div className="wrapper">
-      {/* Replace `LeadText` with `Experiment` component.
-          `experiments` prop is supplied with the repeating 
-          component Entry data and the `render` prop (or JSX
-          children) is the React component that is used to render
-          the correct variant for the current visitor's "bucket" */}
+      {/* Replace `LeadText` with `Experiment` component */}
       <Experiment
-        experiments={entry.experiments}
-        render={(props) => <LeadText {...props} />}
+        // `experiments` prop is supplied with the repeating component Entry data
+        experiments={entry.experiments} 
+        // the component used to render the correct variant
+        render={(props) => <LeadText {...props} />} 
       />
     </div>
   );

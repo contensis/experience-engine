@@ -2,7 +2,11 @@
 
 Calling the usePersonalizationContext hook requires no arguments, but does require our root component to be wrapped in a [`PersonalizationProvider`](./PERSONALIZATION_PROVIDER.md)
 
-An object will be returned that can be destructured to use any of the following attributes
+An [IPersonalizationReactContext](https://github.com/contensis/personalization/blob/main/packages/react/src/context/PersonalizationReactContext.tsx) object will be returned that can be destructured to use any of the following attributes
+
+```typescript
+usePersonalizationContext(): IPersonalizationReactContext;
+```
 
 ### Returns
 

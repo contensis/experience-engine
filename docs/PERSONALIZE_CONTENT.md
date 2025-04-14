@@ -14,7 +14,7 @@ When working with Contensis, it is normal to render the content fields of an Ent
       "lead": "Personalization in Contensis (the default variant)"
     },
     {
-      "audiences": ["userHasLoggedIn"],
+      "audiences": ["returningVisitors"],
       "lead": "This variant will be rendered for visitors placed in the above audience(s)"
     }
     // Add more variants...
@@ -23,12 +23,19 @@ When working with Contensis, it is normal to render the content fields of an Ent
 }
 ```
 
+_Example Entry JSON highlighting a `lead` text field and then personalized versions of the same field in a repeatable field called `variants`_
+
 ### Repeatable Component
-For the next example, our Entry uses a Component field set up in the Content Type called `personalizedHero`. The Component field is configured to be repeatable. We will add multiples of this Component field for every audience we wish to tailor the content for.
 
-The Component is defined with an Audience Picker field in addition to the content field(s) encapsulated within this component.
+For the next example, our Entry will contain a Component field configured in a Content Type called `personalizedHero`.
 
-We will also use the original `hero` field in the Content Type that serves as the default version (the variation we will render when the visitor matches no audiences in the `personalizedHero`). We could drop the `hero` field from this Content Type and use only the `personalizedHero` field, but we would have to include a variant of the component that serves as the default version to render in each Entry.
+- The Component field is configured to be repeatable
+- We will add an instance of this Component field for each of the audiences we wish to tailor content for
+- The Component is configured with a Resource Picker field to store the audience(s) for each variation, in addition to the content field(s) encapsulated within this component.
+
+In this example we will retain the original `hero` field in the Content Type and that field serves as the default version. Alternatively, we could drop the `hero` field from this Content Type and rely on the `personalizedHero` field to contain all content. In this case we must include a variant of the component that serves as the default version to render in each Entry.
+
+- We will render one default content variation when the visitor has not activated any of the audiences within the `personalizedHero` content variants
 
 ```json
 {
@@ -76,7 +83,7 @@ We will also use the original `hero` field in the Content Type that serves as th
 }
 ```
 
-_Example Content Type JSON_
+_Example Content Type JSON containing a `hero` component field, and another field using the same component called `personalizedHero` configured to allow multiple variants_
 
 ```json
 {
@@ -146,6 +153,12 @@ _Example Content Type JSON_
 }
 ```
 
-_Example Personalized Hero Component JSON_
+_Example `personalizedHero` Component JSON containing an `audiences` field, and the content fields we are personalizing_
 
-After we have made changes to the Component and Content Type (adding the Resource Picker to the Component and the repeating Component field in the Content Type) and the changes have been Published, we can begin adding audence-specific variants of the content in a new or an existing Entry of this Content Type.
+After we have made changes to the Component and Content Type, we can begin creating audence-specific variants of our content in a new or an existing Entry.
+
+1. add the Resource Picker to the Component
+2. add the repeating Component field to the Content Type
+3. Publish the changes
+
+Patterns similar to this can be applied to any content model.
