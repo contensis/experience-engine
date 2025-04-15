@@ -50,9 +50,9 @@ type PageView = [string, Date, CalculateSignals | null];
 export class PersonalizationContext {
   static Store = Store;
 
-  /** Output console.log messaging, true or v=verbose */
+  /** Output console.log messaging, `true` or `v`=verbose */
   debug: boolean | "v";
-  /** True if the context is running in preview mode */
+  /** `true` if the context is running in preview mode */
   preview: boolean;
   /** Contensis Personalization Id */
   cpid: string;
@@ -255,7 +255,7 @@ export class PersonalizationContext {
   };
 
   /**
-   * Compute (or recompute) the signals and audiences from this page
+   * Compute (or recompute) the signals and audiences from the current page
    * @param pageView optional pageView object to compute signals for (defaults to current pageView)
    */
   compute = (pageView = this.#cpv) => {

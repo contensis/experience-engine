@@ -212,7 +212,7 @@ export default VisitorSpecificBanner;
 
 ## Custom Attributes
 
-Custom attributes can be configured in Contensis and can be part of the conditions to activate a signal
+Custom attributes are configured in Contensis and can become part of the conditions to activate a signal
 
 They allow developers to supply values produced within the app or provided by visitor actions for consideration when calculating signal and audience conditions
 
@@ -257,9 +257,11 @@ return (
 );
 ```
 
-Attributes we have set will be calculated one time only.
+Attributes we have set will be calculated one time only
 
-If our Manifest contains a signal that requires the above `custom.searchQuery` to match before it is activated, we can match and activate any signals containing this condition at the time the search is performed. The attribute value will not be stored and cannot be considered as a "previous" searchQuery in subsequent navigations or actions.
+If our Manifest contains a signal that requires the above `custom.searchQuery` to match before it is activated, we can match and activate signals containing this condition at the time the search is performed and the value for the attribute has been set.
+
+The attribute values are not stored and cannot be considered as a "previous" searchQuery in subsequent navigations or actions
 
 ### [overrideAttributes](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#overrideattributes)
 
@@ -293,10 +295,13 @@ const handleSearchSubmit = (value = searchInput) => {
 
 ## Experiments
 
-When running experiments (or A/B testing), similar to the `<Personalize />` component, the `<Experiment />` component will render one of a number of supplied content variants (experiments) except we are not rendering personalized content based on active audiences, instead each variant (experiment) contains a number field between 0 and 100 that constitutes where the experiment variants are "split" between each randomly assigned "bucket".
+When running experiments (or A/B testing), similar to the `<Personalize />` component, the `<Experiment />` component will render one of a number of supplied content variants (experiments).
+
+Except we are not rendering personalized content based on active audiences, instead each variant (experiment) contains a number field between 0 and 100 that constitutes where the experiment variants are "split" between each randomly assigned "bucket".
 
 ### Prerequisites
-* [Curating experimental content](https://github.com/contensis/personalization/blob/main/docs/EXPERIMENT_CONTENT.md)
+
+- [Curating content for experiments](https://github.com/contensis/personalization/blob/main/docs/EXPERIMENT_CONTENT.md)
 
 ### Example
 
@@ -314,17 +319,17 @@ type ExampleHomePageEntry = {
 const ExampleComponent = (entry: ExampleHomePageEntry) => {
   return (
     <div className="wrapper">
-      {/* Replace `LeadText` with `Experiment` component */}
-      <Experiment
-        // `experiments` prop is supplied with the repeating component Entry data
-        experiments={entry.experiments} 
-        // the component used to render the correct variant
-        render={(props) => <LeadText {...props} />} 
-      />
+      <Experiment experiments={entry.experiments}>
+        {(variant) => <LeadText {...variant} />}
+      </Experiment>
     </div>
   );
 };
 ```
+
+1. Replace component `LeadText` with `Experiment` component
+2. `experiments` prop is the repeating component Entry data
+3. `render` prop or JSX children is the component(s) for rendering the correct variant
 
 ## Debugging
 
@@ -351,7 +356,7 @@ Type `window.CONTENSIS_PERSONALIZATION.context` into the browser developer tools
 
 Manually reset personalization by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
 
-We can also manually reset personalization by running the `reset()` function in the browser console:
+Alternatively, we can manually reset personalization by running the `reset()` function in the browser console using [the window object reference](#browser-window-object-reference):
 
 ```javascript
 window.CONTENSIS_PERSONALIZATION.context.reset();

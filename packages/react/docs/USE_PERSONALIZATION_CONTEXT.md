@@ -23,10 +23,10 @@ usePersonalizationContext(): IPersonalizationReactContext;
 | pageViews.total    | number                                                                                                                                        | Total number of page views (recorded in localStorage)                                          |
 | percentile         | number                                                                                                                                        | The random percentile the current visitor is placed in to 2 decimal places (resolution: 10000) |
 | state              | [IPersonalizationStore](https://github.com/contensis/personalization/blob/main/packages/personalization/src/models/PersonalizationStore.d.ts) | The personalization store that is persisted in the browser localStorage                        |
-| setAttributes      | [Function](#setattributes)                                                                                                                    | Supply custom attributes identified within the app to the personalization context              |
-| overrideAttributes | [Function](#overrideattributes)                                                                                                               | Set signal attributes within the app to override the personalization context                   |
-| getAttributes      | [Function](#getattributes)                                                                                                                    | Return any custom attributes provided by the app to the personalization context                |
-| toggleAudience     | [Function](#toggleaudience)                                                                                                                   | Toggle a specific audience on or off                                                           |
+| setAttributes      | [Function](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#setattributes)                                                                                                                    | Supply custom attributes identified within the app to the personalization context              |
+| overrideAttributes | [Function](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#overrideattributes)                                                                                                               | Set signal attributes within the app to override the personalization context                   |
+| getAttributes      | [Function](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#getattributes)                                                                                                                    | Return any custom attributes provided by the app to the personalization context                |
+| toggleAudience     | [Function](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#toggleaudience)                                                                                                                   | Toggle a specific audience on or off                                                           |
 
 ## isAudience
 
@@ -36,56 +36,4 @@ Test if the visitor has activated any provided audience id(s)
 isAudience(audienceId: string): boolean;
 
 isAudience(audienceIds: string[]): boolean;
-```
-
-## setAttributes
-
-Supply one or more custom attributes and then perform signal and audience calculations
-
-```typescript
-setAttributes({
-    [attributeId: string]: string | number | boolean
-}): void;
-```
-
-## overrideAttributes
-
-Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the personalization attributes are reset.
-
-```typescript
-overrideAttributes({
-    [attribute: string]: string | number | boolean
-}): void;
-```
-
-## getAttributes
-
-Return the value for the provided attribute key
-
-```typescript
-getAttributes(attribute: string): string | number | boolean;
-```
-
-Provide an array of attribute keys to return just those attributes
-
-```typescript
-getAttributes(attributes: string[]): {
-    [attribute: string]: string | number | boolean
-};
-```
-
-Return all available attributes from the current attributes snapshot
-
-```typescript
-getAttributes(): {
-    [attribute: string]: string | number | boolean
-};
-```
-
-## toggleAudience
-
-Toggle a specific audience on or off for use when debugging sites in preview
-
-```typescript
-toggleAudience(audienceId: string): void;
 ```
