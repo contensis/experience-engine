@@ -73,7 +73,7 @@ describe(`Personalization Reset functions`, () => {
 
           // Having matched audiences and signals from previous navigation
           cy.getLocalStorage().its("audiences.active").should("have.length", 1);
-          cy.getLocalStorage().its("signals.active").should("have.length", 1);
+          cy.getLocalStorage().its("signals.active").should("have.length", 2);
 
           // Check the preview manifest checkbox and wait for the new manifest to load
           cy.get("#isPreviewChecked").check();
