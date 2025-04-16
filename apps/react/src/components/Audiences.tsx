@@ -96,7 +96,13 @@ const ConditionsTable = ({
 
   return (
     <>
-      <AudiencesTable table={table} />
+      {!data.length ? (
+        <div style={{ textAlign: "center" }}>
+          No conditions in this audience
+        </div>
+      ) : (
+        <AudiencesTable table={table} />
+      )}
       <Collapsible label={"raw JSON"}>
         <div className="json-panel" style={{ padding: "2em" }}>
           <SyntaxHighlighter language="json" style={theme}>
