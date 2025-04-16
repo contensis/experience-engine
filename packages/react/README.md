@@ -48,7 +48,7 @@ const App = () => {
 
 // Render the App
 createRoot(document.getElementById("root") as HTMLElement).render(
-    <StrictMode>
+  <StrictMode>
     <App />
   </StrictMode>
 );
@@ -58,9 +58,9 @@ createRoot(document.getElementById("root") as HTMLElement).render(
 
 ### [\<Personalize \/\> component](https://github.com/contensis/personalization/blob/main/packages/react/docs/PERSONALIZE.md)
 
-A typical React component that renders a content Entry might look like this.
+A typical React component that renders a content Entry might look like this
 
-The `ExampleHomePage` component renders a logo and the title from the Entry, then a `HeroBanner` component fed is props from the contents of the `hero` field
+The `ExampleHomePage` component renders a logo and the title from the Entry, then a `HeroBanner` component is fed props from the contents of the `hero` field
 
 ```tsx
 import React from "react";
@@ -119,11 +119,6 @@ const ExampleHomePage = (entry: ExampleHomePageEntry) => {
         </Link>
         <h1>{entry.title}</h1>
       </div>
-      {/* Replace `HeroBanner` with `Personalize` component.
-          `variants` prop is supplied with the `personalizedHero`
-          repeatable component and the `render` prop (or JSX
-          children) is the React component that is used to
-          render the correct variant */}
       <Personalize
         defaultContent={entry.hero}
         render={HeroBanner}
@@ -136,11 +131,19 @@ const ExampleHomePage = (entry: ExampleHomePageEntry) => {
 export default ExampleHomePage;
 ```
 
-We have replaced the `<HeroBanner>` JSX with the `<Personalize>` component. The component takes the `variants` from the Entry as a prop.
+1. Replace component `<HeroBanner>` with `<Personalize>` component
+2. `variants` prop is the repeating component Entry data
+3. `render` prop or JSX children is the component(s) for rendering the personalized variant
 
-One content variant will be chosen based on the current visitor's active audiences.
+One content variant will be chosen based on the current visitor's active audiences
 
-The chosen variant will be provided to the `render` component (or children) with the render props supplied for a single variant of the component - the same as if the component was being rendered with regular, non-personalized content (as in the original/previous example).
+If the current visitor is not a member of any audiences in the `variants` array, the component will pick the default variant to render from either
+
+- the `defaultContent` prop
+- a default variant from the `variants` array
+  <br>(the first variant with no audiences defined)
+
+The chosen variant will be provided to the `render` component (or JSX children) with render props for a single variant of the component - the same as if the component was being rendered with regular, non-personalized content (as in the previous example).
 
 ## Personalize anything
 
@@ -155,7 +158,8 @@ import { usePersonalizationContext } from "@contensis/personalization-react";
 const VisitorSpecificBanner = () => {
   const { isAudience } = usePersonalizationContext();
 
-  // isAudience returns true if any of the supplied audience Ids have been made active
+  // isAudience returns true if any of the supplied
+  // audience Ids have been made active
   return isAudience(["returningVisitor"]) ? (
     <div className="wrapper">
       Additional information for returning visitors!
@@ -228,8 +232,8 @@ const [searchInput, setSearchInput] = useState("");
 
 /** Sets the attribute `custom.searchQuery` */
 const handleSearchSubmit = (value = searchInput) => {
-  /** We can call `setAttributes` any time we have
-   * captured the value(s) to use for the custom attribute(s) */
+  /** We can call `setAttributes` any time we have captured
+   *  the value(s) to use for the custom attribute(s) */
   setAttributes({
     searchQuery: value,
   });
@@ -283,11 +287,11 @@ const handleSearchSubmit = (value = searchInput) => {
   });
 
   /** We can call `overrideAttributes` any time we wish
-   * to hold and maintain an attribute over time */
+   *  to hold and maintain an attribute over time */
   overrideAttributes({
     "custom.lastSearchQuery": value,
     /** We could maintain a counter of previous interactions
-     * Recall a previously set attribute with `getAttributes` and increment */
+     *  Recall a previously set attribute with `getAttributes` and increment */
     "custom.totalSearches": 1 + (getAttributes('custom.totalSearches') || 0);
   });
 };
