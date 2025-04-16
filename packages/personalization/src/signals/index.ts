@@ -13,6 +13,7 @@ import {
   ComputedSignal,
   ISignalAttributes,
   ISignalsStore,
+  MatchedSignal,
   Where,
   WhereAttribute,
   WhereCriteria,
@@ -21,16 +22,45 @@ import { AppSignalsSnapshot } from "./app";
 import { BrowserSignalsSnapshot } from "./browser";
 
 export class CalculateSignals {
-  #context: PersonalizationContext;
   computed: ComputedSignal[] = [];
-  matched: ComputedSignal[] = [];
+  matched: MatchedSignal[] = [];
   snapshot: ISignalAttributes;
   t = now();
+  #context: PersonalizationContext;
+
+  constructor(context: PersonalizationContext) {
+    this.#context = context;
+    const { custom, currentPage, pageViews, previousPage } = context;
+
+    // Find the signals from the last page view
+    const previousSignals =
+      pageViews.length > 1
+        ? pageViews[pageViews.length - 2]?.[2]?.snapshot
+        : undefined;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { browser, location, ...sessionSignals } = context.session.state;
+
+    // Hold the signals for this page view and a referrer
+    this.snapshot = {
+      ...RouteSignalsSnapshot(currentPage, previousSignals || previousPage),
+      ...flattenObject(AppSignalsSnapshot(custom)),
+      ...flattenObject(sessionSignals, "session"),
+      ...flattenObject(BrowserSignalsSnapshot(), "browser"),
+      ...flattenObject(location, "location"),
+    };
+    delete context.custom; // Clear custom attributes so they are not consumed in the next snapshot
+
+    if (isSSR()) return; // Don't compute signals in SSR
+
+    this.#calculate();
+  }
 
   get attributes(): ISignalAttributes {
     const overrides = this.#context.state.overrides || {};
     return { ...this.snapshot, ...overrides };
   }
+
   /** Return the state of the signals, merging newly matched signals with those previously matched */
   get state() {
     const { computed, matched: matchedThis, t } = this;
@@ -99,34 +129,6 @@ export class CalculateSignals {
     return nextState;
   }
 
-  constructor(context: PersonalizationContext) {
-    this.#context = context;
-    const { custom, currentPage, pageViews, previousPage } = context;
-
-    // Find the signals from the last page view
-    const previousSignals =
-      pageViews.length > 1
-        ? pageViews[pageViews.length - 2]?.[2]?.snapshot
-        : undefined;
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { browser, location, ...sessionSignals } = context.session.state;
-
-    // Hold the signals for this page view and a referrer
-    this.snapshot = {
-      ...RouteSignalsSnapshot(currentPage, previousSignals || previousPage),
-      ...flattenObject(AppSignalsSnapshot(custom)),
-      ...flattenObject(sessionSignals, "session"),
-      ...flattenObject(BrowserSignalsSnapshot(), "browser"),
-      ...flattenObject(location, "location"),
-    };
-    delete context.custom; // Clear custom attributes so they are not consumed in the next snapshot
-
-    if (isSSR()) return; // Don't compute signals in SSR
-
-    this.#calculate();
-  }
-
   /** Iterate computed.signals that are unmatched and check signal criteria for a match */
   redo = () => {
     try {
@@ -150,7 +152,8 @@ export class CalculateSignals {
           signal.matched = true;
           ++signal.times;
           // preview apps may be interfering here so don't push new matches without checking first
-          if (!matches.find((m) => m.id === signal.id)) matches.push(signal);
+          if (!matches.find((m) => m.id === signal.id))
+            matches.push(signal as MatchedSignal);
         }
       }
       this.#log();
@@ -173,7 +176,7 @@ export class CalculateSignals {
           matched,
           times: matchedTimes + (matched ? 1 : 0),
         };
-        if (matched) this.matched.push(computed);
+        if (matched) this.matched.push(computed as MatchedSignal);
         this.computed.push(computed);
       }
       this.#log();

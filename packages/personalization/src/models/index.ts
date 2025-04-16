@@ -4,5 +4,6 @@ export * from "./api/Signal";
 export * from "./IContensisPersonalizationGlobals";
 export * from "./IHandlers";
 export * from "./ISignalAttributes";
+export * from "./PageView";
 export * from "./PersonalizationStore";
 export * from "./Signals";

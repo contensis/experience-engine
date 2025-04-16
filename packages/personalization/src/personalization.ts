@@ -6,6 +6,7 @@ import {
   IHandlers,
   IManifest,
   IPersonalizationStore,
+  PageView,
   SignalValue,
 } from "./models";
 import { CalculateSignals } from "./signals";
@@ -44,8 +45,6 @@ export type PersonalizationContextOptions = {
    * */
   session?: true;
 };
-
-type PageView = [string, Date, CalculateSignals | null];
 
 export class PersonalizationContext {
   static Store = Store;

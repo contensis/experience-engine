@@ -2,13 +2,54 @@ import { Condition, Conditions, IAudience, IAudiencesStore } from "./models";
 import { PersonalizationContext } from "./personalization";
 import { isSSR, now, objectFromEntries, objectKeys } from "./util";
 
+/** An audience that has been computed in this calculation */
 export type ComputedAudience = IAudience & { matched: boolean };
+/** An audience that has been matched in this calculation */
+export type MatchedAudience = IAudience & { matched: true };
 
 export class CalculateAudiences {
-  #context: PersonalizationContext;
   computed: ComputedAudience[] = [];
-  matched: ComputedAudience[] = [];
+  matched: MatchedAudience[] = [];
   t = now();
+  #context: PersonalizationContext;
+
+  constructor(context: PersonalizationContext) {
+    this.#context = context;
+
+    if (isSSR()) return;
+
+    const { computed, matched: matches } = this;
+
+    for (const audience of context.manifest?.audiences || []) {
+      const matched = this.#check(audience.conditions);
+      const a = { ...audience, matched };
+      if (matched) matches.push(a as MatchedAudience);
+      computed.push(a);
+    }
+    let matchLen = matches.length;
+    let prevLen = 0;
+    while (matchLen > prevLen) {
+      prevLen = matchLen;
+      // Keep checking unmatched audiences to see if we can match
+      // further audiences based on a match we've just made
+      for (const audience of computed.filter((a) => !a.matched)) {
+        const matched = this.#check(audience.conditions);
+        if (matched) {
+          // mutate the array item here to update computed array
+          audience.matched = true;
+          matches.push(audience as MatchedAudience);
+          ++matchLen;
+        }
+      }
+    }
+    if (matchLen)
+      context.l(
+        "am",
+        matchLen,
+        matches.map((m) => m.id)
+      );
+  }
+
   get active() {
     return this.state.active;
   }
@@ -63,42 +104,6 @@ export class CalculateAudiences {
     return nextState;
   }
 
-  constructor(context: PersonalizationContext) {
-    this.#context = context;
-
-    if (isSSR()) return;
-
-    const { computed, matched: matches } = this;
-
-    for (const audience of context.manifest?.audiences || []) {
-      const matched = this.#check(audience.conditions);
-      const a = { ...audience, matched };
-      if (matched) matches.push(a);
-      computed.push(a);
-    }
-    let matchLen = matches.length;
-    let prevLen = 0;
-    while (matchLen > prevLen) {
-      prevLen = matchLen;
-      // Keep checking unmatched audiences to see if we can match
-      // further audiences based on a match we've just made
-      for (const audience of computed.filter((a) => !a.matched)) {
-        const matched = this.#check(audience.conditions);
-        if (matched) {
-          // mutate the array item here to update computed array
-          audience.matched = true;
-          matches.push(audience);
-          ++matchLen;
-        }
-      }
-    }
-    if (matchLen)
-      context.l(
-        "am",
-        matchLen,
-        matches.map((m) => m.id)
-      );
-  }
   /**
    * An audience will contain a collection of conditions wrapped
    * in a single and/or array. Iterate criteria and evaluate
