@@ -13,6 +13,7 @@ export type IManifestClientArgs = {
   alias: string;
   rootUrl?: string;
   projectId?: string;
+  preview?: boolean;
   token?: string;
 };
 

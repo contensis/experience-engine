@@ -56,6 +56,10 @@ export class CalculateSignals {
     this.#calculate();
   }
 
+  get active() {
+    return this.state.active;
+  }
+
   get attributes(): ISignalAttributes {
     const overrides = this.#context.state.overrides || {};
     return { ...this.snapshot, ...overrides };

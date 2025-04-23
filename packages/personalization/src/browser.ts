@@ -22,13 +22,15 @@ const getAttributes = (element: Element): PersonalizationContextOptions => {
   const rootUrl = getDataAttribute("root-url");
   const projectId = getDataAttribute("project-id");
   const debug = ["true", "1"].includes(getDataAttribute("debug", ""));
+  const preview = ["true", "1"].includes(getDataAttribute("preview", ""));
   const client =
     rootUrl || alias
-      ? ({ alias, rootUrl, projectId } as IManifestClientArgs)
+      ? ({ alias, rootUrl, projectId, preview } as IManifestClientArgs)
       : undefined;
   return {
     client,
     debug,
+    preview,
   };
 };
 let constructor: PersonalizationContextOptions = {};
