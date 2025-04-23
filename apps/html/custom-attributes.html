@@ -6,8 +6,7 @@
     <script defer src="personalization.js"></script>
     <script defer>
       /** Set custom attributes `searchQuery`, `lastSearchQuery` and `totalSearches` */
-      const handleSearchSubmit = () => {
-        const { context } = CONTENSIS_PERSONALIZATION;
+      const handleSearchSubmit = (context) => {
         const value = document.getElementById("searchInput").value;
         /** We can call `setAttributes` any time we have captured
          *  the value(s) to use for the custom attribute(s) */
@@ -28,16 +27,20 @@
 
       window.onload = function () {
         const { context } = CONTENSIS_PERSONALIZATION;
+
         /** Add search submit handlers to elements **/
-        const searchInputEl = document.getElementById("searchInput");
-        const searchSubmitEl = document.getElementById("searchSubmit");
-        searchInputEl.addEventListener("keydown", (e) => {
-          // Submit on Enter key
-          if (e.key === "Enter") handleSearchSubmit();
-        });
-        searchSubmitEl.addEventListener("click", () => {
-          handleSearchSubmit();
-        });
+        document
+          .getElementById("searchInput")
+          .addEventListener("keydown", (e) => {
+            // Submit on Enter key
+            if (e.key === "Enter") handleSearchSubmit(context);
+          });
+
+        document
+          .getElementById("searchSubmit")
+          .addEventListener("click", () => {
+            handleSearchSubmit(context);
+          });
 
         context.addHandler("onComputed", () => {
           const attributes = context.getAttributes([
@@ -45,8 +48,10 @@
             "custom.lastSearchQuery",
             "custom.totalSearches",
           ]);
+
           if (attributes["custom.lastSearchQuery"])
-            searchInputEl.value = attributes["custom.lastSearchQuery"];
+            document.getElementById("searchInput").value =
+              attributes["custom.lastSearchQuery"];
 
           if (attributes["custom.totalSearches"])
             document.getElementById(

@@ -164,8 +164,7 @@ Supply one or more custom attributes and then perform signal and audience calcul
   <head>
     <script>
       /** Set custom attribute `searchQuery` */
-      const handleSearchSubmit = () => {
-        const { context } = CONTENSIS_PERSONALIZATION;
+      const handleSearchSubmit = (context) => {
         const value = document.getElementById("searchInput").value;
         /** We can call `setAttributes` any time we have captured
          *  the value(s) to use for the custom attribute(s) */
@@ -181,12 +180,12 @@ Supply one or more custom attributes and then perform signal and audience calcul
           .getElementById("searchInput")
           .addEventListener("keydown", (e) => {
             // Submit on Enter key
-            if (e.key === "Enter") handleSearchSubmit();
+            if (e.key === "Enter") handleSearchSubmit(context);
           });
         document
           .getElementById("searchSubmit")
           .addEventListener("click", () => {
-            handleSearchSubmit();
+            handleSearchSubmit(context);
           });
       };
     </script>
@@ -347,18 +346,8 @@ window.CONTENSIS_PERSONALIZATION.context.reset();
 
 Or we can reset some or all personalization elements programatically
 
-```javascript
-import React from "react";
-import { usePersonalizationContext } from "@contensis/personalization-react";
 
-const ExampleComponent = () => {
-  // First get a handle on the `context` object
-  const { context } = usePersonalizationContext();
-
-  // examples are below
-  return <div>...</div>;
-};
-```
+The `reset` function requires a handle on and is called from within the [Personalization Context](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#reset)
 
 #### Reset all personalizations
 

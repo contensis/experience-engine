@@ -167,7 +167,7 @@ compute(pageView?: PageView): void;
 
 Register a new page view to compute signals and audiences with
 
-You should not need to call this as we watch for changes being made to the DOM tree using a [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) and automatically detect navigation via changes to the URL
+You should not need to call this as we watch for changes being made to the DOM tree using a [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) and automatically detect navigation (in a SPA) via changes to the URL
 
 ```typescript
 pageView(url?: string): void;
