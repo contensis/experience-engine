@@ -162,6 +162,12 @@ Supply one or more custom attributes and then perform signal and audience calcul
 ```html
 <html>
   <head>
+    <script
+      type="module"
+      src="https://unpkg.com/@contensis/personalization@latest/dist/personalization.browser.min.mjs"
+      data-contensis-personalization-alias="example"
+      data-contensis-personalization-project-id="website"
+    ></script>
     <script>
       /** Set custom attribute `searchQuery` */
       const handleSearchSubmit = (context) => {
@@ -255,6 +261,12 @@ Except we are not rendering personalized content based on active audiences, inst
 ```html
 <html>
   <head>
+    <script
+      type="module"
+      src="https://unpkg.com/@contensis/personalization@latest/dist/personalization.browser.min.mjs"
+      data-contensis-personalization-alias="example"
+      data-contensis-personalization-project-id="website"
+    ></script>
     <script>
       /** data: Hard-coded example entry for the demo */
       const entry = {
@@ -345,7 +357,6 @@ window.CONTENSIS_PERSONALIZATION.context.reset();
 ```
 
 Or we can reset some or all personalization elements programatically
-
 
 The `reset` function requires a handle on and is called from within the [Personalization Context](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#reset)
 
