@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Entry content page</title>
+    <script async src="personalization.js"></script>
+    <script
+      async
+      src="https://unpkg.com/contensis-delivery-api@latest/bundle/zengenti.contensis-client.js"
+    ></script>
+
+    <script>
+      /** boilerplate to select and set the content of a HTML tag **/
+      const setTag = function (selector, content) {
+        const el = document.querySelector(selector);
+        if (el) {
+          el.innerHTML = content;
+        }
+      };
+
+      /** boilerplate to show a loading state **/
+      const toggleLoading = function () {
+        const loadingEl = document.querySelector("#loading");
+        loadingEl.style.display =
+          loadingEl.style.display !== "none" ? "none" : "";
+
+        const contentEl = document.querySelector("#content");
+        contentEl.style.display =
+          contentEl.style.display !== "none" ? "none" : "";
+      };
+
+      /** boilerplate to show an error state **/
+      const renderError = function (error) {
+        const loadingEl = document.querySelector("#loading");
+        loadingEl.innerHTML = error.toString();
+      };
+
+      /** map entry elements to html tags **/
+      const renderPersonalizedHero = function (variants, defaultVariant) {
+        // select a personalized variant, or fallback to a supplied default
+        const hero = variants.find(selectAudienceVariant) || defaultVariant;
+        setTag("#hero-audience-id", `audience: ${hero.audienceId}`);
+        setTag("#hero-heading", hero.heading);
+        setTag("#hero-short-text", hero.shortText);
+        setTag("#hero-lead-in", hero.leadIn);
+        setTag("#hero-background-image", hero.backgroundImage.asset.sys.uri);
+      };
+
+      /** match a personalized variant from a content field called `audienceId` **/
+      const selectAudienceVariant = (content) =>
+        CONTENSIS_PERSONALIZATION.context.audiences?.active.some(
+          (a) => a === content.audienceId
+        );
+
+      /** Testing: render a list of possible audiences with a checkbox next to each **/
+      const renderAudienceCheckboxes = function (content, onchange) {
+        const activeAudiences =
+          CONTENSIS_PERSONALIZATION.context.audiences?.active || [];
+        const listElement = document.querySelector("#hero-audiences");
+
+        for (const variant of content) {
+          // Create a list item and checkbox input
+          const listItem = document.createElement("li");
+          listItem.innerHTML = variant.audienceId;
+          const checkbox = document.createElement("input");
+          // Assign the attributes to created checkbox
+          checkbox.type = "checkbox";
+          checkbox.name = "audience";
+          checkbox.value = variant.audienceId;
+          checkbox.checked = activeAudiences.find(
+            (a) => a === variant.audienceId
+          );
+          checkbox.id = `audience-${variant.audienceId}`;
+          checkbox.onchange = onchange;
+          // Render the created elements
+          listItem.prepend(checkbox);
+          listElement.appendChild(listItem);
+        }
+      };
+
+      /** call the function when the dependent scripts have loaded and the DOM is ready */
+      window.onload = function () {
+        const context = window.CONTENSIS_PERSONALIZATION.context;
+
+        /** create a Delivery API client */
+        const client = Zengenti.Contensis.Client.create({
+          rootUrl: "https://cms-develop.cloud.contensis.com/",
+          projectId: "website",
+          accessToken: "4O5Jvs0gWpAqBdjGZzzlMLVqfU5QXhT5w4NRlPxjhGcr9Vl2",
+        });
+
+        const renderPersonalizedEntry = (entry) => {
+          if ((entry.sys.contentTypeId = "personalizationHomePage")) {
+            // Render the details from the entry
+            setTag("title", entry.title);
+            setTag("#title", entry.title);
+            setTag("#sub-title", entry.subTitle);
+            renderPersonalizedHero(entry.personalizedHero, entry.hero);
+
+            // Testing: Render a list of possible audiences with a checkbox next to each
+            renderAudienceCheckboxes(entry.personalizedHero, (e) => {
+              // Toggle the audience when audience is checked or unchecked
+              context.toggleAudience(e.target.value);
+            });
+
+            // Re-render the personalized content when audience(s) have changed
+            context.addHandler("onComputed", () => {
+              renderPersonalizedHero(entry.personalizedHero, entry.hero);
+            });
+
+            toggleLoading();
+          }
+        };
+
+        /** wrap the entry fetch and render inside a function we can call from a
+         * personalization event - the render depends on audiences and signals being
+         * available so we are deferring this to load after the "onComputed" event */
+        const loadEntry = () => {
+          client.entries
+            .get("bcd353ed-0348-4491-a034-d83b9f8e7590")
+            .then(renderPersonalizedEntry)
+            .catch(renderError)
+            // Dispose the handler as we only need it called one time
+            .finally(() => context.removeHandler("onComputed", loadEntry));
+        };
+
+        context.addHandler("onComputed", loadEntry);
+      };
+    </script>
+  </head>
+  <body>
+    <div id="loading">Loading...</div>
+    <div id="content" style="display: none">
+      <h1 id="title">Entry title</h1>
+      <p id="sub-title">Entry sub-title</p>
+      <p id="hero-audience-id"></p>
+      <ul id="hero">
+        <li id="hero-heading">Entry hero heading</li>
+        <li id="hero-short-text">Entry hero shortText</li>
+        <li id="hero-lead-in">Entry hero leadIn</li>
+        <li id="hero-background-image">
+          Entry hero backgroundImage.asset.sys.uri
+        </li>
+      </ul>
+      <ul id="hero-audiences"></ul>
+    </div>
+    <p><a href="index.html">Navigate to Home Page</a></p>
+  </body>
+</html>

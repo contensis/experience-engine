@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Experiment page</title>
+    <script defer src="personalization.js"></script>
+    <script defer>
+      /** Hard-coded example entry data for the demo */
+      const entry = {
+        lead: "Personalization in Contensis",
+        experiments: [
+          {
+            split: 0,
+            lead: "This content will be rendered for visitors randomly placed in the lower 10%",
+          },
+          {
+            split: 10,
+            lead: "This content will be rendered for visitors in the 10-50 percentile range",
+          },
+          {
+            split: 50,
+            lead: "This content will be rendered for visitors randomly placed in the top 50%",
+          },
+        ],
+      };
+
+      /** Pick from one of the experiments based on the random
+       * bucket the visitor has been placed into */
+      const pickExperiment = (experiments) => {
+        // Sort the variants by the value of the "split" field in descending order
+        const variants = experiments.toSorted((e) => Number(e.split)).reverse();
+
+        // Find the first variant in the sorted array that has a split value less
+        // than the random percentile
+        const experiment = variants.find(
+          (e) => CONTENSIS_PERSONALIZATION.context.percentile >= Number(e.split)
+        );
+
+        // Return an experiment for the visitor bucket, or find a default variant
+        return experiment || variants.find((e) => !e.split);
+      };
+
+      window.onload = function () {
+        const { context } = CONTENSIS_PERSONALIZATION;
+        /** Render to elements **/
+        document.getElementById("percentile").value = context.percentile;
+        document.getElementById("percentile-label").innerHTML =
+          context.percentile;
+        /** Render the entry data */
+        document.getElementById("title").innerHTML = entry.lead;
+        document.getElementById("lead").innerHTML = pickExperiment(
+          entry.experiments
+        )?.lead;
+
+        /** Test: Rerender the entry data when percentile is updated */
+        document
+          .getElementById("percentile")
+          .addEventListener("input", (event) => {
+            const { context } = CONTENSIS_PERSONALIZATION;
+            context.percentile = Number(event.target.value);
+
+            document.getElementById("percentile-label").innerHTML =
+              context.percentile;
+
+            document.getElementById("lead").innerHTML = pickExperiment(
+              entry.experiments
+            )?.lead;
+          });
+      };
+    </script>
+  </head>
+  <body>
+    <div>
+      <div>
+        <label for="percentile">Random percentile:</label>
+        <input
+          type="range"
+          id="percentile"
+          name="volume"
+          min="0"
+          max="100"
+          value="0"
+        />
+        <label for="percentile" id="percentile-label"> </label>
+      </div>
+      <h1 id="title"></h1>
+      <p id="lead"></p>
+    </div>
+    <p><a href="index.html">Navigate to Home Page</a></p>
+  </body>
+</html>
