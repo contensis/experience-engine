@@ -1,5 +1,7 @@
 # Personalization Context
 
+The singleton context object that manages the personalization features
+
 ```typescript
 new PersonalizationContext(options: PersonalizationContextOptions): PersonalizationContext;
 ```
@@ -43,7 +45,7 @@ new PersonalizationContext(options: PersonalizationContextOptions): Personalizat
 | previousPage       | string                                                                                                                                        | The previous page href we are working with                                                                                                        |
 | removeHandler      | [Function](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#removehandler)              | Dispose any previously added event handlers                                                                                                       |
 | reset              | [Function](#reset)                                                                                                                            | Reset some or all personalization elements                                                                                                        |
-| session            | [Session]                                                                                                                                     | Holds details pertaining to the current session                                                                                                   |
+| session            | [Session](#session)                                                                                                                           | Holds details pertaining to the current session                                                                                                   |
 | setAttributes      | [Function](#setattributes)                                                                                                                    | Supply custom attributes identified within the app to the Personalization Context                                                                 |
 | signals            | [CalculateSignals](#calculatesignals)                                                                                                         | The signals last calculated                                                                                                                       |
 | state              | [IPersonalizationStore](https://github.com/contensis/personalization/blob/main/packages/personalization/src/models/PersonalizationStore.d.ts) | The personalization store that is persisted in the browser [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) |
@@ -173,7 +175,9 @@ pageView(url?: string): void;
 
 ## reset
 
-Reset some or all personalization elements
+Resets some or all personalization elements
+
+[Reset examples](https://github.com/contensis/personalization/tree/main/packages/react#reset-personalization)
 
 ```typescript
 reset(): void;
@@ -187,5 +191,3 @@ reset({
     store?: boolean;
 }): void;
 ```
-
-[Reset examples](https://github.com/contensis/personalization/tree/main/packages/react#reset-personalization)

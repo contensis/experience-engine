@@ -7,7 +7,7 @@ Provides a context wrapper, hooks and components to easily leverage personalizat
 
 ### Prerequisites
 
-Before we can see Personalization in action it is recommended we first [ensure content is Personalized with variants for different audiences](https://github.com/contensis/personalization/blob/main/docs/PERSONALIZE_CONTENT.md)
+Before we can see Personalization in action it is recommended we first [ensure content is Personalized for different audiences](https://github.com/contensis/personalization/blob/main/docs/PERSONALIZE_CONTENT.md)
 
 Familiarise yourself with the terminology by looking at [how we determine audiences](https://github.com/contensis/personalization/blob/main/README.md#how-it-works) in order to personalize content
 
@@ -220,7 +220,7 @@ Custom attributes are configured in Contensis and can become part of the conditi
 
 They allow developers to supply values produced within the app or provided by visitor actions for consideration when calculating signal and audience conditions
 
-### [setAttributes](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#setattributes)
+### [setAttributes](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#setattributes)
 
 Supply one or more custom attributes and then perform signal and audience calculations
 
@@ -267,7 +267,7 @@ If our Manifest contains a signal that requires the above `custom.searchQuery` t
 
 The attribute values are not stored and cannot be considered as a "previous" searchQuery in subsequent navigations or actions
 
-### [overrideAttributes](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#overrideattributes)
+### [overrideAttributes](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#overrideattributes)
 
 Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the personalization attributes are reset.
 
@@ -400,6 +400,8 @@ return (
 
 #### Reset the Manifest
 
+Set the `preview` flag and then reset the manifest to load the latest (unpublished) manifest version
+
 ```tsx
 // Manage checkbox state
 const [isPreviewChecked, setIsPreviewChecked] = useState(context.preview);
@@ -453,6 +455,8 @@ return (
 ```
 
 #### Reset all Attributes
+
+Clears all custom and overridden attributes
 
 ```tsx
 return (

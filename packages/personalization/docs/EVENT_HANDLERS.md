@@ -16,11 +16,15 @@ A custom event handler can be added to the PersonalizationContext in a few ways
 
 ## addHandler
 
+Add a handler with a callback that will be invoked when the event occurs (dispose handlers with `removeHandler`)
+
 ```typescript
 addHandler("onComputed", IHandler["onComputed"]): void;
 ```
 
 ## removeHandler
+
+Dispose any previously added event handlers
 
 ```typescript
 removeHandler("onComputed", IHandler["onComputed"]): void;
