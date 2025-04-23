@@ -578,7 +578,7 @@ export class PersonalizationContext {
 
   /** Actions to call when the manifest has been loaded */
   #onManifestReady = (manifest: IManifest) => {
-    const { l, pageViews, preview, state } = this;
+    const { manifest: { client } = {}, l, pageViews, preview, state } = this;
 
     // Should we update location attributes from the manifest to the session?
     const stateLocation = state.manifest?.location;
@@ -601,7 +601,7 @@ export class PersonalizationContext {
     ) {
       // Save the new manifest
       this.#save = { ...state, manifest };
-      l(preview ? "mp" : "mv", manifestVersion, stateVersion);
+      l(!client ? "mu" : preview ? "mp" : "mv", manifestVersion, stateVersion);
 
       // Recompute all pageViews when manifest is updated
       for (const pageView of pageViews) this.#computePage(pageView);

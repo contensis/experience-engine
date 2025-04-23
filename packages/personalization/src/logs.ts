@@ -3,6 +3,7 @@ export const messages = {
   init: `[init] visitorId: {0}, percentile: {1}%, pageViews: {2}`,
   im: `[init] Initialising with supplied manifest`,
   ic: `[init] Initialising manifest with client`,
+  mu: `[onManifestReady] Updated to user-supplied version "{0}" from version "{1}"`,
   mp: `[onManifestReady] Updated to preview version "{0}" from version "{1}"`,
   mv: `[onManifestReady] Updated to version "{0}" from version "{1}"`,
   ml: `[onManifestReady] Location updated "{0}" from "{1}"`,
