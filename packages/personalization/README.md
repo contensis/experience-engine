@@ -3,9 +3,9 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-Create a Personalization Context to easily leverage personalization with Contensis in your JavaScript site.
+Create a Personalization Context to easily leverage personalization with Contensis in your JavaScript projects.
 
-If your project is built with React it is recommended you use the [@contensis/personalization-react](../react/README.md) package instead
+If your project is built with React we recommend using the [@contensis/personalization-react](../react/README.md) package instead
 
 ### Prerequisites
 
@@ -324,6 +324,10 @@ Except we are not rendering personalized content based on active audiences, inst
 ```
 
 [Complete example](https://github.com/contensis/personalization/blob/main/apps/html/experiment-content.html)
+
+## FAQs
+
+Check out some [Frequently Asked Questions](https://github.com/contensis/personalization/blob/main/docs/FAQS.md)
 
 ## Debugging
 

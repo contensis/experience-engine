@@ -335,6 +335,10 @@ const ExampleComponent = (entry: ExampleHomePageEntry) => {
 2. `experiments` prop is the repeating component Entry data
 3. `render` prop or JSX children is the component(s) for rendering the correct variant
 
+## FAQs
+
+Check out some [Frequently Asked Questions](https://github.com/contensis/personalization/blob/main/docs/FAQS.md)
+
 ## Debugging
 
 ### Debug flag
