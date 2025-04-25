@@ -37,11 +37,10 @@
     "client",
     "library"
   ],
-  "peerDependencies": {
-    "@contensis/personalization": "*",
-    "react": "*"
+  "dependencies": {
+    "@contensis/personalization": ">=1.0.0-alpha.0"
   },
-  "devDependencies": {
-    "browserslist-to-esbuild": "^2.1.1"
+  "peerDependencies": {
+    "react": "*"
   }
 }
