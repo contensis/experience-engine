@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-- I want to **keep track of how many pages** my site visitors have visited
+- I want to **keep track of how many pages** the visitor has viewed/navigated
 
   - The [Personalization Context](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md) automatically tracks the number of pages the visitor has viewed in the current session, and a total page view count from the current and all previous sessions.
   - You need to do nothing to maintain these counters

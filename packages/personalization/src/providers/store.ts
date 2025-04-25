@@ -1,3 +1,4 @@
+import { IPersonalizationStore } from "../models";
 import {
   isObject,
   isSSR,
@@ -30,9 +31,9 @@ export interface IStoreOptions {
 }
 
 export class Store {
-  private key = "cp";
   // type: "localStorage" | "sessionStorage" | "cookie" = "localStorage";
   type: "localStorage" | "sessionStorage" | "c" = "localStorage";
+  private key = "cp";
   #persist = true;
 
   /**
@@ -94,9 +95,9 @@ export class Store {
   ) => {
     if (isSSR()) return undefined;
 
-    const stringified = isObject(value)
-      ? stringify(value, stringifyReplacer)
-      : value;
+    const stringified = (
+      isObject(value) ? stringify(value, stringifyReplacer) : value
+    ) as string;
 
     if (type === "c") {
       const expires = now() + 30 * 24 * 60 * 60 * 1000;
@@ -104,6 +105,15 @@ export class Store {
         `${key}=${stringified};${
           this.#persist ? `expires=${utcDate(expires)};` : ""
         }SameSite=Lax`
+      );
+    }
+
+    const maxSize = 1048576; // 1MiB 524288; //512KiB
+    if (stringified.length > maxSize) {
+      return this.#shrink(
+        value as IPersonalizationStore,
+        stringified.length,
+        maxSize
       );
     }
 
@@ -116,6 +126,44 @@ export class Store {
     return type === "c"
       ? cookie(`${key}=;expires=${utcDate(0)}`)
       : w[type].removeItem(key);
+  };
+
+  #shrink = (
+    value: IPersonalizationStore,
+    originalSize: number,
+    targetSize: number,
+    nuke = false
+  ) => {
+    value.signals.computed = undefined;
+    if (!nuke) {
+      // First pass, remove computed signals
+      // limit signal matches to 10
+      if (value.signals.matched)
+        for (const [signal, matches] of Object.entries(
+          value.signals.matched || {}
+        )) {
+          value.signals.matched[signal] = matches.slice(0, 9);
+        }
+    } else {
+      // Final pass, clear all matches
+      value.signals.matched = {};
+    }
+    const size = stringify(value, stringifyReplacer).length;
+    if (size <= targetSize) {
+      console.info(
+        `[Store] shrunk from ${originalSize} to ${size}/${targetSize}`
+      );
+      this.set(value);
+    } else if (!nuke) {
+      // go for another pass
+      this.#shrink(value, size, targetSize, true);
+    } else if (nuke) {
+      // still too big
+      console.error(
+        `[Store] failed to shrink below ${targetSize} bytes, shrunk from ${originalSize} to ${size}`,
+        value
+      );
+    }
   };
 }
 

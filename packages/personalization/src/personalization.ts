@@ -203,12 +203,22 @@ export class PersonalizationContext {
 
   /** Assign any state or [value, options] to persist the value */
   set #save(state: IPersonalizationStore | [unknown, IStoreOptions]) {
-    if (isStore(state)) {
-      this.#store.set(state);
-    }
-    if (isArray(state) && state.length === 2) {
-      const [value, opts] = state;
-      this.#store.set(value, opts);
+    try {
+      if (isStore(state)) {
+        this.#store.set(state);
+      }
+      if (isArray(state) && state.length === 2) {
+        const [value, opts] = state;
+        this.#store.set(value, opts);
+      }
+    } catch (ex: unknown) {
+      // if (isQuotaExceededError(ex)) {
+      //   // Handle quota exceeded
+      //   // Retry
+      //   this.#save = state;
+      // } else {
+      this.l("e", ex);
+      // }
     }
   }
 

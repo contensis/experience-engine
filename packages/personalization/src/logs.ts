@@ -1,4 +1,5 @@
 export const messages = {
+  e: `an unexpected error occurred`,
   pre: `@contensis/personalization:`,
   init: `[init] visitorId: {0}, percentile: {1}%, pageViews: {2}`,
   im: `[init] Initialising with supplied manifest`,
