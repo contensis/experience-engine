@@ -57,10 +57,11 @@ export class Session {
     const date = isoDate();
     const browser = BrowserSignalsSnapshot();
     const { page, state } = this.#context;
+    const url = UrlSignals(page);
     const initial: IPersonalizationSessionStore = {
       isFirstVisit: state.pageViews < 2,
       duration: 0,
-      entryPage: page,
+      entryPage: url.path(),
       lastActivity: date,
       pageViews: this.pvc,
       startTime: date,
@@ -77,6 +78,7 @@ export class Session {
         path: url.path(),
         querystring: url.querystring(),
         queryParams: url.queryParams(),
+        // "queryParams.*": (name: string) => url.queryParam(name),
         subdomain: url.subdomain(),
         url: url.href(),
       };
