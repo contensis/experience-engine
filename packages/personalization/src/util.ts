@@ -21,12 +21,19 @@ export const flattenObject = <T extends object>(
 ) =>
   objectKeys(obj).reduce((acc, k) => {
     const pre = prefix?.length ? `${prefix}.` : "";
-    if (
-      isObject(obj[k as keyof T]) &&
-      objectKeys(obj[k as keyof T] || {}).length > 0
-    )
-      Object.assign(acc, flattenObject(obj[k as keyof T] as T, pre + k));
-    else acc[pre + k] = obj[k as keyof T];
+    const value = obj[k as keyof T];
+
+    if (isArray(value)) {
+      // Preserve arrays as-is
+      acc[pre + k] = value;
+    } else if (isObject(value) && objectKeys(value || {}).length > 0) {
+      // Continue flattening nested objects
+      Object.assign(acc, flattenObject(value as T, pre + k));
+    } else {
+      // Assign primitive values directly
+      acc[pre + k] = value;
+    }
+
     return acc;
   }, {} as Record<string, unknown>);
 
@@ -79,8 +86,8 @@ export const objectMatches = <T extends object, S extends object>(
 export const trimToLower = (val: string | number | boolean) =>
   `${val}`.trim().toLowerCase();
 
-export const isArray = (arr: unknown): arr is Array<unknown> =>
-  Array.isArray(arr);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isArray = (arr: unknown): arr is Array<any> => Array.isArray(arr);
 export const isNullOrUndefined = (val: unknown): val is null | undefined =>
   val === null || typeof val === "undefined";
 export const isNumber = (val: unknown): val is number =>
@@ -105,6 +112,19 @@ export const isManifestClient = (
 
 export const objectKeys = Object.keys;
 export const objectFromEntries = Object.fromEntries;
+export const objectFromEntriesPreserveMultiples = <T = string>(
+  entries: [string, T][] | URLSearchParamsIterator<[string, T]>
+) => {
+  const obj = {} as { [key: string]: T | T[] };
+  for (const [param, value] of entries) {
+    if (isArray(obj[param]))
+      obj[param].push(...(isArray(value) ? value : [value]));
+    else if (!isUndefined(obj[param]))
+      obj[param] = [obj[param], ...(isArray(value) ? value : [value])];
+    else obj[param] = value;
+  }
+  return obj;
+};
 export const stringify = JSON.stringify;
 
 export const stringifyReplacer = (key: string, value: unknown) => {

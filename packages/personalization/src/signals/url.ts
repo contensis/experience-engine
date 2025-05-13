@@ -1,4 +1,4 @@
-import { isSSR, objectFromEntries } from "../util";
+import { isSSR, objectFromEntriesPreserveMultiples } from "../util";
 
 export const UrlSignals = (page: string) => {
   const url = !isSSR() ? new URL(page) : new URL("ssr://");
@@ -16,11 +16,17 @@ export const UrlSignals = (page: string) => {
     },
     baseUrl: () => `${url.origin}${url.pathname}`,
     querystring: () => url.search,
-    queryParam: (name: string) => url.searchParams.getAll(name),
+    queryParam: (name: string) => {
+      const params = url.searchParams.getAll(name);
+      if (params.length)
+        if (params.length > 1) return params;
+        else return params[0];
+      else return;
+    },
     queryParams: () => {
       const params = url.searchParams;
       params.sort();
-      return objectFromEntries(params.entries());
+      return objectFromEntriesPreserveMultiples(params.entries());
     },
   };
 };

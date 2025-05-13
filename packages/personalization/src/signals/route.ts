@@ -21,7 +21,7 @@ export const RouteSignalsSnapshot = (
     "page.url": _url.href(),
     "page.path": _url.path(),
     "page.querystring": _url.querystring(),
-    "page.queryParams.*": (name: string) => _url.queryParam(name),
+    "page.queryParams": (name: string) => _url.queryParam(name),
     // "page.queryParams.*": _url.queryParams(),
     "page.domain": _url.domain(),
     "page.subdomain": _url.subdomain(),
@@ -29,8 +29,8 @@ export const RouteSignalsSnapshot = (
     "referrer.url": _referrer?.["page.url"],
     "referrer.path": _referrer?.["page.path"],
     "referrer.querystring": _referrer?.["page.querystring"],
-    "referrer.queryParams.*": (name: string) =>
-      _referrer?.["page.queryParams.*"](name),
+    "referrer.queryParams": (name: string) =>
+      _referrer?.["page.queryParams"](name),
     // "referrer.queryParams.*": _referrer?._url.queryParams(),
     "referrer.domain": _referrer?.["page.domain"],
     "referrer.subdomain": _referrer?.["page.subdomain"],

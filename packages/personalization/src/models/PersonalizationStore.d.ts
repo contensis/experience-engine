@@ -29,7 +29,7 @@ export interface IPersonalizationSessionStore {
     url: string;
     path: string;
     querystring;
-    queryParams: { [param: string]: string };
+    queryParams: { [param: string]: string | string[] };
     domain: string;
     subdomain: string;
     baseUrl: string;

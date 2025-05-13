@@ -4,7 +4,7 @@ import {
   isSSR,
   isString,
   now,
-  objectFromEntries,
+  objectFromEntriesPreserveMultiples,
   stringify,
   stringifyReplacer,
   tryParse,
@@ -71,16 +71,25 @@ export class Store {
     }
   };
 
-  getAll = ({ type = this.type }: IStoreOptions = {}): Storage | undefined => {
+  getAll: {
+    (options?: { type?: "c" }):
+      | { [key: string]: string | string[] }
+      | undefined;
+    (options?: { type?: "localStorage" | "sessionStorage" }):
+      | Storage
+      | undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = ({ type = this.type }: IStoreOptions = {}): any => {
     if (isSSR()) return undefined;
 
-    return type === "c"
-      ? objectFromEntries(
-          cookie()
-            .split(";")
-            .map((cookie) => cookie.trim().split("="))
-        )
-      : w[type];
+    if (type === "c")
+      return objectFromEntriesPreserveMultiples(
+        cookie()
+          .split(";")
+          .map((cookie) => cookie.trim().split("=")) as [string, string][]
+      );
+
+    return w[type];
   };
 
   getString = ({ type = this.type }: IStoreOptions = {}): string => {

@@ -3,15 +3,20 @@ describe("External referrers", () => {
     context("When I click a link that brings me to this site", () => {
       beforeEach(() => {
         cy.interceptManifest("signals.page.path-manifest.json");
-        cy.intercept("https://google.com/test_page?test_query=test_value", {
-          fixture: "google.html",
-        });
+        cy.intercept(
+          "https://google.com/test_page?test_query=test_value&test_query=test_value2",
+          {
+            fixture: "google.html",
+          }
+        );
         if (Cypress.isBrowser("firefox")) {
           // Firefox complains of
           // Permission denied to access property on cross-origin object
           cy.pageViewVisit("/");
         } else {
-          cy.visit("https://google.com/test_page?test_query=test_value");
+          cy.visit(
+            "https://google.com/test_page?test_query=test_value&test_query=test_value2"
+          );
           // inject a link into the external page so we can link back to ourselves
           cy.injectLink("Link back to my home");
           cy.contains("Link back to my home").pageViewClick();
@@ -33,6 +38,16 @@ describe("External referrers", () => {
               expect(
                 context.signals.attributes["session.referrer.url"]
               ).to.contain("https://google.com");
+              expect(
+                context.signals.attributes[
+                  "session.referrer.queryParams.test_query"
+                ]
+              ).to.include("test_value");
+              expect(
+                context.signals.attributes[
+                  "session.referrer.queryParams.test_query"
+                ]
+              ).to.include("test_value2");
             });
 
             cy.getSessionStorage()

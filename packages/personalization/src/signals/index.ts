@@ -260,8 +260,8 @@ export class CalculateSignals {
     const { attributes: snapshot } = this;
     if (attribute === "cookie.*") return snapshot[attribute]?.[key];
     if (
-      attribute === "page.queryParams.*" ||
-      attribute === "referrer.queryParams.*"
+      attribute === "page.queryParams" ||
+      attribute === "referrer.queryParams"
     )
       return snapshot[attribute](key);
     return snapshot[attribute];
@@ -275,14 +275,17 @@ export class CalculateSignals {
    * separately when we find the value for that signal attribute
    */
   #keyedAttribute = (attribute: WhereAttribute): [WhereAttribute, string] => {
-    let slices = 0;
-    if (attribute.includes(".queryParams.")) slices = 2;
-    if (attribute.startsWith("cookie.")) slices = 1;
+    const slices = attribute.includes(".queryParams.")
+      ? 2
+      : attribute.startsWith("cookie.")
+      ? 1
+      : 0;
+    // if (attribute.includes(".queryParams.")) slices = 2;
+    // if (attribute.startsWith("cookie.")) slices = 1;
     const att = slices
-      ? (`${attribute
-          .split(".")
-          .slice(0, slices)
-          .join(".")}.*` as WhereAttribute)
+      ? (`${attribute.split(".").slice(0, slices).join(".")}${
+          slices === 1 ? ".*" : ""
+        }` as WhereAttribute)
       : attribute;
     const key = slices ? attribute.split(".").slice(slices).join(".") : "";
 
