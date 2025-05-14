@@ -1,6 +1,6 @@
 {
   "name": "@contensis/personalization",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-beta.0",
   "description": "Create personalized experiences with Contensis",
   "main": "dist/personalization.js",
   "module": "dist/personalization.mjs",
