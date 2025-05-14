@@ -1,0 +1,75 @@
+name: Publish npm package
+
+on:
+  workflow_call:
+    inputs:
+      package_paths:
+        required: true
+        type: string
+      npm_tag:
+        required: true
+        type: string
+      release:
+        required: true
+        type: boolean
+
+  workflow_dispatch:
+    inputs:
+      package_paths:
+        description: "Publish the package in this folder"
+        required: true
+        type: choice
+        options:
+          - '["packages/personalization"]'
+          - '["packages/react"]'
+      npm_tag:
+        description: Publish the package with npm tag
+        required: true
+        type: choice
+        default: latest
+        options:
+          - latest
+          - prerelease
+      release:
+        description: "Publish the package version"
+        required: true
+        type: boolean
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.package_paths != '[]' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        path: ${{ fromJson(inputs.package_paths) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build package in ${{ matrix.path }}
+        id: build
+        run: |
+          cd ${{ matrix.path }}
+          npm run build
+          package_name=$(node --eval="process.stdout.write(require('./package.json').name)")
+          package_version=$(node --eval="process.stdout.write(require('./package.json').version)")
+          echo "name=$package_name" > $GITHUB_OUTPUT
+          echo "version=$package_version" > $GITHUB_OUTPUT
+
+      - name: Publish ${{ inputs.npm_tag }} ${{ steps.build.outputs.name }}@${{ steps.build.outputs.version }}
+        if: ${{ inputs.release == true }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --tag ${{ inputs.npm_tag }} --ignore-scripts --workspace ${{ matrix.path }} --access=public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

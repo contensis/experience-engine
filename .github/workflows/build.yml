@@ -80,3 +80,30 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
+
+  # release-please:
+  #   runs-on: ubuntu-latest
+  #   needs: cypress-e2e
+  #   steps:
+  #     - uses: googleapis/release-please-action@v4
+  #       id: release
+  #       with:
+  #         token: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
+  #         target-branch: main
+
+  #     - name: Check release output
+  #       id: check
+  #       env:
+  #         OUTPUTS: "${{ toJson(steps.release.outputs) }}"
+  #       run: |
+  #         echo "releases_created=${{ steps.release.outputs.releases_created }}" >> $GITHUB_OUTPUT
+  #         echo "paths_released=${{ steps.release.outputs.paths_released }}" >> $GITHUB_OUTPUT
+
+  # publish:
+  #   needs: release-please
+  #   uses: ./.github/workflows/publish.yml
+  #   with:
+  #     package_paths: ${{ needs.build.outputs.paths_released }}
+  #     npm_tag: ${{ needs.build.outputs.releases_created != 'true' && 'prerelease' || 'latest' }}
+  #     release: ${{ needs.build.outputs.releases_created == 'true' }}
+  #   secrets: inherit
