@@ -2,6 +2,8 @@
   "name": "@contensis/personalization-react",
   "version": "1.0.0-beta.0",
   "description": "Create personalized experiences with React and Contensis",
+  "repository": "https://github.com/contensis/personalization",
+  "homepage": "https://github.com/contensis/personalization/tree/main/packages/react#readme",
   "main": "dist/personalization-react.js",
   "module": "dist/personalization-react.mjs",
   "types": "dist/personalization-react.d.ts",
