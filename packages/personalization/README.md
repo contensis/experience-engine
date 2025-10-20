@@ -5,7 +5,7 @@
 
 Create a Personalization Context to easily leverage personalization with Contensis in your JavaScript projects.
 
-If your project is built with React we recommend using the [@contensis/personalization-react](../react/README.md) package instead
+If your project is built with React we recommend using the [@contensis/personalization-react](https://www.npmjs.com/package/@contensis/personalization-react) package instead
 
 ### Prerequisites
 
