@@ -14,13 +14,14 @@
     "test:open": "cross-env START_SERVER_AND_TEST_INSECURE=1 start-server-and-test start https://localhost:5173 cy:open",
     "cy:open": "cypress open",
     "e2e": "npm run e2e:chrome && npm run e2e:edge && npm run e2e:firefox",
-    "e2e:chrome": "cypress run --browser chrome",
-    "e2e:edge": "cypress run --browser edge",
-    "e2e:firefox": "cypress run --browser firefox"
+    "e2e:chrome": "dotenvx run -- cypress run --browser chrome --record",
+    "e2e:edge": "dotenvx run -- cypress run --browser edge --record",
+    "e2e:firefox": "dotenvx run -- cypress run --browser firefox --record"
   },
   "author": "Zengenti",
   "license": "ISC",
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.51.0",
     "@eslint/js": "^9.38.0",
     "@microsoft/api-extractor": "^7.53.1",
     "@tsconfig/recommended": "^1.0.10",
