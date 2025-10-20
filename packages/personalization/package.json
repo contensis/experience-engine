@@ -25,7 +25,7 @@
     "prebuild": "rimraf dist && npm run tsc",
     "build": "tsup && tsup --minify",
     "tsc": "tsc --noEmit",
-    "test": "jest -c ../../jest.config.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Zengenti",
   "license": "ISC",
