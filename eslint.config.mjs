@@ -4,7 +4,7 @@ import pluginChaiFriendly from "eslint-plugin-chai-friendly";
 import pluginMocha from "eslint-plugin-mocha";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default tseslint.defineConfig(
   {
     ignores: ["**/dist/", "**/node_modules/**"],
   },

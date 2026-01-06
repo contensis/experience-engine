@@ -1,3 +1,6 @@
+# This workflow is configured with npm trusted publishing which allows only one workflow to be configured
+# The workflow filename must be the parent that was triggered by the event and not the workflow that contains the npm publish step
+
 name: Build
 
 on:
@@ -5,8 +8,31 @@ on:
     branches:
       - main
 
+  workflow_dispatch: # manual trigger was previously in publish.yml but is moved here to support npm trusted publishing
+    inputs:
+      package_paths:
+        description: "Publish the package in this folder"
+        required: true
+        type: choice
+        options:
+          - '["packages/personalization"]'
+          - '["packages/react"]'
+      npm_tag:
+        description: Publish the package with npm tag
+        required: true
+        type: choice
+        default: latest
+        options:
+          - latest
+          - prerelease
+      release:
+        description: "Publish the package version"
+        required: true
+        type: boolean
+
 jobs:
   build:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -33,6 +59,7 @@ jobs:
           path: ./packages/*.tgz
 
   cypress-e2e:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: build
 
@@ -82,6 +109,7 @@ jobs:
           path: cypress/videos
 
   # release-please:
+  #   if: github.event_name != 'workflow_dispatch'
   #   runs-on: ubuntu-latest
   #   needs: cypress-e2e
   #   steps:
@@ -100,10 +128,13 @@ jobs:
   #         echo "paths_released=${{ steps.release.outputs.paths_released }}" >> $GITHUB_OUTPUT
 
   # publish:
+  #   if: always() && (needs.build.result == 'success' || github.event_name == 'workflow_dispatch')
   #   needs: release-please
   #   uses: ./.github/workflows/publish.yml
   #   with:
-  #     package_paths: ${{ needs.build.outputs.paths_released }}
-  #     npm_tag: ${{ needs.build.outputs.releases_created != 'true' && 'prerelease' || 'latest' }}
-  #     release: ${{ needs.build.outputs.releases_created == 'true' }}
+  #     package_paths: ${{ github.event_name == 'workflow_dispatch' && inputs.package_paths || needs.build.outputs.paths_released }}
+  #     npm_tag: ${{ github.event_name == 'workflow_dispatch' && inputs.npm_tag || (needs.build.outputs.releases_created != 'true' && 'prerelease' || 'latest') }}
+  #     release: ${{ github.event_name == 'workflow_dispatch' && inputs.release || needs.build.outputs.releases_created == 'true' }}
   #   secrets: inherit
+  #   permissions:
+  #     id-token: write # for npm trusted publishing

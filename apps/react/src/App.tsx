@@ -27,7 +27,7 @@ const App = () => {
   );
 };
 
-/** Mock geo location api response, delayed by ms */
+/** Mock (third-party) geo location api response, delayed by ms */
 const useGeoIP = () => {
   const [geoData, setGeoData] = useState<
     typeof mockGeoIpResponse | undefined
@@ -43,7 +43,7 @@ const useGeoIP = () => {
   return geoData;
 };
 
-const MainLayout = () => {
+export const MainLayout = () => {
   const geoLocation = useGeoIP();
   const { audiences, computed, context, isAudience, setAttributes, signals } =
     usePersonalizationContext();

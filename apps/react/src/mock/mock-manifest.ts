@@ -213,11 +213,11 @@ export const MOCK_MANIFEST: IManifest = {
       where: {
         and: [
           {
-            attribute: "app.purchaseCategory",
+            attribute: "custom.purchaseCategory",
             equalTo: "sports",
           },
           {
-            attribute: "app.purchaseAmount",
+            attribute: "custom.purchaseAmount",
             greaterThan: 50,
           },
         ],
