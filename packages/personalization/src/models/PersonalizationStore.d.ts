@@ -24,11 +24,12 @@ export interface IPersonalizationSessionStore {
   pageViews: number;
   lastActivity: string;
   entryPage: string;
+  attribution: ISessionAttribution;
   browser: IBrowserSignalAttributes;
   referrer?: {
     url: string;
     path: string;
-    querystring;
+    querystring: string;
     queryParams: { [param: string]: string | string[] };
     domain: string;
     subdomain: string;
@@ -36,6 +37,21 @@ export interface IPersonalizationSessionStore {
   };
   location?: ILocationSignalAttributes;
   error?: unknown;
+}
+
+export interface ISessionAttribution {
+  utm_campaign?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_content?: string;
+  utm_term?: string;
+  gclid?: string;
+  dclid?: string;
+  msclkid?: string;
+  fbclid?: string;
+  ttclid?: string;
+  li_fat_id?: string;
+  twclid?: string;
 }
 
 export interface ISignalsStore {

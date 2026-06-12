@@ -1,9 +1,18 @@
-import { IPersonalizationSessionStore } from "./models";
+import { IPersonalizationSessionStore, ISessionAttribution } from "./models";
 import { PersonalizationContext } from "./personalization";
 import { Store } from "./providers/store";
 import { BrowserSignalsSnapshot } from "./signals/browser";
+import { RouteSignalsSnapshot } from "./signals/route";
 import { UrlSignals } from "./signals/url";
-import { date, isoDate, isSSR, now, toSeconds } from "./util";
+import {
+  date,
+  isArray,
+  isoDate,
+  isSSR,
+  isUndefined,
+  now,
+  toSeconds,
+} from "./util";
 
 /**
  * Interact with session store and hold session signals
@@ -58,6 +67,34 @@ export class Session {
     const browser = BrowserSignalsSnapshot();
     const { page, state } = this.#context;
     const url = UrlSignals(page);
+    const route = RouteSignalsSnapshot(url.href());
+
+    const attribution = Object.fromEntries(
+      [
+        "utm_campaign",
+        "utm_source",
+        "utm_medium",
+        "utm_content",
+        "utm_term",
+        "gclid",
+        "dclid",
+        "msclkid",
+        "fbclid",
+        "ttclid",
+        "li_fat_id",
+        "twclid",
+      ]
+        .map((source) => {
+          const value = route["page.queryParams"](source);
+          return [source, isArray(value) ? value.pop() : value];
+        })
+        .filter(([, value]) => !isUndefined(value)) as [
+        keyof ISessionAttribution,
+        string,
+      ][],
+    );
+
+    const testUrl = "http://localhost:5173/?utm_campaign=test&utm_source=google&utm_medium=cpc&utm_content=ad1&utm_term=personalization&gclid=12345&dclid=67890&msclkid=abcde&fbclid=vwxyz&ttclid=11111&li_fat_id=22222&twclid=33333";
     const initial: IPersonalizationSessionStore = {
       isFirstVisit: state.pageViews < 2,
       duration: 0,
@@ -65,6 +102,7 @@ export class Session {
       lastActivity: date,
       pageViews: this.pvc,
       startTime: date,
+      attribution,
       browser,
       location: state.manifest?.location,
     };
