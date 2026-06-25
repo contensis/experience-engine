@@ -37,7 +37,7 @@ export class Store {
   #persist = true;
 
   /**
-   * Store is an interface for persisting values or (stringifiable) objects for Personalization
+   * Store is an interface for persisting values or (stringifiable) objects for the Experience Engine
     * Provide a key to maintain a particular store or omit the key to write to the default "cxp" store
    * The store type can be set and used for sessionStorage or a cookie, localStorage is default
    * Use sessionStorage or localStorage if persist is false or true (default: true)

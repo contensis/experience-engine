@@ -75,7 +75,7 @@ export class ExperienceEngineContext {
   manifest?: Manifest;
 
   /**
-   * The pageViews we have counted and calculated since the Personalization Context was last instantiated
+   * The pageViews we have counted and calculated since the Experience Engine Context was last instantiated
    * Used for counting pageViews in a SPA and monitored by the MutationObserver created in the observe() method
    */
   pageViews: PageView[] = [];
@@ -154,7 +154,7 @@ export class ExperienceEngineContext {
         this.#onManifestReady,
         l,
         state.manifest,
-        this.preview
+        this.preview,
       );
     } else if (client) {
       l("ic");
@@ -163,7 +163,7 @@ export class ExperienceEngineContext {
         this.#onManifestReady,
         l,
         state.manifest,
-        this.preview
+        this.preview,
       );
     } else {
       console.warn(`cxp: client or manifest required`);
@@ -228,7 +228,7 @@ export class ExperienceEngineContext {
    */
   addHandler = <T extends keyof IHandlers>(
     event: T,
-    callback: IHandlers[T]
+    callback: IHandlers[T],
   ) => {
     this.#events.push([event, callback]);
     return callback; // return the callback so it can be passed to the removeHandler
@@ -237,12 +237,12 @@ export class ExperienceEngineContext {
   /** Clean up any handlers previously added */
   removeHandler = <T extends keyof IHandlers>(
     key: T,
-    callback: IHandlers[T]
+    callback: IHandlers[T],
   ) => {
     // Filter the events array to remove the event
     // matching the supplied key and callback
     this.#events = this.#events.filter(
-      (e) => e[0] !== key || e[1] !== callback
+      (e) => e[0] !== key || e[1] !== callback,
     );
   };
 
@@ -359,13 +359,13 @@ export class ExperienceEngineContext {
 
   /**
    * Return any custom attributes provided by the app to the
-    * experience engine context
+   * experience engine context
    */
   getAttributes = <
     T extends string | string[] | undefined = undefined,
-    R = T extends string ? SignalValue : ICustomAttributes
+    R = T extends string ? SignalValue : ICustomAttributes,
   >(
-    key?: T
+    key?: T,
   ) => {
     const allAttributes = (this.signals?.attributes ||
       {}) as unknown as ICustomAttributes;
@@ -384,7 +384,7 @@ export class ExperienceEngineContext {
 
   /**
    * Supply custom attributes identified within the app to the
-    * experience engine context
+   * experience engine context
    */
   setAttributes = (customAttributes: ICustomAttributes) => {
     if (objectKeys(customAttributes).length) {
@@ -400,7 +400,7 @@ export class ExperienceEngineContext {
 
   /**
    * Set signal attributes within the app to override the
-    * experience engine context
+   * experience engine context
    */
   overrideAttributes = (overrideSignals: IOverrideAttributes) => {
     if (objectKeys(overrideSignals).length) {
@@ -460,13 +460,13 @@ export class ExperienceEngineContext {
       manifest?: boolean;
       /** Reset the current session */
       session?: boolean;
-       /** Reset the experience engine store */
+      /** Reset the experience engine store */
       store?: boolean;
     } = {
       manifest: true,
       session: true,
       store: true,
-    }
+    },
   ) => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const me = this;

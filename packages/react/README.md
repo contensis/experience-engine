@@ -8,7 +8,7 @@ Provides a context wrapper, hooks and components to easily leverage experience e
 
 ### Prerequisites
 
-Before we can see Personalization in action it is recommended we first [ensure content is Personalized for different audiences](https://github.com/contensis/experience-engine/blob/main/docs/PERSONALIZE_CONTENT.md)
+Before we can see the Experience Engine in action it is recommended we first [ensure content is personalized for different audiences](https://github.com/contensis/experience-engine/blob/main/docs/PERSONALIZE_CONTENT.md)
 
 Familiarise yourself with the terminology by looking at [how we determine audiences](https://github.com/contensis/experience-engine/blob/main/README.md#how-it-works) in order to personalize content
 
@@ -344,7 +344,7 @@ Check out some [Frequently Asked Questions](https://github.com/contensis/experie
 
 ### Debug flag
 
-Output trace information in console logs showing actions performed by the Personalization Context
+Output trace information in console logs showing actions performed by the Experience Engine Context
 
 Set the `debug` property in the `ExperienceEngineContext` to `true` to output trace logs. Use `"v"` for verbose logging.
 
@@ -353,7 +353,7 @@ Set the `debug` property in the `ExperienceEngineContext` to `true` to output tr
 To test changes made to audiences and signals in Contensis prior to them being published, we can request the latest manifest version (instead of the default published version)
 
 1. Set the `preview` property in the `ExperienceEngineContext` to `true`
-2. If the `preview` property is updated after the `ExperienceEngineContext` has instantiated, also `reset` the manifest in the Personalization Context
+2. If the `preview` property is updated after the `ExperienceEngineContext` has instantiated, also `reset` the manifest in the Experience Engine Context
 
 ### Browser Window object reference
 

@@ -1,6 +1,6 @@
 ﻿# [![Contensis](https://github.com/contensis/cli/raw/refs/heads/main/assets/contensis-logo--tiny.svg)](https://www.contensis.com) Contensis Experience Engine [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-[![Build workflow](https://github.com/contensis/experience-engine/actions/workflows/build.yml/badge.svg?event=push)]() [![Personalization](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/m6esjw/main&style=flat&logo=cypress)](https://cloud.cypress.io/projects/m6esjw/runs) [![Personalization](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/count/m6esjw/main&style=flat&logo=cypress)](https://cloud.cypress.io/projects/m6esjw/runs)
+[![Build workflow](https://github.com/contensis/experience-engine/actions/workflows/build.yml/badge.svg?event=push)]() [![Cypress tests](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/m6esjw/main&style=flat&logo=cypress)](https://cloud.cypress.io/projects/m6esjw/runs) [![Cypress total tests](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/count/m6esjw/main&style=flat&logo=cypress)](https://cloud.cypress.io/projects/m6esjw/runs)
 
 [![Contensis](https://img.shields.io/badge/Contensis-00304d?style=for-the-badge&logoColor=white&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii02IDAgNjIgNjIiIGhlaWdodD0iMTYiIGZpbGw9Im5vbmUiPjxwYXRoIGZpbGw9IiMzN0JGQTciIGQ9Im00Ny43NjIgMTguNDk0LTMuNjEyLTIuMDZjLjM1OCAxLjY1NS42MzEgMy4yOS43OTkgNC44NTkuMTQ0IDEuMzUzLjM1OCA0LjMwOS4zNTggNC40NXYxOS45NzVjMCAuNDI3LS41MTggMS4zMTEtLjg5MiAxLjUyNkwyNi44OTMgNTcuMjNjLS4xMDkuMDYxLS40NDguMTYtLjg5MS4xNi0uNDQ1IDAtLjc4NC0uMDk5LS44OTItLjE2TDcuNTg2IDQ3LjI0NGMtLjM3Ni0uMjE1LS44OTItMS4wOTktLjg5Mi0xLjUyNlYyNS43NDRjMC0uNDI4LjUxOC0xLjMxMy44OTItMS41MjVsOS43MzEtNS41NDZjMS4xMzQtMS41NDUgMi40MzMtMy4xODkgMy44MjctNC45NTEgMS41NDYtMS45NTUgMy4xODgtNC4wMzYgNC44MzMtNi4yNTgtMS41NDIuMDAzLTMuMDM3LjM3NC00LjIxNiAxLjA0NUw0LjIzOCAxOC40OTdDMS43ODMgMTkuODk1IDAgMjIuOTQ1IDAgMjUuNzQ0djE5Ljk3NGMwIDIuNzk5IDEuNzgzIDUuODQ5IDQuMjM4IDcuMjQ5bDE3LjUyMyA5Ljk4OGMxLjE4Mi42NzUgMi42ODggMS4wNDUgNC4yNCAxLjA0NSAxLjU1IDAgMy4wNTQtLjM3IDQuMjM4LTEuMDQ2bDE3LjUyMy05Ljk4N2MyLjQ1Ni0xLjQgNC4yMzgtNC40NSA0LjIzOC03LjI0OFYyNS43NDRjMC0yLjgtMS43ODItNS44NDgtNC4yMzgtNy4yNVoiLz48cGF0aCBmaWxsPSIjMzdCRkE3IiBkPSJNMjEuNTcxIDUyLjcxM2M1LjA5NC03LjQzOCA3Ljg2Mi0xOC43MDkgOS4xODQtMjUuNzc2LTMuMzQ4IDYuMTYtOS4yMjkgMTUuNjY2LTE2LjQgMjEuNjc4LS4wMzgtLjA2My0uMDYyLS4wMzkgNy4yMTYgNC4wOThaIi8+PHBhdGggZmlsbD0iIzM3QkZBNyIgZD0iTTMzLjIwMi40MTFDMjUuNzQ1IDEzLjAyIDE1LjcyMyAyMS43MjIgMTUuMDkxIDI3LjQ5Yy0uNTkgNS4zODggMS4zNiA5LjgzNyA0LjU1NCAxMi42MDRhODEuMDg2IDgxLjA4NiAwIDAgMCAzLjYxNC00Ljg4Yy0uMDU4LTEuMTE0LS40ODItOS44MTUuNDQtMTIuMjY0LjUyNyAzLjc3OCAxLjYxNiA3LjI2NSAyLjAyIDguNDgzYTExMy45NDggMTEzLjk0OCAwIDAgMCAyLjc0Ni00LjY4NWMtLjA4My0yLjIxMy0uMzEzLTEwLjAwOC40Ni0xMS43OTQuMjA1IDIuNTc1IDEuMTYzIDUuODUyIDEuNzM4IDcuNjM3Ljc2NC0xLjUyMyAxLjE4My0yLjQ1IDEuMTkzLTIuNDcybDIuNzA1LTYuMDE2LS43MSA2LjU0NWMtLjAwNC4wMzQtLjI0MiAyLjE5My0uODIgNS40NzggMS41ODYtMS4yODkgNC4xMDQtMy40NTcgNS4zMjgtNS4xNi4xMDUgMi4wNTQtNC40NDQgNy41NTYtNi4xOTMgOS41OTQtLjE4My44NDktLjM4MiAxLjczLS42IDIuNjM1LS4xNTQuNjQtLjMxMiAxLjI3LS40NzMgMS44OSAxLjUxNy0uODQyIDQuOTkyLTIuODYgNi45MzItNC42OTctLjI5NCAyLjA5NS02LjQ2IDcuNDE5LTguMDkgOC43OTRhODAuMTYxIDgwLjE2MSAwIDAgMS0xLjMzNiAzLjk4YzMuNzQ0LS4yMTMgNy42NzYtMi4xIDEwLjk2OC02LjEzNkM0OS40MDcgMjQuOTYgMzUuNjcyLTMuNzY1IDMzLjIwMi40MTFaIi8+PC9zdmc+)](https://www.contensis.com)
 [![Contensis Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)](https://contensis.slack.com)
@@ -40,13 +40,13 @@ Check out some [Frequently Asked Questions](https://github.com/contensis/experie
 
 This is a monorepo containing the source code for all of the JavaScript packages that are published to [npmjs](https://www.npmjs.com)
 
-**If you want to use personalization in your project, you should continue reading in one of the following packages' README**
+**If you want to use the experience engine to apply personalization in your project, you should continue reading in one of the following packages' README**
 
 - `/packages`
   - [`/experience-engine`](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/README.md)
-    <br> The standalone personalization package
+    <br> The standalone experience engine package
   - [`/react`](https://github.com/contensis/experience-engine/blob/main/packages/react/README.md)
-    <br> The React personalization package
+    <br> The React experience engine package
     - **Use this for React projects**
 
 ### Test apps

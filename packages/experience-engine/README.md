@@ -9,7 +9,7 @@ If your project is built with React we recommend using the [@contensis/experienc
 
 ### Prerequisites
 
-Before we can see Personalization in action it is recommended we first [ensure content is Personalized for different audiences](https://github.com/contensis/experience-engine/blob/main/docs/PERSONALIZE_CONTENT.md)
+Before we can see the Experience Engine in action it is recommended we first [ensure content is personalized for different audiences](https://github.com/contensis/experience-engine/blob/main/docs/PERSONALIZE_CONTENT.md)
 
 Familiarise yourself with the terminology by looking at [how we determine audiences](https://github.com/contensis/experience-engine/blob/main/README.md#how-it-works) in order to personalize content
 
@@ -82,13 +82,13 @@ window.CONTENSIS_XP.debug = true;
 window.CONTENSIS_XP.manifest = json;
 ```
 
-| Attribute       | Type                                                                                                                               | Description                                                                                           |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| manifest        | [Manifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)                                                | The complete Manifest to use in this experience engine context. Used instead of `alias` and `projectId` |
-| debug           | boolean                                                                                                                            | Set `true` to enable console logging                                                                  |
-| onComputed      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#oncomputed)      | Custom handler called each time signals and audiences are computed                                    |
+| Attribute       | Type                                                                                                                                   | Description                                                                                             |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| manifest        | [Manifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)                                                  | The complete Manifest to use in this experience engine context. Used instead of `alias` and `projectId` |
+| debug           | boolean                                                                                                                                | Set `true` to enable console logging                                                                    |
+| onComputed      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#oncomputed)      | Custom handler called each time signals and audiences are computed                                      |
 | onInit          | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#oninit)          | Custom handler called one time when the Experience Engine Context is initialized                        |
-| onManifestReady | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#onmanifestready) | Custom handler called each time a manifest has been loaded                                            |
+| onManifestReady | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#onmanifestready) | Custom handler called each time a manifest has been loaded                                              |
 | onNavigate      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#onnavigate)      | Custom handler called each time the Experience Engine Context detects navigation within a SPA           |
 | onPageView      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#onpageview)      | Custom handler called each time the Experience Engine Context has registered a Page View                |
 
@@ -117,7 +117,7 @@ const variants = [
 ];
 
 const personalizedVariant = variants.find((variant) =>
-  context.audiences.active.includes(variant.audience)
+  context.audiences.active.includes(variant.audience),
 );
 ```
 
@@ -137,7 +137,7 @@ const audiences: string[] = context.audiences.active;
 const defaultVariant = variants.find((variant) => variant.audience === "");
 
 const personalizedVariant = variants.find((variant) =>
-  audiences.includes(variant.audience)
+  audiences.includes(variant.audience),
 );
 
 const render = personalizedVariant || defaultVariant;
@@ -297,7 +297,7 @@ Except we are not rendering personalized content based on active audiences, inst
         // Find the first variant in the sorted array that has a split
         // value less than the random percentile
         const experiment = variants.find(
-          (e) => CONTENSIS_XP.context.percentile >= Number(e.split)
+          (e) => CONTENSIS_XP.context.percentile >= Number(e.split),
         );
 
         // Return an experiment for the visitor bucket
@@ -309,7 +309,7 @@ Except we are not rendering personalized content based on active audiences, inst
         /** Render the entry data to elements */
         document.getElementById("title").innerHTML = entry.lead;
         document.getElementById("lead").innerHTML = pickExperiment(
-          entry.experiments
+          entry.experiments,
         )?.lead;
       };
     </script>

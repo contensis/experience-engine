@@ -23,7 +23,7 @@ describe(`Personalization Reset functions`, () => {
         });
       });
 
-      context(`When I reset all personalization storage`, () => {
+      context(`When I reset all experience engine storage`, () => {
         it("Then I can navigate the website as if it were our first visit", () => {
           cy.get("#resetStorage").click();
           cy.getLocalStorage().its("pageViews").should("equal", 1);
