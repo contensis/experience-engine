@@ -1,4 +1,4 @@
-# Contensis Personalization Monorepo
+# Contensis Experience Engine Monorepo
 
 ## Structure
 
@@ -9,7 +9,7 @@ npm workspaces monorepo. Two publishable libraries, three test/demo apps.
 | `packages/experience-engine` | `@contensis/experience-engine` | Core experience engine |
 | `packages/react` | `@contensis/experience-engine-react` | React bindings, depends on core |
 | `apps/react-router` | `react-router-app` | Main test app, target for Cypress e2e |
-| `apps/react` | `contensis-personalization-react-test-app` | Debug/manifest playground |
+| `apps/react` | `contensis-experience-engine-react-test-app` | Debug/manifest playground |
 | `apps/html` | `html-example` | Static HTML demo |
 
 ## Commands
@@ -29,7 +29,7 @@ npm workspaces monorepo. Two publishable libraries, three test/demo apps.
 npm run build -w @contensis/experience-engine
 npm run build -w @contensis/experience-engine-react
 npm run typecheck -w react-router-app
-npm run dev -w contensis-personalization-react-test-app
+npm run dev -w contensis-experience-engine-react-test-app
 ```
 
 ## Build Details

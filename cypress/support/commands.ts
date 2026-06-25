@@ -37,8 +37,8 @@
 // }
 
 import {
-  IPersonalizationSessionStore,
-  IPersonalizationStore,
+  IExperienceEngineSessionStore,
+  IExperienceEngineStore,
   ExperienceEngineContext,
 } from "@contensis/experience-engine";
 import "cypress-wait-until";

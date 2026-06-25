@@ -62,7 +62,7 @@ if (isObject(g)) {
 } else w[GLOBAL] = {};
 
 /**
- * Instantiate a personalization context and add it to the global context
+  * Instantiate an experience engine context and add it to the global context
  * or use an existing context stored in the global if it exists
  */
 w[GLOBAL].context =

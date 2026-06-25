@@ -4,7 +4,7 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-Provides a context wrapper, hooks and components to easily leverage personalization with Contensis in your React projects
+Provides a context wrapper, hooks and components to easily leverage experience engine with Contensis in your React projects
 
 ### Prerequisites
 
@@ -24,7 +24,7 @@ yarn add --save @contensis/experience-engine-react
 
 ## Configuration
 
-### [\<ExperienceEngineProvider \/\> component](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/PERSONALIZATION_PROVIDER.md)
+### [\<ExperienceEngineProvider \/\> component](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/EXPERIENCE_ENGINE_PROVIDER.md)
 
 Wrap your "`App`" root component with a `ExperienceEngineProvider`
 
@@ -148,9 +148,9 @@ The chosen variant will be provided to the `render` component (or JSX children) 
 
 ## Personalize anything
 
-[`useExperienceEngineContext` hook](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md) can be called in any component and will return properties and functions we can use when personalizing parts of your application
+[`useExperienceEngineContext` hook](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/USE_EXPERIENCE_ENGINE_CONTEXT.md) can be called in any component and will return properties and functions we can use when personalizing parts of your application
 
-### [IsAudience](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#isaudience)
+### [IsAudience](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/USE_EXPERIENCE_ENGINE_CONTEXT.md#isaudience)
 
 ```tsx
 import React from "react";
@@ -221,7 +221,7 @@ Custom attributes are configured in Contensis and can become part of the conditi
 
 They allow developers to supply values produced within the app or provided by visitor actions for consideration when calculating signal and audience conditions
 
-### [setAttributes](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#setattributes)
+### [setAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#setattributes)
 
 Supply one or more custom attributes and then perform signal and audience calculations
 
@@ -268,9 +268,9 @@ If our Manifest contains a signal that requires the above `custom.searchQuery` t
 
 The attribute values are not stored and cannot be considered as a "previous" searchQuery in subsequent navigations or actions
 
-### [overrideAttributes](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#overrideattributes)
+### [overrideAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#overrideattributes)
 
-Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the personalization attributes are reset.
+Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the experience engine attributes are reset.
 
 `overrideAttributes` can permanently set/override any of the signal attributes including built-in attributes. It may be useful to override a specific attribute with a specific value when debugging certain scenarios.
 
@@ -357,21 +357,21 @@ To test changes made to audiences and signals in Contensis prior to them being p
 
 ### Browser Window object reference
 
-The personalization context can be examined or watched in the Console of the browser developer tools at any time from the browser's global scope
+The experience engine context can be examined or watched in the Console of the browser developer tools at any time from the browser's global scope
 
 Type `window.CONTENSIS_XP.context` into the browser developer tools Console window
 
-### Reset personalization
+### Reset experience engine
 
-Manually reset personalization by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
+Manually reset experience engine by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
 
-Alternatively, we can manually reset personalization by running the `reset()` function in the browser console using [the window object reference](#browser-window-object-reference):
+Alternatively, we can manually reset experience engine by running the `reset()` function in the browser console using [the window object reference](#browser-window-object-reference):
 
 ```javascript
 window.CONTENSIS_XP.context.reset();
 ```
 
-Or we can reset some or all personalization elements programatically in our components
+Or we can reset some or all experience engine elements programatically in our components
 
 ```tsx
 import React from "react";
@@ -386,7 +386,7 @@ const ExampleComponent = () => {
 };
 ```
 
-#### Reset all personalizations
+#### Reset all experience engine state
 
 ```tsx
 return (
@@ -397,7 +397,7 @@ return (
         context.reset();
       }}
     >
-      Reset personalizations
+      Reset experience engine
     </button>
   </div>
 );
@@ -422,7 +422,7 @@ return (
           // Update the preview flag in the context
           context.preview = event.target.checked;
 
-          // Reset the personalization manifest
+          // Reset the experience engine manifest
           context.reset({ manifest: true });
 
           // Handle component state

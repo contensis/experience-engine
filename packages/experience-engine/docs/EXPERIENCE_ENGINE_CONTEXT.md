@@ -1,6 +1,6 @@
-# Personalization Context
+# Experience Engine Context
 
-The singleton context object that manages the personalization features
+The singleton context object that manages the experience engine features
 
 ```typescript
 new ExperienceEngineContext(options: ExperienceEngineContextOptions): ExperienceEngineContext;
@@ -12,9 +12,9 @@ new ExperienceEngineContext(options: ExperienceEngineContextOptions): Experience
 | -------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | client   | [ManifestClient](#manifestclient)                                                                                   | Required configuration for the Manifest Client                                                  |
 | debug    | boolean                                                                                                             | Output additional debug information to console and `localStorage`                               |
-| handlers | [IHandlers](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md) | Add handler(s) to call after the specified event                                                |
-| manifest | [IManifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)                                | The Personalization Manifest containing the working rules for calculating signals and audiences |
-| preview  | boolean                                                                                                             | Are we running the preview Personalization Context                                              |
+| handlers | [IHandlers](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md) | Add handler(s) to call after the specified event                                                |
+| manifest | [IManifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)                                | The Experience Engine Manifest containing the working rules for calculating signals and audiences |
+| preview  | boolean                                                                                                             | Are we running the preview Experience Engine Context                                              |
 
 ### ManifestClient
 
@@ -29,26 +29,26 @@ new ExperienceEngineContext(options: ExperienceEngineContextOptions): Experience
 
 | Attribute          | Type                                                                                                                                          | Description                                                                                                                                       |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| addHandler         | [Function](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#addhandler)                 | Add a handler with a callback that will be invoked when the event occurs (dispose handlers with `removeHandler`)                                  |
+| addHandler         | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#addhandler)                 | Add a handler with a callback that will be invoked when the event occurs (dispose handlers with `removeHandler`)                                  |
 | audiences          | [CalculateAudiences](#calculateaudiences)                                                                                                     | The audiences last calculated                                                                                                                     |
 | compute            | [Function](#compute)                                                                                                                          | Compute (or recompute) the signals and audiences from the current page                                                                            |
 | cxpid               | string                                                                                                                                        | Contensis Experience Engine Id                                                                                                                      |
 | currentPage        | string                                                                                                                                        | The current page href we are working with                                                                                                         |
 | debug              | boolean                                                                                                                                       | Output console.log messaging, `true` or `v`=verbose                                                                                               |
-| getAttributes      | [Function](#getattributes)                                                                                                                    | Return any custom attributes provided by the app to the Personalization Context                                                                   |
+| getAttributes      | [Function](#getattributes)                                                                                                                    | Return any custom attributes provided by the app to the Experience Engine Context                                                                   |
 | manifest           | [Manifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)                                                           | The manifest containing the conditions we are using to calculate signals and audiences                                                            |
-| overrideAttributes | [Function](#overrideattributes)                                                                                                               | Set signal attributes within the app to override the Personalization Context                                                                      |
+| overrideAttributes | [Function](#overrideattributes)                                                                                                               | Set signal attributes within the app to override the Experience Engine Context                                                                      |
 | pageView           | [Function](#pageview)                                                                                                                         | Register a new page view to compute signals and audiences with                                                                                    |
-| pageViews          | [PageView[]](https://github.com/contensis/experience-engine/blob/main/packages/personalization/src/models/PageView.d.ts)                        | The page views we have counted and calculated since the Personalization Context was last instantiated                                             |
+| pageViews          | [PageView[]](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/src/models/PageView.d.ts)                        | The page views we have counted and calculated since the Experience Engine Context was last instantiated                                             |
 | percentile         | number                                                                                                                                        | Random percentile for experiment bucketing                                                                                                        |
 | preview            | boolean                                                                                                                                       | `true` if the context is running in preview mode                                                                                                  |
 | previousPage       | string                                                                                                                                        | The previous page href we are working with                                                                                                        |
-| removeHandler      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#removehandler)              | Dispose any previously added event handlers                                                                                                       |
-| reset              | [Function](#reset)                                                                                                                            | Reset some or all personalization elements                                                                                                        |
+| removeHandler      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#removehandler)              | Dispose any previously added event handlers                                                                                                       |
+| reset              | [Function](#reset)                                                                                                                            | Reset some or all experience engine elements                                                                                                        |
 | session            | [Session](#session)                                                                                                                           | Holds details pertaining to the current session                                                                                                   |
-| setAttributes      | [Function](#setattributes)                                                                                                                    | Supply custom attributes identified within the app to the Personalization Context                                                                 |
+| setAttributes      | [Function](#setattributes)                                                                                                                    | Supply custom attributes identified within the app to the Experience Engine Context                                                                 |
 | signals            | [CalculateSignals](#calculatesignals)                                                                                                         | The signals last calculated                                                                                                                       |
-| state              | [IPersonalizationStore](https://github.com/contensis/experience-engine/blob/main/packages/personalization/src/models/PersonalizationStore.d.ts) | The personalization store that is persisted in the browser [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) |
+| state              | [IExperienceEngineStore](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/src/models/ExperienceEngineStore.d.ts) | The experience engine store that is persisted in the browser [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) |
 | toggleAudience     | [Function](#toggleaudience)                                                                                                                   | Toggle a specific audience on or off                                                                                                              |
 
 ## CalculateAudiences
@@ -77,8 +77,8 @@ type MatchedAudience = IAudience & { matched: true };
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | matched    | [MatchedSignal[]](#matchedsignal)                                                                                                      | Signals that have been matched in this calculation                                                                           |
 | computed   | [ComputedSignal[]](#computedsignal)                                                                                                    | Signals that have been processed in this calculation                                                                         |
-| attributes | [ISignalAttributes](https://github.com/contensis/experience-engine/blob/main/packages/personalization/src/models/ISignalAttributes.d.ts) | A snapshot of all signal attributes available while this calculation was processed, includes overridden attributes           |
-| snapshot   | [ISignalAttributes](https://github.com/contensis/experience-engine/blob/main/packages/personalization/src/models/ISignalAttributes.d.ts) | A snapshot of produced signal attributes available while this calculation was processed, not including overridden attributes |
+| attributes | [ISignalAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/src/models/ISignalAttributes.d.ts) | A snapshot of all signal attributes available while this calculation was processed, includes overridden attributes           |
+| snapshot   | [ISignalAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/src/models/ISignalAttributes.d.ts) | A snapshot of produced signal attributes available while this calculation was processed, not including overridden attributes |
 
 ### ComputedSignal
 
@@ -97,7 +97,7 @@ type MatchedSignal = ISignal & { times: number; matched: true };
 | Attribute | Type                                            | Description                                                                                                                                           |
 | --------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | pvc       | number                                          | The total number of page views in the context                                                                                                         |
-| state     | [IPersonalizationSessionStore](#computedsignal) | The personalization store that is persisted in the browser [`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage) |
+| state     | [IExperienceEngineSessionStore](#computedsignal) | The experience engine store that is persisted in the browser [`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage) |
 | clear     | Function                                        | Clear the session store                                                                                                                               |
 | update    | Function                                        | Provide a partial state and update the session store                                                                                                  |
 
@@ -113,7 +113,7 @@ setAttributes({
 
 ## overrideAttributes
 
-Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the personalization attributes are reset.
+Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the experience engine attributes are reset.
 
 ```typescript
 overrideAttributes({
@@ -175,7 +175,7 @@ pageView(url?: string): void;
 
 ## reset
 
-Resets some or all personalization elements
+Resets some or all experience engine elements
 
 [Reset examples](https://github.com/contensis/experience-engine/tree/main/packages/react#reset-personalization)
 

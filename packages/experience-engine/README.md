@@ -3,7 +3,7 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-Create a Personalization Context to easily leverage personalization with Contensis in your JavaScript projects.
+Create an Experience Engine Context to easily leverage experience engine with Contensis in your JavaScript projects.
 
 If your project is built with React we recommend using the [@contensis/experience-engine-react](https://www.npmjs.com/package/@contensis/experience-engine-react) package instead
 
@@ -27,10 +27,10 @@ yarn add --save @contensis/experience-engine
 
 Two bundles are available for use:
 
-- `dist/personalization.min.(m)js`
-  <br>exports the core [ExperienceEngineContext](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md) class to instantiate yourself
+- `dist/experience-engine.min.(m)js`
+  <br>exports the core [ExperienceEngineContext](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md) class to instantiate yourself
 - `dist/experience-engine.browser.min.(m)js`
-  <br>browser-specific bundle instantiates the [ExperienceEngineContext](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md) with `data` attributes in the `<script>` tag
+  <br>browser-specific bundle instantiates the [ExperienceEngineContext](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md) with `data` attributes in the `<script>` tag
 
 ## Browser bundle
 
@@ -52,7 +52,7 @@ For example
 
 ### Script attributes
 
-Set `data` attributes in the above `<script>` tag to configure the Personalization Context.
+Set `data` attributes in the above `<script>` tag to configure the Experience Engine Context.
 
 Each attribute must be prefixed with `data-contensis-xp-`.
 
@@ -72,7 +72,7 @@ For example, to set `alias` attribute it must be added to the `<script>` tag lik
 
 ### Global attributes
 
-Some attributes can be pre-set in the `global` / `window` context, this approach can ensure these attributes are set _before_ the Personalization Context is initialized.
+Some attributes can be pre-set in the `global` / `window` context, this approach can ensure these attributes are set _before_ the Experience Engine Context is initialized.
 
 ```javascript
 // Output console logs and extra info
@@ -84,17 +84,17 @@ window.CONTENSIS_XP.manifest = json;
 
 | Attribute       | Type                                                                                                                               | Description                                                                                           |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| manifest        | [Manifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)                                                | The complete Manifest to use in this personalization context. Used instead of `alias` and `projectId` |
+| manifest        | [Manifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)                                                | The complete Manifest to use in this experience engine context. Used instead of `alias` and `projectId` |
 | debug           | boolean                                                                                                                            | Set `true` to enable console logging                                                                  |
-| onComputed      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#oncomputed)      | Custom handler called each time signals and audiences are computed                                    |
-| onInit          | [Function](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#oninit)          | Custom handler called one time when the Personalization Context is initialized                        |
-| onManifestReady | [Function](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#onmanifestready) | Custom handler called each time a manifest has been loaded                                            |
-| onNavigate      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#onnavigate)      | Custom handler called each time the Personalization Context detects navigation within a SPA           |
-| onPageView      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/EVENT_HANDLERS.md#onpageview)      | Custom handler called each time the Personalization Context has registered a Page View                |
+| onComputed      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#oncomputed)      | Custom handler called each time signals and audiences are computed                                    |
+| onInit          | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#oninit)          | Custom handler called one time when the Experience Engine Context is initialized                        |
+| onManifestReady | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#onmanifestready) | Custom handler called each time a manifest has been loaded                                            |
+| onNavigate      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#onnavigate)      | Custom handler called each time the Experience Engine Context detects navigation within a SPA           |
+| onPageView      | [Function](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EVENT_HANDLERS.md#onpageview)      | Custom handler called each time the Experience Engine Context has registered a Page View                |
 
 ## Personalize content
 
-All functions require a handle on and are called from within the [Personalization Context](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md)
+All functions require a handle on and are called from within the [Experience Engine Context](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md)
 
 ### Active audiences
 
@@ -155,7 +155,7 @@ Custom attributes are configured in Contensis and can become part of the conditi
 
 They allow developers to supply values produced within the app or provided by visitor actions for consideration when calculating signal and audience conditions
 
-### [setAttributes](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#setattributes)
+### [setAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#setattributes)
 
 Supply one or more custom attributes and then perform signal and audience calculations
 
@@ -211,9 +211,9 @@ If our Manifest contains a signal that requires the above `custom.searchQuery` t
 
 The attribute values are not stored and cannot be considered as a "previous" searchQuery in subsequent navigations or actions
 
-### [overrideAttributes](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#overrideattributes)
+### [overrideAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#overrideattributes)
 
-Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the personalization attributes are reset.
+Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the experience engine attributes are reset.
 
 `overrideAttributes` can permanently set/override any of the signal attributes including built-in attributes. It may be useful to override a specific attribute with a specific value when debugging certain scenarios.
 
@@ -333,7 +333,7 @@ Check out some [Frequently Asked Questions](https://github.com/contensis/experie
 
 ### Debug flag
 
-Output trace information in console logs showing actions performed by the Personalization Context
+Output trace information in console logs showing actions performed by the Experience Engine Context
 
 Set the `debug` property in the `ExperienceEngineContext` to `true` to output trace logs. Use `"v"` for verbose logging.
 
@@ -342,29 +342,29 @@ Set the `debug` property in the `ExperienceEngineContext` to `true` to output tr
 To test changes made to audiences and signals in Contensis prior to them being published, we can request the latest manifest version (instead of the default published version)
 
 1. Set the `preview` property in the `ExperienceEngineContext` to `true`
-2. If the `preview` property is updated after the `ExperienceEngineContext` has instantiated, also `reset` the manifest in the Personalization Context
+2. If the `preview` property is updated after the `ExperienceEngineContext` has instantiated, also `reset` the manifest in the Experience Engine Context
 
 ### Browser Window object reference
 
-The personalization context can be examined or watched in the Console of the browser developer tools at any time from the browser's global scope
+The experience engine context can be examined or watched in the Console of the browser developer tools at any time from the browser's global scope
 
 Type `window.CONTENSIS_XP.context` into the browser developer tools Console window
 
-### Reset personalization
+### Reset experience engine
 
-Manually reset personalization by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
+Manually reset experience engine by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
 
-Alternatively, we can manually reset personalization by running the `reset()` function in the browser console using [the window object reference](#browser-window-object-reference):
+Alternatively, we can manually reset experience engine by running the `reset()` function in the browser console using [the window object reference](#browser-window-object-reference):
 
 ```javascript
 window.CONTENSIS_XP.context.reset();
 ```
 
-Or we can reset some or all personalization elements programatically
+Or we can reset some or all experience engine elements programatically
 
-The `reset` function requires a handle on and is called from within the [Personalization Context](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#reset)
+The `reset` function requires a handle on and is called from within the [Experience Engine Context](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#reset)
 
-#### Reset all personalizations
+#### Reset all experience engine state
 
 ```javascript
 context.reset();
@@ -378,7 +378,7 @@ Set the `preview` flag and then reset the manifest to load the latest (unpublish
 // Update the preview flag in the context
 context.preview = true;
 
-// Reset the personalization manifest
+// Reset the experience engine manifest
 context.reset({ manifest: true });
 ```
 

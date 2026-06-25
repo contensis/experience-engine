@@ -359,7 +359,7 @@ export class ExperienceEngineContext {
 
   /**
    * Return any custom attributes provided by the app to the
-   * personalization context
+    * experience engine context
    */
   getAttributes = <
     T extends string | string[] | undefined = undefined,
@@ -384,7 +384,7 @@ export class ExperienceEngineContext {
 
   /**
    * Supply custom attributes identified within the app to the
-   * personalization context
+    * experience engine context
    */
   setAttributes = (customAttributes: ICustomAttributes) => {
     if (objectKeys(customAttributes).length) {
@@ -400,7 +400,7 @@ export class ExperienceEngineContext {
 
   /**
    * Set signal attributes within the app to override the
-   * personalization context
+    * experience engine context
    */
   overrideAttributes = (overrideSignals: IOverrideAttributes) => {
     if (objectKeys(overrideSignals).length) {
@@ -460,7 +460,7 @@ export class ExperienceEngineContext {
       manifest?: boolean;
       /** Reset the current session */
       session?: boolean;
-      /** Reset the personalization store */
+       /** Reset the experience engine store */
       store?: boolean;
     } = {
       manifest: true,

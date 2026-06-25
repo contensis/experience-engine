@@ -40,7 +40,7 @@ export const Personalize = <
       ? props.render
       : null;
 
-  // Get the isAudience helper function from personalization context
+  // Get the isAudience helper function from experience engine context
   const { isAudience } = useExperienceEngineContext();
 
   // Determine the key in each variant that holds the audiences

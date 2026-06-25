@@ -7,12 +7,12 @@ declare namespace Cypress {
     getLocalStorage<T extends string = undefined>(
       key?: T
     ): typeof key extends undefined
-      ? Chainable<IPersonalizationStore>
+      ? Chainable<IExperienceEngineStore>
       : Chainable<any>;
     getSessionStorage<T extends string = undefined>(
       key?: T
     ): typeof key extends undefined
-      ? Chainable<IPersonalizationSessionStore>
+      ? Chainable<IExperienceEngineSessionStore>
       : Chainable<any>;
     injectLink(innerHTML: string, href?: string): Chainable<Subject>;
     interceptManifest(fixture: string, preview?: boolean): Chainable<Subject>;

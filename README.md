@@ -1,4 +1,4 @@
-﻿# [![Contensis](https://github.com/contensis/cli/raw/refs/heads/main/assets/contensis-logo--tiny.svg)](https://www.contensis.com) Contensis Personalization [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+﻿# [![Contensis](https://github.com/contensis/cli/raw/refs/heads/main/assets/contensis-logo--tiny.svg)](https://www.contensis.com) Contensis Experience Engine [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 [![Build workflow](https://github.com/contensis/experience-engine/actions/workflows/build.yml/badge.svg?event=push)]() [![Personalization](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/m6esjw/main&style=flat&logo=cypress)](https://cloud.cypress.io/projects/m6esjw/runs) [![Personalization](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/count/m6esjw/main&style=flat&logo=cypress)](https://cloud.cypress.io/projects/m6esjw/runs)
 
@@ -9,7 +9,7 @@ Create a personalized experience with Contensis
 
 ## How it works
 
-1. Site visitors performing any of the below actions could trigger new signals and activate new audiences within the [Personalization Context](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md)
+1. Site visitors performing any of the below actions could trigger new signals and activate new audiences within the [Experience Engine Context](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md)
 
 2. Render audience-appropriate content (or fall-back to a default variant)
 
@@ -31,8 +31,7 @@ _How we identify audiences in order to personalize content_   -->
 1. Curate signals, audiences and their conditions in Contensis. Publish changes to create the [`Manifest`](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md).
 2. [Update your content model](https://github.com/contensis/experience-engine/blob/main/docs/PERSONALIZE_CONTENT.md) to accept multiple variants of specific content fields for different audiences
 3. Ensure your project is set up to use one of the `@contensis/experience-engine*` packages configured for your Contensis environment
-4. Website components can expect a list of active audiences provided by the [Personalization Context](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md) and a list of [content variations curated in Contensis](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZE_CONTENT.md)
-
+4. Website components can expect a list of active audiences provided by the [Experience Engine Context](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md) and a list of [content variations curated in Contensis](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/PERSONALIZE_CONTENT.md)
    - [React package](https://github.com/contensis/experience-engine/blob/main/packages/react/README.md) exports a `useExperienceEngineContext()` hook and additional personalization components
 
 Check out some [Frequently Asked Questions](https://github.com/contensis/experience-engine/blob/main/docs/FAQS.md)
@@ -44,7 +43,7 @@ This is a monorepo containing the source code for all of the JavaScript packages
 **If you want to use personalization in your project, you should continue reading in one of the following packages' README**
 
 - `/packages`
-  - [`/personalization`](https://github.com/contensis/experience-engine/blob/main/packages/personalization/README.md)
+  - [`/experience-engine`](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/README.md)
     <br> The standalone personalization package
   - [`/react`](https://github.com/contensis/experience-engine/blob/main/packages/react/README.md)
     <br> The React personalization package
@@ -66,7 +65,7 @@ Dependencies will be installed for all the packages in the workspace.
 
 ```bash
 git clone https://github.com/contensis/experience-engine.git
-cd personalization
+ cd experience-engine
 npm install
 ```
 
@@ -85,7 +84,7 @@ npm run build
 2. build the package with `npm run build`
 
 ```bash
-cd packages/personalization
+cd packages/experience-engine
 npm run build
 ```
 
@@ -94,7 +93,6 @@ npm run build
 1. `cd` into the app folder, e.g. `cd apps/react-router`
 
 2. run the appropriate script from the `scripts` object in the app's `package.json`
-
    - this is often `npm start`
    - the React projects can be run locally with `npm run dev`
 

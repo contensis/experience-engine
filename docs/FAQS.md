@@ -2,20 +2,20 @@
 
 - I want to **keep track of how many pages** the visitor has viewed/navigated
 
-  - The [Experience Engine Context](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md) automatically tracks the number of pages the visitor has viewed in the current session, and a total page view count from the current and all previous sessions.
+  - The [Experience Engine Context](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md) automatically tracks the number of pages the visitor has viewed in the current session, and a total page view count from the current and all previous sessions.
   - You need to do nothing to maintain these counters
 
 - I want to **use data I have retrieved from an external API** to trigger a signal and activate an audience
 
   - Use Custom Attributes, set these up in Contensis to form part of the conditions to trigger the signal
   - The signal and audience "definitions" will be served to site visitors via the [Manifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)
-  - Make a call to [`setAttributes`](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#setattributes) in your API response handler to supply the data for any custom attributes and trigger signal/audience calculations
+  - Make a call to [`setAttributes`](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#setattributes) in your API response handler to supply the data for any custom attributes and trigger signal/audience calculations
 
 - I want to activate a signal/audience **when the user performs a specific action on my site**. For example, if they perform a search, make a purchase or click a specific call to action.
 
   - Use Custom Attributes, set these up in Contensis to form part of the conditions to trigger the signal
   - The signal and audience "definitions" will be served to site visitors via the [Manifest](https://github.com/contensis/experience-engine/blob/main/docs/MANIFEST.md)
-  - Make a call to [`setAttributes`](https://github.com/contensis/experience-engine/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#setattributes) in your action handler to supply the data for any custom attributes and trigger signal/audience calculations
+  - Make a call to [`setAttributes`](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#setattributes) in your action handler to supply the data for any custom attributes and trigger signal/audience calculations
 
 - I want to personalize parts of my site **based on the visitor's location**
   - Configure a signal condition in Contensis to look for the built-in attribute `location.country`
