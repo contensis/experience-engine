@@ -11,11 +11,11 @@
     { "type": "revert", "section": "Reverts", "hidden": false }
   ],
   "packages": {
-    "packages/personalization": {
-      "component": "@contensis/personalization"
+    "packages/experience-engine": {
+      "component": "@contensis/experience-engine"
     },
     "packages/react": {
-      "component": "@contensis/personalization-react"
+      "component": "@contensis/experience-engine-react"
     }
   },
   "plugins": ["node-workspace"],

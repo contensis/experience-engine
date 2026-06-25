@@ -1,8 +1,8 @@
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 
 const Audiences = () => {
   const { audiences, isAudience, matched, manifest, pageViews, signals } =
-    usePersonalizationContext();
+    useExperienceEngineContext();
 
   const className =
     "flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700";

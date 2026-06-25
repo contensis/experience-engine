@@ -1,4 +1,4 @@
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 
@@ -12,7 +12,7 @@ import { useState } from "react";
 import { getRelativeTime } from "../util";
 
 const DebugPanel = () => {
-  const { context, pageViews } = usePersonalizationContext();
+  const { context, pageViews } = useExperienceEngineContext();
 
   const [tabIndex, setTabIndex] = useState(
     Number(sessionStorage.getItem("cpdemo-tabIndex")) || 0

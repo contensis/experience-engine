@@ -1,4 +1,4 @@
-import { IManifest } from "@contensis/personalization";
+import { IManifest } from "@contensis/experience-engine";
 
 export const MOCK_MANIFEST: IManifest = {
   audiences: [

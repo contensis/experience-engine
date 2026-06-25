@@ -4,7 +4,7 @@ describe("Shrink Personalisation store", () => {
   context("Given my localStorage is near to the maximum size limit", () => {
     beforeEach(() => {
       cy.window().then((window) => {
-        window.localStorage.setItem("cp", str5198k);
+        window.localStorage.setItem("cxp", str5198k);
       });
       cy.interceptManifest("storage.shrink-manifest.json");
       cy.getLocalStorage().then((state) => {
@@ -17,7 +17,7 @@ describe("Shrink Personalisation store", () => {
     it("When I access the home page", () => {
       cy.getLocalStorage().then((state) => {
         const stateStr = JSON.stringify(state);
-        expect(state.cpid).to.exist;
+        expect(state.cxpid).to.exist;
         expect(stateStr.length).to.be.greaterThan(0).and.lessThan(1048576);
       });
     });

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Custom attributes page</title>
-    <script defer src="personalization.js"></script>
+    <script defer src="experience-engine.js"></script>
     <script defer>
       /** Set custom attributes `searchQuery`, `lastSearchQuery` and `totalSearches` */
       const handleSearchSubmit = (context) => {
@@ -26,7 +26,7 @@
       };
 
       window.onload = function () {
-        const { context } = CONTENSIS_PERSONALIZATION;
+        const { context } = CONTENSIS_XP;
 
         /** Add search submit handlers to elements **/
         document

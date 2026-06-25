@@ -39,8 +39,8 @@
 import {
   IPersonalizationSessionStore,
   IPersonalizationStore,
-  PersonalizationContext,
-} from "@contensis/personalization";
+  ExperienceEngineContext,
+} from "@contensis/experience-engine";
 import "cypress-wait-until";
 
 /**
@@ -82,7 +82,7 @@ Cypress.Commands.add("waitManifest", (alias: string, versionNo: string) =>
 Cypress.Commands.add("waitSignals", () =>
   cy
     .waitUntil(() =>
-      cy.getContext().then((c: PersonalizationContext) => {
+      cy.getContext().then((c: ExperienceEngineContext) => {
         return (
           // ensure we have computed signals
           (c.signals?.computed?.length > 0 &&
@@ -119,7 +119,7 @@ Cypress.Commands.add(
 );
 
 type ContextWindow = typeof window & {
-  CONTENSIS_PERSONALIZATION: { context?: PersonalizationContext };
+  CONTENSIS_XP: { context?: ExperienceEngineContext };
 };
 
 /**
@@ -132,12 +132,12 @@ Cypress.Commands.add("getContext", () => {
     cy
       .window()
       .then((window: ContextWindow) =>
-        window.CONTENSIS_PERSONALIZATION &&
-        window.CONTENSIS_PERSONALIZATION.context
+        window.CONTENSIS_XP &&
+        window.CONTENSIS_XP.context
           ? window
           : false
       )
-      .then(({ CONTENSIS_PERSONALIZATION: { context } = {} }: ContextWindow) =>
+      .then(({ CONTENSIS_XP: { context } = {} }: ContextWindow) =>
         context ? context : false
       )
   );
@@ -146,11 +146,11 @@ Cypress.Commands.add("getContext", () => {
  * Custom getLocalStorage command to get the personalisation store
  * from localStorage, and parse it to a JSON object
  */
-Cypress.Commands.add("getLocalStorage", (key = "cp") => {
+Cypress.Commands.add("getLocalStorage", (key = "cxp") => {
   cy.window().then((window) => {
     const ls = window.localStorage.getItem(key);
-    if (key !== "cp") return ls;
-    const state = JSON.parse(ls || "") as IPersonalizationStore;
+    if (key !== "cxp") return ls;
+    const state = JSON.parse(ls || "") as IExperienceEngineStore;
     return state;
   });
 });
@@ -158,11 +158,11 @@ Cypress.Commands.add("getLocalStorage", (key = "cp") => {
  * Custom getSessionStorage command to get the personalisation store
  * from sessionStorage, and parse it to a JSON object
  */
-Cypress.Commands.add("getSessionStorage", (key = "cp") => {
+Cypress.Commands.add("getSessionStorage", (key = "cxp") => {
   cy.window().then((window) => {
     const ls = window.sessionStorage.getItem(key);
-    if (key !== "cp") return ls;
-    const state = JSON.parse(ls || "") as IPersonalizationSessionStore;
+    if (key !== "cxp") return ls;
+    const state = JSON.parse(ls || "") as IExperienceEngineSessionStore;
     return state;
   });
 });

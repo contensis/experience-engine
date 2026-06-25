@@ -1,18 +1,18 @@
 import {
   Condition,
   Conditions,
-  IPersonalizationStore,
-  PersonalizationContext,
+  IExperienceEngineStore,
+  ExperienceEngineContext,
   Store,
   Where,
   WhereCriteria,
-} from "@contensis/personalization";
+} from "@contensis/experience-engine";
 
 const store = new Store({ persist: true });
 
 export const recalculateSignals = (
-  context: PersonalizationContext,
-  state: IPersonalizationStore
+  context: ExperienceEngineContext,
+  state: IExperienceEngineStore
 ) => {
   store.set(state);
 

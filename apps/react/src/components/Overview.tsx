@@ -1,4 +1,4 @@
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 import { useState } from "react";
 import ReactSlider from "react-slider";
 import ReactSwitch from "react-switch";
@@ -6,7 +6,7 @@ import { abTestContent } from "../mock/mock-content";
 
 const Overview = () => {
   const { audiences, context, matched, percentile, signals } =
-    usePersonalizationContext();
+    useExperienceEngineContext();
 
   const [debug, setDebug] = useState(!!context?.debug);
 
@@ -130,7 +130,7 @@ const Overview = () => {
           type="button"
           onClick={() => {
             context?.reset({ session: true });
-            // sessionStorage.removeItem("cp");
+            // sessionStorage.removeItem("cxp");
             // location.reload();
           }}
         >

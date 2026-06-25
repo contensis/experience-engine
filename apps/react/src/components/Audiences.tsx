@@ -3,12 +3,12 @@ import ReactSwitch from "react-switch";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
 import { googlecode as theme } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 import {
   Condition,
   IAudience,
-  PersonalizationContext,
-} from "@contensis/personalization";
+  ExperienceEngineContext,
+} from "@contensis/experience-engine";
 import {
   getCoreRowModel,
   getExpandedRowModel,
@@ -32,7 +32,7 @@ const ConditionsTable = ({
   row,
   data,
 }: {
-  context?: PersonalizationContext;
+  context?: ExperienceEngineContext;
   data: ConditionData[];
   row: Row<IAudience>;
 }) => {
@@ -116,7 +116,7 @@ const ConditionsTable = ({
 
 const Audiences = ({ ids }: { ids?: string[] }) => {
   const { audiences, context, isAudience, manifest, state } =
-    usePersonalizationContext();
+    useExperienceEngineContext();
   const manifestAudiences = manifest?.audiences ?? [];
   const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
 

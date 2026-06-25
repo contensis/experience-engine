@@ -1,6 +1,6 @@
-import { IContensisPersonalizationGlobals } from "@contensis/personalization";
+import { IContensisExperienceEngineGlobals } from "@contensis/experience-engine";
 
 declare global {
   // eslint-disable-next-line no-var
-  var CONTENSIS_PERSONALIZATION: IContensisPersonalizationGlobals;
+  var CONTENSIS_XP: IContensisExperienceEngineGlobals;
 }

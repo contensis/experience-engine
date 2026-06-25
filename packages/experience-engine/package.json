@@ -1,0 +1,50 @@
+{
+  "name": "@contensis/experience-engine",
+  "version": "1.0.0-beta.1",
+  "description": "Create personalized experiences with Contensis",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/contensis/experience-engine.git"
+  },
+  "homepage": "https://github.com/contensis/experience-engine/tree/main/packages/experience-engine#readme",
+  "main": "dist/experience-engine.js",
+  "module": "dist/experience-engine.mjs",
+  "types": "dist/experience-engine.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/experience-engine.d.ts",
+      "require": "./dist/experience-engine.js",
+      "import": "./dist/experience-engine.mjs"
+    },
+    "./browser": {
+      "types": "./dist/experience-engine.d.ts",
+      "require": "./dist/experience-engine.browser.js",
+      "import": "./dist/experience-engine.browser.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "npm run build",
+    "prebuild": "rimraf dist && npm run tsc",
+    "build": "tsup && tsup --minify",
+    "tsc": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zengenti",
+  "license": "ISC",
+  "keywords": [
+    "contensis",
+    "cms",
+    "dxp",
+    "content",
+    "audience",
+    "personalization",
+    "api",
+    "js",
+    "react",
+    "client",
+    "library"
+  ]
+}

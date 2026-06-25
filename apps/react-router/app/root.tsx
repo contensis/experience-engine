@@ -3,9 +3,9 @@ import type { LinksFunction } from "react-router";
 
 import "./app.css";
 import {
-  PersonalizationProvider,
-  usePersonalizationContext,
-} from "@contensis/personalization-react";
+  ExperienceEngineProvider,
+  useExperienceEngineContext,
+} from "@contensis/experience-engine-react";
 import { MOCK_MANIFEST } from "./mocks/manifest-1";
 import { ifCypressTest } from "./util";
 
@@ -32,7 +32,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <PersonalizationProvider
+        <ExperienceEngineProvider
           // Use a specific alias to intercept manifest calls in Cypress tests
           alias={ifCypressTest("cypress-test")}
           // We need debug flag set to true when running Cypress tests
@@ -41,7 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           manifest={ifCypressTest(undefined, MOCK_MANIFEST)}
         >
           {children}
-        </PersonalizationProvider>
+        </ExperienceEngineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -50,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { isAudience } = usePersonalizationContext();
+   const { isAudience } = useExperienceEngineContext();
   return (
     <>
       {isAudience(["loggedInUser"]) && (

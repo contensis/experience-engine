@@ -1,4 +1,4 @@
-import { ISignal, PersonalizationContext } from "@contensis/personalization";
+import { ISignal, ExperienceEngineContext } from "@contensis/experience-engine";
 
 const audienceMatchedBy = ["signals", "audiences"];
 for (const dimension of audienceMatchedBy) {
@@ -47,7 +47,7 @@ for (const dimension of audienceMatchedBy) {
             beforeEach(() => {
               cy.getContext()
                 .waitSignals()
-                .then((c: PersonalizationContext) => {
+                .then((c: ExperienceEngineContext) => {
                   // Find a signal in the manifest
                   signal = c.manifest?.signals.find((s) => s.minMatches === 3);
 

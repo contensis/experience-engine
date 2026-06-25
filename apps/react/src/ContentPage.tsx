@@ -2,15 +2,15 @@ import { useState } from "react";
 import {
   Experiment,
   Personalize,
-  usePersonalizationContext,
-} from "@contensis/personalization-react";
+  useExperienceEngineContext,
+} from "@contensis/experience-engine-react";
 import LeadText from "./components/LeadText";
 
 import { abTestContent, audienceContent } from "./mock/mock-content";
 import DebugPanel from "./components/DebugPanel";
 
 const Heading = ({ title }: { title: string }) => {
-  const { matched } = usePersonalizationContext();
+  const { matched } = useExperienceEngineContext();
   return matched.map((s) => s.id).includes("isLoggedIn") ? (
     <div>
       <h2>Welcome back! 😎</h2>

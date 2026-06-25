@@ -3,3 +3,6 @@ dist/
 *.tsbuildinfo
 cypress/screenshots/
 .env
+.obsidian
+docs/brainstorms/
+docs/ideas/

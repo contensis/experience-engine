@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig((options) => {
-  const outputName = `personalization-react${options.minify ? ".min" : ""}`;
+  const outputName = `experience-engine-react${options.minify ? ".min" : ""}`;
   const oneTime = !options.minify;
   return {
     entry: {

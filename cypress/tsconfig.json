@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "lib": ["es5", "dom"],
-    "types": ["cypress", "node", "@contensis/personalization"],
+    "types": ["cypress", "node", "@contensis/experience-engine"],
     "paths": {
       "@contensis/*": ["./packages/*"]
     }
