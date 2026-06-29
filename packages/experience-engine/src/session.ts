@@ -94,7 +94,6 @@ export class Session {
       ][],
     );
 
-    const testUrl = "http://localhost:5173/?utm_campaign=test&utm_source=google&utm_medium=cpc&utm_content=ad1&utm_term=personalization&gclid=12345&dclid=67890&msclkid=abcde&fbclid=vwxyz&ttclid=11111&li_fat_id=22222&twclid=33333";
     const initial: IExperienceEngineSessionStore = {
       isFirstVisit: state.pageViews < 2,
       duration: 0,
