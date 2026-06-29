@@ -2,7 +2,12 @@
   "compilerOptions": {
     "target": "es5",
     "lib": ["es5", "dom"],
-    "types": ["cypress", "node", "@contensis/experience-engine"],
+    "types": [
+      "cypress",
+      "cypress-wait-until",
+      "node",
+      "@contensis/experience-engine"
+    ],
     "paths": {
       "@contensis/*": ["./packages/*"]
     }
