@@ -45,7 +45,7 @@
     "library"
   ],
   "dependencies": {
-    "@contensis/experience-engine": ">=1.0.0-beta.0"
+    "@contensis/experience-engine": ">=1.0.0-beta.1"
   },
   "peerDependencies": {
     "react": "*"
