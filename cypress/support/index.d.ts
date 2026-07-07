@@ -1,25 +1,25 @@
 /// <reference types="cypress" />
-/// <reference types="@contensis/personalization" />
+/// <reference types="@contensis/experience-engine" />
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    getContext(): Chainable<PersonalizationContext>;
+    getContext(): Chainable<ExperienceEngineContext>;
     getLocalStorage<T extends string = undefined>(
       key?: T
     ): typeof key extends undefined
-      ? Chainable<IPersonalizationStore>
+      ? Chainable<IExperienceEngineStore>
       : Chainable<any>;
     getSessionStorage<T extends string = undefined>(
       key?: T
     ): typeof key extends undefined
-      ? Chainable<IPersonalizationSessionStore>
+      ? Chainable<IExperienceEngineSessionStore>
       : Chainable<any>;
     injectLink(innerHTML: string, href?: string): Chainable<Subject>;
     interceptManifest(fixture: string, preview?: boolean): Chainable<Subject>;
-    pageView(url?: string): Chainable<PersonalizationContext>;
-    pageViewClick(): Chainable<PersonalizationContext>;
-    pageViewVisit(url: string): Chainable<PersonalizationContext>;
+    pageView(url?: string): Chainable<ExperienceEngineContext>;
+    pageViewClick(): Chainable<ExperienceEngineContext>;
+    pageViewVisit(url: string): Chainable<ExperienceEngineContext>;
     waitManifest(fixture: string, versionNo: string): Chainable<Subject>;
-    waitSignals(): Chainable<PersonalizationContext>;
+    waitSignals(): Chainable<ExperienceEngineContext>;
   }
 }

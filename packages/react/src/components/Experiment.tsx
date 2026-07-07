@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { usePersonalizationContext } from "../hooks/usePersonalizationContext";
+import { useExperienceEngineContext } from "../hooks/useExperienceEngineContext";
 
 const DEFAULT_SPLIT_KEY = "split";
 
@@ -40,7 +40,7 @@ export const Experiment = <
       ? props.render
       : null;
 
-  const { percentile } = usePersonalizationContext();
+  const { percentile } = useExperienceEngineContext();
 
   // Determine the key in each variant that holds the audiences
   const [split] = useState(

@@ -1,5 +1,5 @@
-import { ISignalAttributes, SignalValue } from "@contensis/personalization";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { ISignalAttributes, SignalValue } from "@contensis/experience-engine";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 import {
   CellContext,
   flexRender,
@@ -102,7 +102,7 @@ const formatSignals = (snapshot?: ISignalAttributes) =>
     });
 
 const Attributes = () => {
-  const { context, overrideAttributes } = usePersonalizationContext();
+  const { context, overrideAttributes } = useExperienceEngineContext();
 
   const rerender = Object.values(context?.signals?.attributes || {}).join("+");
 

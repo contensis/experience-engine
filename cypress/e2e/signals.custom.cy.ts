@@ -1,4 +1,4 @@
-import { ComputedSignal } from "@contensis/personalization";
+import { ComputedSignal } from "@contensis/experience-engine";
 
 describe(`Match Signals via custom attributes`, () => {
   const manifestFixture = `signals.custom-manifest.json`;

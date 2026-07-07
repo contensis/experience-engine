@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
 import {
-  PersonalizationProvider,
-  usePersonalizationContext,
-} from "@contensis/personalization-react";
+  ExperienceEngineProvider,
+  useExperienceEngineContext,
+} from "@contensis/experience-engine-react";
 
 import "./App.css";
 import ContentPage from "./ContentPage";
@@ -17,13 +17,13 @@ import { mockGeoIpResponse } from "./mock/mock-geoip";
 
 const App = () => {
   return (
-    <PersonalizationProvider
+    <ExperienceEngineProvider
       debug={true}
       manifest={MOCK_MANIFEST}
       // rootUrl="https://personalization-api-contensis-dev.services.contensis.com"
     >
       <MainLayout />
-    </PersonalizationProvider>
+    </ExperienceEngineProvider>
   );
 };
 
@@ -46,7 +46,7 @@ const useGeoIP = () => {
 export const MainLayout = () => {
   const geoLocation = useGeoIP();
   const { audiences, computed, context, isAudience, setAttributes, signals } =
-    usePersonalizationContext();
+    useExperienceEngineContext();
 
   // This is to make the component re-render when the location has changed
   // (simulating client-side navigation to trigger MutationObserver callback)

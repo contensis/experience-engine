@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Entry content page</title>
-    <script async src="personalization.js"></script>
+    <script async src="experience-engine.js"></script>
     <script
       async
       src="https://unpkg.com/contensis-delivery-api@latest/bundle/zengenti.contensis-client.js"
@@ -48,14 +48,14 @@
 
       /** match a personalized variant from a content field called `audienceId` **/
       const selectAudienceVariant = (content) =>
-        CONTENSIS_PERSONALIZATION.context.audiences?.active.some(
+        CONTENSIS_XP.context.audiences?.active.some(
           (a) => a === content.audienceId
         );
 
       /** Testing: render a list of possible audiences with a checkbox next to each **/
       const renderAudienceCheckboxes = function (content, onchange) {
         const activeAudiences =
-          CONTENSIS_PERSONALIZATION.context.audiences?.active || [];
+          CONTENSIS_XP.context.audiences?.active || [];
         const listElement = document.querySelector("#hero-audiences");
 
         for (const variant of content) {
@@ -80,7 +80,7 @@
 
       /** call the function when the dependent scripts have loaded and the DOM is ready */
       window.onload = function () {
-        const context = window.CONTENSIS_PERSONALIZATION.context;
+        const context = window.CONTENSIS_XP.context;
 
         /** create a Delivery API client */
         const client = Zengenti.Contensis.Client.create({

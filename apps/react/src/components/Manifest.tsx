@@ -1,8 +1,8 @@
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 import Editor from "@monaco-editor/react";
 
 const Manifest = () => {
-  const { manifest } = usePersonalizationContext();
+  const { manifest } = useExperienceEngineContext();
   return !manifest ? null : (
     <div>
       <Editor

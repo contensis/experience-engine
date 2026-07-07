@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "paths": {
-      "@contensis/personalization": ["../../packages/personalization"],
-      "@contensis/personalization-react": ["../../packages/react"]
+      "@contensis/experience-engine": ["../../packages/experience-engine"],
+      "@contensis/experience-engine-react": ["../../packages/react"]
     }
   },
   "files": [],

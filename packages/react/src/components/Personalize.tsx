@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { usePersonalizationContext } from "../hooks/usePersonalizationContext";
+import { useExperienceEngineContext } from "../hooks/useExperienceEngineContext";
 
 const DEFAULT_AUDIENCE_KEY = "audiences";
 
@@ -40,8 +40,8 @@ export const Personalize = <
       ? props.render
       : null;
 
-  // Get the isAudience helper function from personalization context
-  const { isAudience } = usePersonalizationContext();
+  // Get the isAudience helper function from experience engine context
+  const { isAudience } = useExperienceEngineContext();
 
   // Determine the key in each variant that holds the audiences
   const [audiences] = useState(audienceKey);

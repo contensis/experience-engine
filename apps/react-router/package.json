@@ -10,7 +10,7 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@contensis/personalization-react": "^1.0.0-alpha.0",
+    "@contensis/experience-engine-react": "^1.0.0-alpha.0",
     "@react-router/node": "^7.9.4",
     "@react-router/serve": "^7.9.4",
     "isbot": "^5.1.31",

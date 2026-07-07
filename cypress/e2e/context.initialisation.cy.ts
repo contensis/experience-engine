@@ -12,7 +12,7 @@ describe("Personalisation basics", () => {
 
     it("Then I should have a visitorId and a random percentile persisted", () => {
       cy.getLocalStorage().then((state) => {
-        expect(state.cpid).to.exist;
+        expect(state.cxpid).to.exist;
         expect(state.pc).to.be.greaterThan(0).and.lessThan(10000);
       });
     });

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Experiment page</title>
-    <script defer src="personalization.js"></script>
+    <script defer src="experience-engine.js"></script>
     <script defer>
       /** Hard-coded example entry data for the demo */
       const entry = {
@@ -33,7 +33,7 @@
         // Find the first variant in the sorted array that has a split value less
         // than the random percentile
         const experiment = variants.find(
-          (e) => CONTENSIS_PERSONALIZATION.context.percentile >= Number(e.split)
+          (e) => CONTENSIS_XP.context.percentile >= Number(e.split)
         );
 
         // Return an experiment for the visitor bucket, or find a default variant
@@ -41,7 +41,7 @@
       };
 
       window.onload = function () {
-        const { context } = CONTENSIS_PERSONALIZATION;
+        const { context } = CONTENSIS_XP;
         /** Render to elements **/
         document.getElementById("percentile").value = context.percentile;
         document.getElementById("percentile-label").innerHTML =
@@ -56,7 +56,7 @@
         document
           .getElementById("percentile")
           .addEventListener("input", (event) => {
-            const { context } = CONTENSIS_PERSONALIZATION;
+            const { context } = CONTENSIS_XP;
             context.percentile = Number(event.target.value);
 
             document.getElementById("percentile-label").innerHTML =

@@ -1,37 +1,37 @@
-# [![Contensis](https://github.com/contensis/cli/raw/refs/heads/main/assets/contensis-logo--tiny.svg)](https://www.contensis.com) @contensis/personalization-react [![NPM version](https://img.shields.io/npm/v/@contensis/personalization-react.svg?style=flat)](https://www.npmjs.com/package/@contensis/personalization-react)
+# [![Contensis](https://github.com/contensis/cli/raw/refs/heads/main/assets/contensis-logo--tiny.svg)](https://www.contensis.com) @contensis/experience-engine-react [![NPM version](https://img.shields.io/npm/v/@contensis/experience-engine-react.svg?style=flat)](https://www.npmjs.com/package/@contensis/experience-engine-react)
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-Provides a context wrapper, hooks and components to easily leverage personalization with Contensis in your React projects
+Provides a context wrapper, hooks and components to easily leverage experience engine with Contensis in your React projects
 
 ### Prerequisites
 
-Before we can see Personalization in action it is recommended we first [ensure content is Personalized for different audiences](https://github.com/contensis/personalization/blob/main/docs/PERSONALIZE_CONTENT.md)
+Before we can see the Experience Engine in action it is recommended we first [ensure content is personalized for different audiences](https://github.com/contensis/experience-engine/blob/main/docs/PERSONALIZE_CONTENT.md)
 
-Familiarise yourself with the terminology by looking at [how we determine audiences](https://github.com/contensis/personalization/blob/main/README.md#how-it-works) in order to personalize content
+Familiarise yourself with the terminology by looking at [how we determine audiences](https://github.com/contensis/experience-engine/blob/main/README.md#how-it-works) in order to personalize content
 
 ## Installation
 
 ```bash
-npm install --save @contensis/personalization-react
+npm install --save @contensis/experience-engine-react
 ```
 
 ```bash
-yarn add --save @contensis/personalization-react
+yarn add --save @contensis/experience-engine-react
 ```
 
 ## Configuration
 
-### [\<PersonalizationProvider \/\> component](https://github.com/contensis/personalization/blob/main/packages/react/docs/PERSONALIZATION_PROVIDER.md)
+### [\<ExperienceEngineProvider \/\> component](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/EXPERIENCE_ENGINE_PROVIDER.md)
 
-Wrap your "`App`" root component with a `PersonalizationProvider`
+Wrap your "`App`" root component with a `ExperienceEngineProvider`
 
 ```jsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { PersonalizationProvider } from "@contensis/personalization-react";
+import { ExperienceEngineProvider } from "@contensis/experience-engine-react";
 
 import { MainLayout } from "./App";
 
@@ -39,9 +39,9 @@ import { MainLayout } from "./App";
 const App = () => {
   return (
     <div className="content">
-      <PersonalizationProvider alias="example" projectId="website">
+      <ExperienceEngineProvider alias="example" projectId="website">
         <MainLayout />
-      </PersonalizationProvider>
+      </ExperienceEngineProvider>
     </div>
   );
 };
@@ -57,7 +57,7 @@ createRoot(document.getElementById("root") as HTMLElement).render(
 
 ## Personalize content variations
 
-### [\<Personalize \/\> component](https://github.com/contensis/personalization/blob/main/packages/react/docs/PERSONALIZE.md)
+### [\<Personalize \/\> component](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/PERSONALIZE.md)
 
 A typical React component that renders a content Entry might look like this
 
@@ -105,7 +105,7 @@ After updating the `ExampleHomePage` component to include the additional `person
 
 ```tsx
 import React from "react";
-import { Personalize } from "@contensis/personalization-react";
+import { Personalize } from "@contensis/experience-engine-react";
 
 import HeroBanner from "~/components/hero/HeroBanner";
 import Link from "~/components/link/link.component";
@@ -148,16 +148,16 @@ The chosen variant will be provided to the `render` component (or JSX children) 
 
 ## Personalize anything
 
-[`usePersonalizationContext` hook](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md) can be called in any component and will return properties and functions we can use when personalizing parts of your application
+[`useExperienceEngineContext` hook](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/USE_EXPERIENCE_ENGINE_CONTEXT.md) can be called in any component and will return properties and functions we can use when personalizing parts of your application
 
-### [IsAudience](https://github.com/contensis/personalization/blob/main/packages/react/docs/USE_PERSONALIZATION_CONTEXT.md#isaudience)
+### [IsAudience](https://github.com/contensis/experience-engine/blob/main/packages/react/docs/USE_EXPERIENCE_ENGINE_CONTEXT.md#isaudience)
 
 ```tsx
 import React from "react";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 
 const VisitorSpecificBanner = () => {
-  const { isAudience } = usePersonalizationContext();
+  const { isAudience } = useExperienceEngineContext();
 
   // isAudience returns true if any of the supplied
   // audience Ids have been made active
@@ -175,10 +175,10 @@ export default VisitorSpecificBanner;
 
 ```tsx
 import React from "react";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 
 const VisitorSpecificBanner = () => {
-  const { audiences } = usePersonalizationContext();
+  const { audiences } = useExperienceEngineContext();
 
   // Look for a specific audience the visitor has activated
   const isReturningVisitor = audiences.includes("returningVisitor");
@@ -197,10 +197,10 @@ export default VisitorSpecificBanner;
 
 ```tsx
 import React from "react";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 
 const VisitorSpecificBanner = () => {
-  const { signals } = usePersonalizationContext();
+  const { signals } = useExperienceEngineContext();
 
   // Look for a specific signal the visitor has activated
   const isReturningVisitor = signals.includes("returningVisitor");
@@ -221,12 +221,12 @@ Custom attributes are configured in Contensis and can become part of the conditi
 
 They allow developers to supply values produced within the app or provided by visitor actions for consideration when calculating signal and audience conditions
 
-### [setAttributes](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#setattributes)
+### [setAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#setattributes)
 
 Supply one or more custom attributes and then perform signal and audience calculations
 
 ```tsx
-const { setAttributes } = usePersonalizationContext();
+const { setAttributes } = useExperienceEngineContext();
 
 /** Manage search input state */
 const [searchInput, setSearchInput] = useState("");
@@ -268,9 +268,9 @@ If our Manifest contains a signal that requires the above `custom.searchQuery` t
 
 The attribute values are not stored and cannot be considered as a "previous" searchQuery in subsequent navigations or actions
 
-### [overrideAttributes](https://github.com/contensis/personalization/blob/main/packages/personalization/docs/PERSONALIZATION_CONTEXT.md#overrideattributes)
+### [overrideAttributes](https://github.com/contensis/experience-engine/blob/main/packages/experience-engine/docs/EXPERIENCE_ENGINE_CONTEXT.md#overrideattributes)
 
-Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the personalization attributes are reset.
+Permanently set a value for the given attribute(s). The overridden value will be used in all subsequent signal and audience calculations, or until the experience engine attributes are reset.
 
 `overrideAttributes` can permanently set/override any of the signal attributes including built-in attributes. It may be useful to override a specific attribute with a specific value when debugging certain scenarios.
 
@@ -279,7 +279,7 @@ Following on from the previous example, if we wanted to hold and maintain the la
 `overrideAttributes` requires the fully qualified attribute key, exactly as would appear in the Manifest. For example `custom.searchQuery` or `page.domain`
 
 ```tsx
-const { getAttributes, overrideAttributes, setAttributes } = usePersonalizationContext();
+const { getAttributes, overrideAttributes, setAttributes } = useExperienceEngineContext();
 
 /** Set custom attributes `searchQuery`, `lastSearchQuery` and `totalSearches` */
 const handleSearchSubmit = (value = searchInput) => {
@@ -306,13 +306,13 @@ Except we are not rendering personalized content based on active audiences, inst
 
 ### Prerequisites
 
-- [Curating content for experiments](https://github.com/contensis/personalization/blob/main/docs/EXPERIMENT_CONTENT.md)
+- [Curating content for experiments](https://github.com/contensis/experience-engine/blob/main/docs/EXPERIMENT_CONTENT.md)
 
 ### Example
 
 ```tsx
 import React from "react";
-import { Experiment } from "@contensis/personalization-react";
+import { Experiment } from "@contensis/experience-engine-react";
 
 import LeadText from "~/components/lead/LeadText";
 
@@ -338,55 +338,55 @@ const ExampleComponent = (entry: ExampleHomePageEntry) => {
 
 ## FAQs
 
-Check out some [Frequently Asked Questions](https://github.com/contensis/personalization/blob/main/docs/FAQS.md)
+Check out some [Frequently Asked Questions](https://github.com/contensis/experience-engine/blob/main/docs/FAQS.md)
 
 ## Debugging
 
 ### Debug flag
 
-Output trace information in console logs showing actions performed by the Personalization Context
+Output trace information in console logs showing actions performed by the Experience Engine Context
 
-Set the `debug` property in the `PersonalizationContext` to `true` to output trace logs. Use `"v"` for verbose logging.
+Set the `debug` property in the `ExperienceEngineContext` to `true` to output trace logs. Use `"v"` for verbose logging.
 
 ### Use the Latest Manifest (unpublished / preview)
 
 To test changes made to audiences and signals in Contensis prior to them being published, we can request the latest manifest version (instead of the default published version)
 
-1. Set the `preview` property in the `PersonalizationContext` to `true`
-2. If the `preview` property is updated after the `PersonalizationContext` has instantiated, also `reset` the manifest in the Personalization Context
+1. Set the `preview` property in the `ExperienceEngineContext` to `true`
+2. If the `preview` property is updated after the `ExperienceEngineContext` has instantiated, also `reset` the manifest in the Experience Engine Context
 
 ### Browser Window object reference
 
-The personalization context can be examined or watched in the Console of the browser developer tools at any time from the browser's global scope
+The experience engine context can be examined or watched in the Console of the browser developer tools at any time from the browser's global scope
 
-Type `window.CONTENSIS_PERSONALIZATION.context` into the browser developer tools Console window
+Type `window.CONTENSIS_XP.context` into the browser developer tools Console window
 
-### Reset personalization
+### Reset experience engine
 
-Manually reset personalization by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
+Manually reset experience engine by deleting `localStorage` and `sessionStorage` in the browser developer tools for the current host.
 
-Alternatively, we can manually reset personalization by running the `reset()` function in the browser console using [the window object reference](#browser-window-object-reference):
+Alternatively, we can manually reset experience engine by running the `reset()` function in the browser console using [the window object reference](#browser-window-object-reference):
 
 ```javascript
-window.CONTENSIS_PERSONALIZATION.context.reset();
+window.CONTENSIS_XP.context.reset();
 ```
 
-Or we can reset some or all personalization elements programatically in our components
+Or we can reset some or all experience engine elements programatically in our components
 
 ```tsx
 import React from "react";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 
 const ExampleComponent = () => {
   // First get a handle on the `context` object
-  const { context } = usePersonalizationContext();
+  const { context } = useExperienceEngineContext();
 
   // examples are below
   return <div>...</div>;
 };
 ```
 
-#### Reset all personalizations
+#### Reset all experience engine state
 
 ```tsx
 return (
@@ -397,7 +397,7 @@ return (
         context.reset();
       }}
     >
-      Reset personalizations
+      Reset experience engine
     </button>
   </div>
 );
@@ -422,7 +422,7 @@ return (
           // Update the preview flag in the context
           context.preview = event.target.checked;
 
-          // Reset the personalization manifest
+          // Reset the experience engine manifest
           context.reset({ manifest: true });
 
           // Handle component state

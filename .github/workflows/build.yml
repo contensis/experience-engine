@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - feat/rebrand-experience-engine
 
   workflow_dispatch: # manual trigger was previously in publish.yml but is moved here to support npm trusted publishing
     inputs:
@@ -15,7 +16,7 @@ on:
         required: true
         type: choice
         options:
-          - '["packages/personalization"]'
+          - '["packages/experience-engine"]'
           - '["packages/react"]'
       npm_tag:
         description: Publish the package with npm tag
@@ -55,7 +56,7 @@ jobs:
       - name: Upload packaged artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: contensis-personalization-packages
+          name: contensis-experience-engine-packages
           path: ./packages/*.tgz
 
   cypress-e2e:

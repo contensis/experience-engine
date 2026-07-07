@@ -1,13 +1,13 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
 import Audiences from "~/audiences";
 
 export function Welcome() {
   const { context, getAttributes, overrideAttributes, setAttributes } =
-    usePersonalizationContext();
+    useExperienceEngineContext();
 
   const [isPreviewChecked, setIsPreviewChecked] = useState(false);
 

@@ -37,10 +37,10 @@
 // }
 
 import {
-  IPersonalizationSessionStore,
-  IPersonalizationStore,
-  PersonalizationContext,
-} from "@contensis/personalization";
+  IExperienceEngineSessionStore,
+  IExperienceEngineStore,
+  ExperienceEngineContext,
+} from "@contensis/experience-engine";
 import "cypress-wait-until";
 
 /**
@@ -60,9 +60,9 @@ Cypress.Commands.add("interceptManifest", (fixture: string, preview = false) =>
           "x-geoip-country-code": "GB",
           "x-geoip-ip": "192.168.0.100",
         },
-      }
+      },
     )
-    .as(`${preview ? "preview." : ""}${fixture}`)
+    .as(`${preview ? "preview." : ""}${fixture}`),
 );
 
 /**
@@ -73,8 +73,8 @@ Cypress.Commands.add("waitManifest", (alias: string, versionNo: string) =>
     .wait(`@${alias}`) // wait for manifest stub to be called
     .then(({ response }) => {
       // validate that we have loaded the intended manifest stub version
-      expect(response.body?.version).to.have.property("versionNo", versionNo);
-    })
+      expect(response?.body?.version).to.have.property("versionNo", versionNo);
+    }),
 );
 /**
  * Custom waitSignals command waits for the signals to be computed and persisted
@@ -82,20 +82,21 @@ Cypress.Commands.add("waitManifest", (alias: string, versionNo: string) =>
 Cypress.Commands.add("waitSignals", () =>
   cy
     .waitUntil(() =>
-      cy.getContext().then((c: PersonalizationContext) => {
+      cy.getContext().then((c: ExperienceEngineContext) => {
+        if (!c.signals) return false;
         return (
           // ensure we have computed signals
           (c.signals?.computed?.length > 0 &&
             // ensure the computed signals matches the number of signals in the manifest
-            c.signals.computed.length === c.manifest.signals.length &&
+            c.signals.computed.length === c.manifest?.signals.length &&
             // ensure the computed signals have been persisted to local storage
             Object.keys(c.state.signals?.computed || {}).length ===
               c.signals.computed.length) ||
           +new Date() - c.signals?.t > 1000
         );
-      })
+      }),
     )
-    .getContext()
+    .getContext(),
 );
 
 /**
@@ -110,16 +111,18 @@ Cypress.Commands.add(
   },
   <T>(subject: T, innerHTML: string, href = Cypress.config("baseUrl")) =>
     cy.document().then((doc) => {
+      if (!href) return subject;
+
       const a = doc.createElement("a");
       a.setAttribute("href", href);
       a.innerHTML = innerHTML;
       doc.body.prepend(a);
       return subject;
-    })
+    }),
 );
 
 type ContextWindow = typeof window & {
-  CONTENSIS_PERSONALIZATION: { context?: PersonalizationContext };
+  CONTENSIS_XP: { context?: ExperienceEngineContext };
 };
 
 /**
@@ -127,30 +130,27 @@ type ContextWindow = typeof window & {
  * context to be added to the window global and then return the context
  * so we can use it later
  */
-Cypress.Commands.add("getContext", () => {
-  return cy.waitUntil(() =>
-    cy
-      .window()
-      .then((window: ContextWindow) =>
-        window.CONTENSIS_PERSONALIZATION &&
-        window.CONTENSIS_PERSONALIZATION.context
-          ? window
-          : false
-      )
-      .then(({ CONTENSIS_PERSONALIZATION: { context } = {} }: ContextWindow) =>
-        context ? context : false
-      )
-  );
-});
+Cypress.Commands.add("getContext", () =>
+  cy
+    .waitUntil<ExperienceEngineContext | false>(() =>
+      cy.window().then((window) => {
+        const ctx = (window as ContextWindow).CONTENSIS_XP?.context;
+        return cy.wrap<ExperienceEngineContext | false>(ctx ?? false, {
+          log: false,
+        });
+      }),
+    )
+    .then((result) => result as ExperienceEngineContext),
+);
 /**
  * Custom getLocalStorage command to get the personalisation store
  * from localStorage, and parse it to a JSON object
  */
-Cypress.Commands.add("getLocalStorage", (key = "cp") => {
+Cypress.Commands.add("getLocalStorage", (key = "cxp") => {
   cy.window().then((window) => {
     const ls = window.localStorage.getItem(key);
-    if (key !== "cp") return ls;
-    const state = JSON.parse(ls || "") as IPersonalizationStore;
+    if (key !== "cxp") return ls;
+    const state = JSON.parse(ls || "") as IExperienceEngineStore;
     return state;
   });
 });
@@ -158,11 +158,11 @@ Cypress.Commands.add("getLocalStorage", (key = "cp") => {
  * Custom getSessionStorage command to get the personalisation store
  * from sessionStorage, and parse it to a JSON object
  */
-Cypress.Commands.add("getSessionStorage", (key = "cp") => {
+Cypress.Commands.add("getSessionStorage", (key = "cxp") => {
   cy.window().then((window) => {
     const ls = window.sessionStorage.getItem(key);
-    if (key !== "cp") return ls;
-    const state = JSON.parse(ls || "") as IPersonalizationSessionStore;
+    if (key !== "cxp") return ls;
+    const state = JSON.parse(ls || "") as IExperienceEngineSessionStore;
     return state;
   });
 });
@@ -199,8 +199,8 @@ Cypress.Commands.add("pageView", () =>
         // .log(`[pageView] Current: ${context.currentPage}`)
         // .log(`[pageView] Previous: ${context.previousPage}`)
         .then(() => context);
-    })
-  )
+    }),
+  ),
 );
 /**
  * Custom pageViewClick command combines a click and a pageView
@@ -221,14 +221,14 @@ Cypress.Commands.add(
         .location("href")
         .should("not.equal", prevUrl)
         .pageView();
-    })
+    }),
 );
 
 /**
  * Custom pageViewClick command combines a visit and a pageView
  */
 Cypress.Commands.add("pageViewVisit", (url: string) =>
-  cy.visit(url).pageView()
+  cy.visit(url).pageView(),
 );
 
 // Overwiting the commands doesn't work as we need to wait for the result in

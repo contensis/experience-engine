@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <title>Static HTML Home Page</title>
     <script type="module">
-      /** Initialise the CONTENSIS_PERSONALIZATION object in global context so we can specify options */
-      if (!window.CONTENSIS_PERSONALIZATION)
-        window.CONTENSIS_PERSONALIZATION = {};
+      /** Initialise the CONTENSIS_XP object in global context so we can specify options */
+      if (!window.CONTENSIS_XP)
+        window.CONTENSIS_XP = {};
 
-      if (!window.CONTENSIS_PERSONALIZATION.context)
+      if (!window.CONTENSIS_XP.context)
         // Fetch a hard-coded manifest from test fixtures
         fetch("/../../cypress/fixtures/signals.page.path-manifest.json")
           .then((response) => response.json())
@@ -18,14 +18,14 @@
             );
 
             // Output console logs and extra info
-            window.CONTENSIS_PERSONALIZATION.debug = true;
+            window.CONTENSIS_XP.debug = true;
 
             // Use the manifest we have just fetched
-            window.CONTENSIS_PERSONALIZATION.manifest = json;
+            window.CONTENSIS_XP.manifest = json;
 
             // Boilerplate to get active audiences
             const getAudiences = (context) =>
-              (window.CONTENSIS_PERSONALIZATION?.context || context)?.state
+              (window.CONTENSIS_XP?.context || context)?.state
                 .audiences?.active || [];
 
             let personalised = []; // Keep track of audiences we've made personalisations for
@@ -60,10 +60,10 @@
             /** Trigger personalisatons after specific events by setting handlers */
 
             // Render personalisations based on any previously active audiences
-            window.CONTENSIS_PERSONALIZATION.onInit = personalise;
+            window.CONTENSIS_XP.onInit = personalise;
 
             // Update personalised content if we matched a new audience by visiting this page
-            window.CONTENSIS_PERSONALIZATION.onPageView = () => {
+            window.CONTENSIS_XP.onPageView = () => {
               const audiences = getAudiences();
               if (audiences.length !== personalised.length) {
                 cleanup();
@@ -73,8 +73,8 @@
 
             // Import our helper script to embed a script tag
             // that creates a personalisation context
-            import("/../../apps/html/personalization.js").then(() => {
-              console.log(`HTML app imported personalization.js script`);
+            import("/../../apps/html/experience-engine.js").then(() => {
+               console.log(`HTML app imported experience-engine.js script`);
             });
           });
     </script>

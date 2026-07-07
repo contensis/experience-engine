@@ -1,4 +1,4 @@
-import { ISignal, PersonalizationContext } from "@contensis/personalization";
+import { ISignal, ExperienceEngineContext } from "@contensis/experience-engine";
 
 // Loop through this array running the test suite for each attribute
 // A specific manifest fixture will provide the specific stub manifest for each iteration
@@ -89,7 +89,7 @@ describe("Match Signals via attributes", () => {
             beforeEach(() => {
               cy.getContext()
                 .waitSignals()
-                .then((c: PersonalizationContext) => {
+                .then((c: ExperienceEngineContext) => {
                   // Find a signal in the manifest
                   signal = c.manifest?.signals.find((s) => s.minMatches === 3);
 
@@ -130,7 +130,7 @@ describe("Match Signals via attributes", () => {
             beforeEach(() => {
               cy.getContext()
                 .waitSignals()
-                .then((c: PersonalizationContext) => {
+                .then((c: ExperienceEngineContext) => {
                   signal = c.manifest.signals.find((s) => s.minMatches === 3);
                   expect(signal?.id).to.exist;
                   if (!c.state.signals?.computed?.[signal.id])

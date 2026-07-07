@@ -1,20 +1,20 @@
 {
-  "name": "@contensis/personalization-react",
+  "name": "@contensis/experience-engine-react",
   "version": "1.0.0-beta.0",
   "description": "Create personalized experiences with React and Contensis",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/contensis/personalization.git"
+    "url": "git+https://github.com/contensis/experience-engine.git"
   },
-  "homepage": "https://github.com/contensis/personalization/tree/main/packages/react#readme",
-  "main": "dist/personalization-react.js",
-  "module": "dist/personalization-react.mjs",
-  "types": "dist/personalization-react.d.ts",
+  "homepage": "https://github.com/contensis/experience-engine/tree/main/packages/react#readme",
+  "main": "dist/experience-engine-react.js",
+  "module": "dist/experience-engine-react.mjs",
+  "types": "dist/experience-engine-react.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/personalization-react.d.ts",
-      "require": "./dist/personalization-react.js",
-      "import": "./dist/personalization-react.mjs"
+      "types": "./dist/experience-engine-react.d.ts",
+      "require": "./dist/experience-engine-react.js",
+      "import": "./dist/experience-engine-react.mjs"
     }
   },
   "files": [
@@ -36,6 +36,8 @@
     "content",
     "audience",
     "personalization",
+    "experience",
+    "engine",
     "api",
     "js",
     "react",
@@ -43,7 +45,7 @@
     "library"
   ],
   "dependencies": {
-    "@contensis/personalization": ">=1.0.0-beta.0"
+    "@contensis/experience-engine": ">=1.0.0-beta.1"
   },
   "peerDependencies": {
     "react": "*"

@@ -2,15 +2,15 @@ import ReactSwitch from "react-switch";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
 import { googlecode as theme } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { usePersonalizationContext } from "@contensis/personalization-react";
+import { useExperienceEngineContext } from "@contensis/experience-engine-react";
 import {
   ComputedSignal,
   EvaluateSignal,
   ISignalAttributes,
-  PersonalizationContext,
+  ExperienceEngineContext,
   SignalValue,
   WhereCriteria,
-} from "@contensis/personalization";
+} from "@contensis/experience-engine";
 import {
   getCoreRowModel,
   getExpandedRowModel,
@@ -35,7 +35,7 @@ const ConditionsTable = ({
   row,
   data,
 }: {
-  context?: PersonalizationContext;
+  context?: ExperienceEngineContext;
   data: ConditionData[];
   row: Row<ComputedSignal>;
 }) => {
@@ -134,7 +134,7 @@ const ConditionsTable = ({
 
 const Signals = () => {
   const { context, manifest, matched, signals, state } =
-    usePersonalizationContext();
+    useExperienceEngineContext();
 
   // const [conditions, setConditions] = useState<[string, ConditionData[]][]>([]);
   // useEffect(() => {
